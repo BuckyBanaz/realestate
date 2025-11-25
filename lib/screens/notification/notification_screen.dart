@@ -104,12 +104,12 @@ class NotificationScreen extends StatelessWidget {
           padding: const EdgeInsets.only(left: 16),
           child: _circleIconButton(Icons.arrow_back_ios_new_rounded, () => Navigator.pop(context)),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: _circleIconButton(IconlyLight.delete, () {}),
-          ),
-        ],
+        // actions: [
+        //   Padding(
+        //     padding: const EdgeInsets.only(right: 16),
+        //     child: _circleIconButton(IconlyLight.delete, () {}),
+        //   ),
+        // ],
         title: Text(
           "Notification",
           style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
@@ -256,15 +256,15 @@ class NotificationTile extends StatelessWidget {
               .allNotifications
               .removeWhere((e) => e.id == item.id);
 
-          Get.snackbar(
-            "Deleted",
-            "Notification removed",
-            backgroundColor: Colors.grey[800],
-            colorText: Colors.white,
-            snackPosition: SnackPosition.BOTTOM,
-            margin: const EdgeInsets.all(20),
-            borderRadius: 12,
-          );
+          // Get.snackbar(
+          //   "Deleted",
+          //   "Notification removed",
+          //   backgroundColor: Colors.grey[800],
+          //   colorText: Colors.white,
+          //   snackPosition: SnackPosition.BOTTOM,
+          //   margin: const EdgeInsets.all(20),
+          //   borderRadius: 12,
+          // );
         },
         child: Container(
           padding: const EdgeInsets.all(16),

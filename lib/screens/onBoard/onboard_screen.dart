@@ -20,7 +20,7 @@ class OpeningScreen extends StatelessWidget {
               // Background image (opening.png)
               Positioned.fill(
                 child: Image.asset(
-                  'assets/images/onboard_1.png',
+                  'assets/images/onboard_3.png',
                   fit: BoxFit.cover,
                 ),
               ),
@@ -29,7 +29,7 @@ class OpeningScreen extends StatelessWidget {
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: secondary.withOpacity(0.2),
+                    color: primary.withOpacity(0.2),
                   ),
                 ),
               ),
@@ -43,7 +43,7 @@ class OpeningScreen extends StatelessWidget {
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Color(0xAA1F4C6B),
+                        primary,
                       ],
                     ),
                   ),
@@ -53,13 +53,9 @@ class OpeningScreen extends StatelessWidget {
               // Center logo/text
               Positioned.fill(
                 child: Center(
-                  child: Text(
-                    "Logo Here",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: Image.asset(
+                    "assets/images/logo.png",
+                    width: 200,
                   ),
                 ),
               ),
@@ -472,6 +468,42 @@ class _OnboardProgressPill extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+class _NearbyFacility extends StatelessWidget {
+  final IconData icon;
+  final String count;
+  final String label;
+  const _NearbyFacility({
+    required this.icon,
+    required this.count,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: Colors.grey.shade700, size: 28),
+          const SizedBox(height: 8),
+          Text(
+            count,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+          ),
+        ],
       ),
     );
   }

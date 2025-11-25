@@ -102,8 +102,8 @@ class FeaturedScreen extends StatelessWidget {
                   name: data["name"]!,
                   rating: data["rating"]!,
                   location: data["loc"]!,
-                  price: data["price"]!,
-                  tag: data["tag"]!,
+                  // price: data["price"]!,
+                  // tag: data["tag"]!,
                 );
               },
             ),
@@ -256,11 +256,40 @@ class FeaturedScreen extends StatelessWidget {
 
 }
 
-// Tera data
 final List<Map<String, String>> estatesData = [
-  {"name": "Sky Dandelions Apartment", "rating": "4.9", "loc": "Jakarta, Indonesia", "price": "290", "tag": "Apartment"},
-  {"name": "The Aurelia Villa", "rating": "4.9", "loc": "Bali", "price": "520", "tag": "Villa"},
-  {"name": "Mill Sper House", "rating": "4.8", "loc": "Bandung", "price": "271", "tag": "House"},
-  {"name": "Wings Tower", "rating": "4.9", "loc": "Jakarta", "price": "220", "tag": "Apartment"},
-  {"name": "Green Paradise Residence", "rating": "4.7", "loc": "Yogyakarta", "price": "350", "tag": "Villa"},
+  {
+    "name": "Urban Heights Apartment",
+    "rating": "4.8",
+    "loc": "Sector 15, Hisar",
+    "price": "230",
+    "tag": "Apartment"
+  },
+  {
+    "name": "The Aurelia Villa - Hisar",
+    "rating": "4.9",
+    "loc": "Rajguru Nagar, Hisar",
+    "price": "520",
+    "tag": "Villa"
+  },
+  {
+    "name": "Mill Sper House (Hisar)",
+    "rating": "4.7",
+    "loc": "Model Town, Hisar",
+    "price": "271",
+    "tag": "House"
+  },
+  {
+    "name": "Wings Tower Hisar",
+    "rating": "4.6",
+    "loc": "Camp Chowk, Hisar",
+    "price": "220",
+    "tag": "Apartment"
+  },
+  {
+    "name": "Green Valley Residence",
+    "rating": "4.7",
+    "loc": "Hisar Cantt",
+    "price": "350",
+    "tag": "Villa"
+  },
 ];

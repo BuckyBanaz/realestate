@@ -44,54 +44,41 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Container(
           color: Colors.white,
-          padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 40.h),
+          padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 1.h),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                      width: 70.w,
+                      height: 50.h,
+                      child: Image.asset("assets/images/logo.png",
+                        fit: BoxFit.fill,)),
+                ),
+                SizedBox(height: 90.h,),
                 // Title
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Let's ",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 22.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      TextSpan(
-                        text: "Sign In",
-                        style: TextStyle(
-                          color: secondary,
-                          fontSize: 22.sp,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
+                Center(
+                  child: Text(
+                     "Sign In",
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 22.sp,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
 
-                SizedBox(height: 8.h),
-
-                // small subtitle
-                Text(
-                  'quis nostrud exercitation ullamco laboris nisi ut',
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 14.sp,
-                  ),
-                ),
-
-                SizedBox(height: 40.h),
+                SizedBox(height: 20.h),
 
                 // Email field with outline + inside icon right
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    hintText: 'jonathan@email.com',
+                    hintText: 'Email / Phone Number',
                     suffixIcon: Icon(
                       IconlyLight.message,
                       color: secondary,
@@ -112,47 +99,28 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: 20.h),
 
                 // Password field card (rounded, subtle bg)
-                Container(
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(12.r),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscure,
+                  decoration: InputDecoration(
+
+                    suffixIcon: Icon(
+                      _obscure ? IconlyLight.lock:  IconlyLight.unlock,
+                      color: secondary,
+                      size: 20.sp,
+                    ),
+                    hintText: '••••••••',
+                    filled: true,
+                    fillColor: cardColor,
+                    contentPadding:
+                    EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _passwordController,
-                          obscureText: _obscure,
-                          decoration: InputDecoration(
-                            hintText: '••••••••',
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(vertical: 18.h),
-                          ),
-                          style: TextStyle(letterSpacing: 4.0, fontSize: 14.sp),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: _togglePassword,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.w),
-                          child: Text(
-                            _obscure ? 'Show' : 'Hide',
-                            style: TextStyle(
-                              color: secondary,
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Icon(
-                        IconlyLight.lock,
-                        color: secondary,
-                        size: 20.sp,
-                      ),
-                    ],
-                  ),
+
+                  style: TextStyle(letterSpacing: 4.0, fontSize: 14.sp),
                 ),
 
                 SizedBox(height: 20.h),
@@ -243,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Expanded(
                       child: SizedBox(
-                        height: 70.h,
+                        height: 60.h,
                         child: OutlinedButton(
                           onPressed: () {},
                           style: OutlinedButton.styleFrom(
@@ -256,8 +224,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           child: Image.asset(
                             "assets/images/google_icon.png",
-                            width: 22.w,
-                            height: 22.h,
+                            width: 24.w,
+                            height: 24.h,
                           ),
                         ),
                       ),
@@ -265,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     SizedBox(width: 12.w),
                     Expanded(
                       child: SizedBox(
-                        height: 70.h,
+                        height: 60.h,
                         child: OutlinedButton(
                           onPressed: () {},
                           style: OutlinedButton.styleFrom(
@@ -277,14 +245,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             side: BorderSide(color: Colors.transparent),
                           ),
                           child: Icon(FontAwesomeIcons.facebook,
-                              size: 22.sp, color: Colors.blueAccent),
+                              size: 24.sp, color: Colors.blueAccent),
                         ),
                       ),
                     ),
                     SizedBox(width: 12.w),
                     Expanded(
                       child: SizedBox(
-                        height: 70.h,
+                        height: 60.h,
                         child: OutlinedButton(
                           onPressed: () {},
                           style: OutlinedButton.styleFrom(
@@ -296,7 +264,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             side: BorderSide(color: Colors.transparent),
                           ),
                           child:
-                          Icon(FontAwesomeIcons.apple, size: 22.sp, color: Colors.black),
+                          Icon(FontAwesomeIcons.apple, size: 24.sp, color: Colors.black),
                         ),
                       ),
                     ),

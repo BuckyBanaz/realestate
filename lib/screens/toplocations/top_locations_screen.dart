@@ -197,37 +197,35 @@ class _LocationCard extends StatelessWidget {
     );
   }
 }
-
-// Real beautiful images + exact names
 final List<Map<String, String>> locations = [
   {
     "rank": "+1",
-    "title": "Bali",
+    "title": "Sector 15, Hisar",
     "image": "assets/images/2.png",
   },
   {
     "rank": "+2",
-    "title": "Jakarta",
+    "title": "Hisar Cantt",
     "image": "assets/images/2.png",
   },
   {
     "rank": "+3",
-    "title": "Maldives",
+    "title": "Rajguru Nagar, Hisar",
     "image": "assets/images/2.png",
   },
   {
     "rank": "+4",
-    "title": "Semarang",
+    "title": "Model Town, Hisar",
     "image": "assets/images/2.png",
   },
   {
     "rank": "+5",
-    "title": "Istanbul",
+    "title": "Camp Chowk, Hisar",
     "image": "assets/images/2.png",
   },
   {
     "rank": "+6",
-    "title": "Bromo",
+    "title": "Urban Estate II, Hisar",
     "image": "assets/images/2.png",
   },
 ];

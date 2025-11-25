@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
-import 'package:realestate/constant/app_colors.dart';
-import 'package:realestate/screens/search/search_screen.dart';
-
-import '../favorite/favorite_screen.dart';
+import '../../constant/app_colors.dart';
 import '../home/home_screen.dart';
+import '../search/search_screen.dart';
+import '../favorite/favorite_screen.dart';
 import '../profile/profile_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
+
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
@@ -16,11 +16,12 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
 
-  // Keep widgets here so they are preserved by the IndexedStack
   final List<Widget> _pages = const [
     HomeScreen(),
-    SearchScreen(),
+    // SearchScreen(),
     FavoriteScreen(),
+    // // Make sure you have a ChatScreen or replace with any widget.
+    // ChatScreen(),
     ProfileScreen(),
   ];
 
@@ -31,51 +32,102 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // responsive bottom nav height
+    // compute nav height responsively if you want:
     final screenHeight = MediaQuery.of(context).size.height;
-    final navHeight = screenHeight * 0.065; // 9.5% of height
-    final clampedNavHeight = navHeight.clamp(kBottomNavigationBarHeight, 84.0);
+    final navHeight = (screenHeight * 0.085).clamp(64.0, 88.0);
 
     return Scaffold(
-      // If you face keyboard overlap issues on pages with TextFields, you can set resizeToAvoidBottomInset: true/false here.
       body: SafeArea(
+        top: true,
+        bottom: false,
         child: IndexedStack(
           index: _selectedIndex,
           children: _pages,
         ),
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.only(top: 4, bottom: 4),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
+      bottomNavigationBar: CustomBottomNav(
+        selectedIndex: _selectedIndex,
+        onTap: _onTap,
+        height: navHeight,
+      ),
+    );
+  }
+}
+
+
+typedef OnNavTap = void Function(int index);
+
+class CustomBottomNav extends StatelessWidget {
+  final int selectedIndex;
+  final OnNavTap onTap;
+  final double height;
+
+  const CustomBottomNav({
+    Key? key,
+    required this.selectedIndex,
+    required this.onTap,
+    this.height = 72,
+  }) : super(key: key);
+
+  Widget _item({
+    required BuildContext context,
+    required IconData icon,
+    IconData? activeIcon,
+    required String label,
+    required int index,
+    required bool selected,
+  }) {
+    final color = selected ? secondary : Colors.grey.shade600;
+
+    return Expanded(
+      child: InkWell(
+        onTap: () => onTap(index),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                selected && activeIcon != null ? activeIcon : icon,
+                size: selected ? 26 : 24,
+                color: color,
+              ),
+              const SizedBox(height: 6),
+              // label - small, subtle
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey.shade700,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
+              // const SizedBox(height: 6),
+              // // dot indicator
+              // AnimatedContainer(
+              //   duration: const Duration(milliseconds: 250),
+              //   curve: Curves.easeInOut,
+              //   width: 8,
+              //   height: 8,
+              //   decoration: BoxDecoration(
+              //     color: selected ? secondary : Colors.transparent,
+              //     shape: BoxShape.circle,
+              //   ),
+              // ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 20,
-              offset: const Offset(0, -4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            _navItem(icon: IconlyLight.home, filledIcon: IconlyBold.home, index: 0, label: 'Home'),
-            _navItem(icon: IconlyLight.search, index: 1, label: 'Search'),
-            _navItem(icon: IconlyLight.heart, filledIcon: IconlyBold.heart, index: 2, label: 'Favorites'),
-            _navItem(icon: IconlyLight.profile, filledIcon: IconlyBold.profile, index: 3, label: 'Profile'),
-          ],
         ),
       ),
-
     );
   }
 
-  Widget _buildBottomNav(double height) {
+  @override
+  Widget build(BuildContext context) {
+    // Container with rounded top corners + shadow
     return Container(
       height: height,
+      padding: const EdgeInsets.only(top: 6, bottom: 8, left: 8, right: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.only(
@@ -91,59 +143,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _navItem(icon: IconlyLight.home, filledIcon: IconlyBold.home, index: 0, label: 'Home'),
-          _navItem(icon: IconlyLight.search, index: 1, label: 'Search'),
-          _navItem(icon: IconlyLight.heart, filledIcon: IconlyBold.heart, index: 2, label: 'Favorites'),
-          _navItem(icon: IconlyLight.profile, filledIcon: IconlyBold.profile, index: 3, label: 'Profile'),
-        ],
-      ),
-    );
-  }
-
-  Widget _navItem({
-    required IconData icon,
-    IconData? filledIcon,
-    required int index,
-    required String label,
-  }) {
-    final bool isSelected = _selectedIndex == index;
-
-    return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: GestureDetector(
-          onTap: () => _onTap(index),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Semantics(
-                  selected: isSelected,
-                  label: label,
-                  child: Icon(
-                    isSelected && filledIcon != null ? filledIcon : icon,
-                    size: isSelected ? 28 : 26,
-                    color: isSelected ? secondary : Colors.grey.shade500,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  height: 8,
-                  width: 8,
-                  decoration: BoxDecoration(
-                    color: isSelected ? secondary : Colors.transparent,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ],
-            ),
+          _item(
+            context: context,
+            icon: IconlyLight.home,
+            activeIcon: IconlyBold.home,
+            label: 'Home',
+            index: 0,
+            selected: selectedIndex == 0,
           ),
-        ),
+
+          _item(
+            context: context,
+            icon: IconlyLight.heart,
+            activeIcon: IconlyBold.heart,
+            label: 'Favorite',
+            index: 1,
+            selected: selectedIndex == 1,
+          ),
+          // _item(
+          //   context: context,
+          //   icon: IconlyLight.message,
+          //   activeIcon: IconlyBold.message,
+          //   label: 'Chat',
+          //   index: 3,
+          //   selected: selectedIndex == 3,
+          // ),
+          _item(
+            context: context,
+            icon: IconlyLight.profile,
+            activeIcon: IconlyBold.profile,
+            label: 'Profile',
+            index: 2,
+            selected: selectedIndex == 2,
+          ),
+        ],
       ),
     );
   }

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:realestate/core/app_theme.dart';
+import 'package:realestate/screens/dashboard/dashboard_screen.dart';
+import 'package:realestate/screens/splash_screen.dart';
 import '../screens/onBoard/onboard_screen.dart';
 
 class MyApp extends StatelessWidget {
@@ -23,7 +25,7 @@ class MyApp extends StatelessWidget {
         );
       },
 
-       child: OpeningScreen(),
+       child: SplashScreen(),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:pinput/pinput.dart';
 import 'package:realestate/screens/dashboard/dashboard_screen.dart';
@@ -7,7 +8,7 @@ import 'package:realestate/screens/home/home_screen.dart';
 import '../../constant/app_colors.dart';
 
 class OTPScreen extends StatefulWidget {
-  final String contact; // "jonathan@email.com" ya "+62 812-3456-7890"
+  final String contact; // "chetan@email.com" ya "+62 812-3456-7890"
   final bool isEmail;   // true = email, false = phone
 
   const OTPScreen({Key? key, required this.contact, this.isEmail = false}) : super(key: key);
@@ -74,102 +75,92 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 12),
-          child: Center(
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration:  BoxDecoration(
-                  color: cardColor,
-                  shape: BoxShape.circle,
-                ),
-                child:  Icon(Icons.arrow_back_ios_new_rounded, color: secondary, size: 22),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+        
+              Align(
+                alignment: Alignment.centerLeft,
+                child: SizedBox(
+                    width: 70.w,
+                    height: 50.h,
+                    child: Image.asset("assets/images/logo.png",
+                      fit: BoxFit.fill,)),
               ),
-            ),
-          ),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 40),
-             Text(
-              "Enter the code",
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: secondary),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "Enter the 4 digit code that we just sent to\n${widget.contact}",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15, color: Colors.grey.shade600, height: 1.5),
-            ),
-            const SizedBox(height: 60),
-
-            // Pinput Field
-            Pinput(
-              controller: _pinController,
-              length: 4,
-              defaultPinTheme: defaultPinTheme,
-              focusedPinTheme: defaultPinTheme.copyWith(
-                decoration: defaultPinTheme.decoration!.copyWith(
-                  border: Border.all(color:  secondary, width: 2),
-                ),
+              SizedBox(height: 40.h,),
+               Text(
+                "Enter the code",
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.grey),
               ),
-              submittedPinTheme: defaultPinTheme.copyWith(
-                decoration: defaultPinTheme.decoration!.copyWith(
-                  color: const Color(0xFFE8F5E8),
-                  border: Border.all(color: const Color(0xFF4CAF50)),
-                ),
+              const SizedBox(height: 16),
+              Text(
+                "Enter the 4 digit code that we just sent to\n${widget.contact}",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 15, color: Colors.grey.shade600, height: 1.5),
               ),
-              onCompleted: _onOTPCompleted,
-              keyboardType: TextInputType.number,
-              hapticFeedbackType: HapticFeedbackType.lightImpact,
-            ),
-
-            const SizedBox(height: 60),
-
-            // Timer + Resend
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.access_time, size: 20, color: Colors.grey.shade600),
-                const SizedBox(width: 8),
-                Text(
-                  "00:${_secondsRemaining.toString().padLeft(2, '0')}",
-                  style: TextStyle(fontSize: 16, color: Colors.grey.shade700, fontWeight: FontWeight.w600),
+              const SizedBox(height: 60),
+        
+              // Pinput Field
+              Pinput(
+                controller: _pinController,
+                length: 4,
+                defaultPinTheme: defaultPinTheme,
+                focusedPinTheme: defaultPinTheme.copyWith(
+                  decoration: defaultPinTheme.decoration!.copyWith(
+                    border: Border.all(color:  secondary, width: 2),
+                  ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Text.rich(
-              TextSpan(
-                text: "Didn't receive the OTP? ",
-                style: TextStyle(color: Colors.grey.shade600),
+                submittedPinTheme: defaultPinTheme.copyWith(
+                  decoration: defaultPinTheme.decoration!.copyWith(
+                    color: const Color(0xFFE8F5E8),
+                    border: Border.all(color: const Color(0xFF4CAF50)),
+                  ),
+                ),
+                onCompleted: _onOTPCompleted,
+                keyboardType: TextInputType.number,
+                hapticFeedbackType: HapticFeedbackType.lightImpact,
+              ),
+        
+              const SizedBox(height: 60),
+        
+              // Timer + Resend
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  WidgetSpan(
-                    child: GestureDetector(
-                      onTap: _secondsRemaining == 0 ? _resendOTP : null,
-                      child: Text(
-                        "Resend OTP",
-                        style: TextStyle(
-                          color: _secondsRemaining == 0 ? secondary : Colors.grey.shade400,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                  Icon(Icons.access_time, size: 20, color: Colors.grey.shade600),
+                  const SizedBox(width: 8),
+                  Text(
+                    "00:${_secondsRemaining.toString().padLeft(2, '0')}",
+                    style: TextStyle(fontSize: 16, color: Colors.grey.shade700, fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              Text.rich(
+                TextSpan(
+                  text: "Didn't receive the OTP? ",
+                  style: TextStyle(color: Colors.grey.shade600),
+                  children: [
+                    WidgetSpan(
+                      child: GestureDetector(
+                        onTap: _secondsRemaining == 0 ? _resendOTP : null,
+                        child: Text(
+                          "Resend OTP",
+                          style: TextStyle(
+                            color: _secondsRemaining == 0 ? secondary : Colors.grey.shade400,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

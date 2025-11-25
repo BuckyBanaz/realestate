@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:iconly/iconly.dart';
@@ -44,45 +45,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: SafeArea(
         child: Container(
           color: Colors.white,
-          padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 40.h),
+          padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 1.h),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                      width: 70.w,
+                      height: 50.h,
+                      child: Image.asset("assets/images/logo.png",
+                        fit: BoxFit.fill,)),
+                ),
+                SizedBox(height: 40.h,),
                 // Title
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Create your ",
-                        style: TextStyle(
-                          color: secondary,
-                          fontSize: 22.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      TextSpan(
-                        text: "account",
-                        style: TextStyle(
-                          color: secondary,
-                          fontSize: 22.sp,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                SizedBox(height: 8.h),
-
-                // small subtitle
-                Text(
-                  'quis nostrud exercitation ullamco laboris nisi ut',
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 14.sp,
-                  ),
-                ),
+             Center(
+               child: Text(
+                  "Create Account",
+                 style: TextStyle(
+                   color: Colors.grey,
+                   fontSize: 22.sp,
+                   fontWeight: FontWeight.w800,
+                 ),
+               ),
+             ),
 
                 SizedBox(height: 20.h),
 
@@ -91,7 +79,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _nameController,
                   keyboardType: TextInputType.name,
                   decoration: InputDecoration(
-                    hintText: 'Jhon Doe',
+                    hintText: 'Chetan',
                     suffixIcon: Icon(
                       IconlyLight.profile,
                       color: secondary,
@@ -115,7 +103,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
-                    hintText: '89014141000',
+                    hintText: '0000000000',
                     suffixIcon: Icon(
                       IconlyLight.call,
                       color: secondary,
@@ -139,7 +127,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    hintText: 'jonathan@email.com',
+                    hintText: 'chetan@email.com',
                     suffixIcon: Icon(
                       IconlyLight.message,
                       color: secondary,
@@ -160,34 +148,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 SizedBox(height: 20.h),
 
                 // Password field
-                Container(
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(12.r),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscure,
+                  decoration: InputDecoration(
+
+                    suffixIcon: Icon(
+                      _obscure ? IconlyLight.lock:  IconlyLight.unlock,
+                      color: secondary,
+                      size: 20.sp,
+                    ),
+                    hintText: '••••••••',
+                    filled: true,
+                    fillColor: cardColor,
+                    contentPadding:
+                    EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _passwordController,
-                          obscureText: _obscure,
-                          decoration: InputDecoration(
-                            hintText: '••••••••',
-                            border: InputBorder.none,
-                            contentPadding:
-                            EdgeInsets.symmetric(vertical: 18.h),
-                          ),
-                          style: TextStyle(letterSpacing: 4.0, fontSize: 14.sp),
-                        ),
-                      ),
-                      Icon(
-                        IconlyLight.lock,
-                        color: secondary,
-                        size: 20.sp,
-                      )
-                    ],
-                  ),
+
+                  style: TextStyle(letterSpacing: 4.0, fontSize: 14.sp),
                 ),
 
                 SizedBox(height: 20.h),
@@ -226,7 +208,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Center(
                   child: SizedBox(
                     width: 150.w,
-                    height: 60.h,
+                    height: 50.h,
                     child: ElevatedButton(
                       onPressed: () {
                         // Using email as contact param for OTP screen as earlier
@@ -278,7 +260,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   children: [
                     Expanded(
                       child: SizedBox(
-                        height: 70.h,
+                        height: 60.h,
                         child: OutlinedButton(
                           onPressed: () {},
                           style: OutlinedButton.styleFrom(
@@ -291,8 +273,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           child: Image.asset(
                             "assets/images/google_icon.png",
-                            width: 22.w,
-                            height: 22.h,
+                            width: 24.w,
+                            height: 24.h,
                           ),
                         ),
                       ),
@@ -300,7 +282,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     SizedBox(width: 12.w),
                     Expanded(
                       child: SizedBox(
-                        height: 70.h,
+                        height: 60.h,
                         child: OutlinedButton(
                           onPressed: () {},
                           style: OutlinedButton.styleFrom(
@@ -313,7 +295,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           child: Icon(
                             FontAwesomeIcons.facebook,
-                            size: 22.sp,
+                            size: 24.sp,
                             color: Colors.blueAccent,
                           ),
                         ),
@@ -322,7 +304,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     SizedBox(width: 12.w),
                     Expanded(
                       child: SizedBox(
-                        height: 70.h,
+                        height: 60.h,
                         child: OutlinedButton(
                           onPressed: () {},
                           style: OutlinedButton.styleFrom(
@@ -335,7 +317,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           child: Icon(
                             FontAwesomeIcons.apple,
-                            size: 22.sp,
+                            size: 24.sp,
                             color: Colors.black,
                           ),
                         ),
