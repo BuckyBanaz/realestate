@@ -230,7 +230,7 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
               // Submit Button with Plot Validation
               SizedBox(
                 width: double.infinity,
-                height: 56,
+                height: 55,
                 child: ElevatedButton(
                   onPressed: _isLoading
                       ? null
@@ -248,7 +248,7 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
                       : Text(
                           "Send Enquiry",
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),

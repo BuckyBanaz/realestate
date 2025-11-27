@@ -31,19 +31,25 @@ class LocationDetailScreen extends StatelessWidget {
         slivers: [
           // ==================== HERO HEADER ====================
           SliverAppBar(
-            expandedHeight: 480,
+            expandedHeight: 400,
             pinned: true,
             backgroundColor: Colors.transparent,
             elevation: 0,
             automaticallyImplyLeading: false,
             leading: Padding(
               padding: const EdgeInsets.only(left: 16, top: 8),
-              child: _circleButton(Icons.arrow_back_ios_new_rounded, () => Navigator.pop(context)),
+              child: _circleButton(
+                Icons.arrow_back_ios_new_rounded,
+                () => Navigator.pop(context),
+              ),
             ),
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: 16, top: 8),
-                child: _circleButton(Icons.more_horiz_rounded, () {}),  // Changed to more_horiz for exact match
+                child: _circleButton(
+                  Icons.more_horiz_rounded,
+                  () {},
+                ), // Changed to more_horiz for exact match
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
@@ -121,7 +127,7 @@ class LocationDetailScreen extends StatelessWidget {
                     child: Transform.translate(
                       offset: const Offset(-20, 0),
                       child: _floatingCard(
-                        "https://images.unsplash.com/photo-1578631618876-73e2d20a4448?w=800",  // Reflection/water temple URL
+                        "https://images.unsplash.com/photo-1578631618876-73e2d20a4448?w=800", // Reflection/water temple URL
                         width: 160,
                         height: 120,
                         borderRadius: 24,
@@ -131,7 +137,7 @@ class LocationDetailScreen extends StatelessWidget {
                           child: BackdropFilter(
                             filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
                             child: Image.network(
-                              "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",  // Beach sunset URL
+                              "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800", // Beach sunset URL
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -147,7 +153,7 @@ class LocationDetailScreen extends StatelessWidget {
                     child: Transform.translate(
                       offset: const Offset(20, 0),
                       child: _floatingCard(
-                        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",  // Beach sunset URL
+                        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800", // Beach sunset URL
                         width: 90,
                         height: 80,
                         borderRadius: 20,
@@ -160,7 +166,10 @@ class LocationDetailScreen extends StatelessWidget {
                     bottom: 20,
                     left: 20,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: primary,
                         borderRadius: BorderRadius.circular(32),
@@ -169,11 +178,11 @@ class LocationDetailScreen extends StatelessWidget {
                             color: Colors.black.withOpacity(0.4),
                             blurRadius: 16,
                             offset: const Offset(0, 8),
-                          )
+                          ),
                         ],
                       ),
                       child: Text(
-                        "#$rank",  // e.g., "#3"
+                        "#$rank", // e.g., "#3"
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -190,63 +199,101 @@ class LocationDetailScreen extends StatelessWidget {
           // ==================== BODY ====================
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(locationName, style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: secondary)),
+                  Text(
+                    locationName,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
                   SizedBox(height: 8),
-                  Text(subtitle, style: TextStyle(fontSize: 15, color: Colors.grey.shade600)),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                  ),
                   SizedBox(height: 24),
 
                   // Search Bar
-                  Container(
-                    height: 56,
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Color(0xFFF5F7FA),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(IconlyLight.filter, color: secondary),
-                        SizedBox(width: 12),
-                        Expanded(child: Text("Modern House", style: TextStyle(color: Colors.grey.shade600, fontSize: 16))),
-                        // Icon(IconlyLight.filter, color: secondary),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 20),
+                  // Container(
+                  //   height: 56,
+                  //   padding: EdgeInsets.symmetric(horizontal: 16),
+                  //   decoration: BoxDecoration(
+                  //     color: Color(0xFFF5F7FA),
+                  //     borderRadius: BorderRadius.circular(16),
+                  //   ),
+                  //   child: Row(
+                  //     children: [
+                  //       Icon(IconlyLight.filter, color: secondary),
+                  //       SizedBox(width: 12),
+                  //       Expanded(child: Text("Modern House", style: TextStyle(color: Colors.grey.shade600, fontSize: 16))),
+                  //       // Icon(IconlyLight.filter, color: secondary),
+                  //     ],
+                  //   ),
+                  // ),
+                  // SizedBox(height: 20),
 
                   // Found + Filters
-                  Row(
-                    children: [
-                      Text("Found 128 estates", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: secondary)),
-                      Spacer(),
-                      _FilterChip(label: "House", icon: Icons.close, isActive: true),
-                      SizedBox(width: 12),
-                      _FilterChip(label: "₹250 - ₹450", icon: Icons.attach_money, isActive: true),
-                    ],
-                  ),
-                  SizedBox(height: 24),
-
-                  // Estate Cards
-                  ResultCard(
-                    name: "Urban Heights House",
-                    rating: "4.7",
+                  // Row(
+                  //   children: [
+                  //     Text("Found 128 estates", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: secondary)),
+                  //     Spacer(),
+                  //     // _FilterChip(label: "House", icon: Icons.close, isActive: true),
+                  //     // SizedBox(width: 12),
+                  //     // _FilterChip(label: "₹250 - ₹450", icon: Icons.attach_money, isActive: true),
+                  //   ],
+                  // ),
+                  // SizedBox(height: 24),
+                  FeatureCard(
+                    imageUrl:
+                        "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
+                    title: "Shree Shyam Kunj",
                     location: "Sector 15, Hisar",
-                    // price: "₹ 37,000",
-                    // tag: "House",
-
+                    price: "12,00,000",
+                    beds: "—",
+                    area: "200 sq.m",
+                    tag: "Top",
+                    rating: "4.8",
                   ),
                   SizedBox(height: 16),
-                  ResultCard(
-                    // imageUrl: "https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800",
-                    name: "Green Valley Residence",
-                    rating: "4.9",
-                    location: "Hisar Cantt",
-                    // price: "520",
-                    // tag: "Villa",
+                  FeatureCard(
+                    imageUrl:
+                        "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
+                    title: "Shree Shyam Kunj",
+                    location: "Sector 15, Hisar",
+                    price: "12,00,000",
+                    beds: "—",
+                    area: "200 sq.m",
+                    tag: "Top",
+                    rating: "4.8",
+                  ),
+                  SizedBox(height: 16),
+                  FeatureCard(
+                    imageUrl:
+                        "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
+                    title: "Shree Shyam Kunj",
+                    location: "Sector 15, Hisar",
+                    price: "12,00,000",
+                    beds: "—",
+                    area: "200 sq.m",
+                    tag: "Top",
+                    rating: "4.8",
+                  ),
+                  SizedBox(height: 16),
+                  FeatureCard(
+                    imageUrl:
+                        "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
+                    title: "Shree Shyam Kunj",
+                    location: "Sector 15, Hisar",
+                    price: "12,00,000",
+                    beds: "—",
+                    area: "200 sq.m",
+                    tag: "Top",
+                    rating: "4.8",
                   ),
                 ],
               ),
@@ -256,6 +303,7 @@ class LocationDetailScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget _circleButton(IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
@@ -271,11 +319,12 @@ class LocationDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _floatingCard(String imageUrl, {
+  Widget _floatingCard(
+    String imageUrl, {
     required double width,
     required double height,
     required double borderRadius,
-    Widget? child,  // For custom like blur
+    Widget? child, // For custom like blur
   }) {
     return Container(
       width: width,
@@ -290,13 +339,12 @@ class LocationDetailScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: child ?? ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: Image.network(
-          imageUrl,
-          fit: BoxFit.cover,
-        ),
-      ),
+      child:
+          child ??
+          ClipRRect(
+            borderRadius: BorderRadius.circular(borderRadius),
+            child: Image.network(imageUrl, fit: BoxFit.cover),
+          ),
     );
   }
 }
@@ -307,7 +355,11 @@ class _FilterChip extends StatelessWidget {
   final IconData icon;
   final bool isActive;
 
-  const _FilterChip({required this.label, required this.icon, this.isActive = false});
+  const _FilterChip({
+    required this.label,
+    required this.icon,
+    this.isActive = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -316,18 +368,22 @@ class _FilterChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: isActive ? Color(0xFFE8F5E8) : Colors.white,
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: isActive ? primary: Colors.grey.shade300),
+        border: Border.all(color: isActive ? primary : Colors.grey.shade300),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (isActive) Icon(icon, size: 16, color: primary),
           if (isActive) SizedBox(width: 4),
-          Text(label, style: TextStyle(fontSize: 14, color: isActive ? primary : Colors.grey.shade700)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: isActive ? primary : Colors.grey.shade700,
+            ),
+          ),
         ],
       ),
     );
   }
-
-
 }

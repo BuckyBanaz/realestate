@@ -1,59 +1,116 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:realestate/screens/permission/permisson_screen.dart';
 import 'package:realestate/screens/profile/documents_screen.dart';
 import 'package:realestate/screens/profile/property_transaction_detail_screen.dart';
+import 'package:realestate/screens/profile/transaction_detail_screen.dart';
 
 import '../../constant/app_colors.dart';
 import 'edit_profile_screen.dart';
-
-// IMPORTANT: Initialize ScreenUtil in your main.dart like:
-// ScreenUtilInit(
-//   designSize: Size(375, 812),
-//   builder: (_, __) => const MyApp(),,
-// );
 
 class ProfileController extends GetxController {
   var selectedTab = 0.obs; // 0=Transaction, 1=my_property, 2=payments
 
   // Purchased / owned properties
-  final List<Transaction> transactions = [
-    Transaction(
-      "Plot No. 21 Shree Shyam Kunj Phase 5",
-      "230",
-      "Raipur Road, Hisar",
-      "4.8",
-      "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
+  final List<TransactionModel> transactions = [
+    TransactionModel(
+      id: 'TXN001',
+      property: 'Plot No. 21 Shree Shyam Kunj Phase 5',
+      location: 'Raipur Road, Hisar',
+      date: DateTime(2025, 11, 24),
+      amount: 230000,
+      type: 'Received',
+      status: 'Completed',
+      reference: 'REF-20251124-001',
+      image:
+          'https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg',
     ),
-    Transaction(
-      "Plot No. 21 Shree Shyam Kunj Phase 5",
-      "520",
-      "Raipur Road, Hisar",
-      "4.9",
-      "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
+    TransactionModel(
+      id: 'TXN002',
+      property: 'Plot No. 78 Galaxy Residency',
+      location: 'Sector 12, Hisar',
+      date: DateTime(2025, 11, 18),
+      amount: 520000,
+      type: 'Received',
+      status: 'Completed',
+      reference: 'REF-20251118-002',
+      image:
+          'https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg',
     ),
-    Transaction(
-      "Plot No. 21 Shree Shyam Kunj Phase 5",
-      "310",
-      "Raipur Road, Hisar",
-      "4.7",
-      "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
+    TransactionModel(
+      id: 'TXN003',
+      property: 'Block A - Park View Apartment',
+      location: 'MG Road, Hisar',
+      date: DateTime(2025, 10, 29),
+      amount: 310000,
+      type: 'Paid',
+      status: 'Pending',
+      reference: 'REF-20251029-003',
+      image:
+          'https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg',
+    ),
+    // more dummy transactions for the View All screen
+    TransactionModel(
+      id: 'TXN004',
+      property: 'Plot No. 9 Sunny Acres',
+      location: 'Ring Road, Hisar',
+      date: DateTime(2025, 9, 5),
+      amount: 125000,
+      type: 'Received',
+      status: 'Completed',
+      reference: 'REF-20250905-004',
+      image:
+          'https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg',
+    ),
+    TransactionModel(
+      id: 'TXN005',
+      property: 'Shop No. 12 Market Plaza',
+      location: 'Old Bazar, Hisar',
+      date: DateTime(2025, 8, 23),
+      amount: 45000,
+      type: 'Paid',
+      status: 'Completed',
+      reference: 'REF-20250823-005',
+      image:
+          'https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg',
     ),
   ];
-
   // Upcoming payments (scheduled / due)
   final List<Payment> upcomingPayments = [
-    Payment("Plot No. 21 Shree Shyam Kunj Phase 5", "Raipur Road, Hisar", "Dec 05, 2025", 230000, false),
-    Payment("hree Shyam Kunj Phase 5 Plot", "Raipur Road, Hisar", "Dec 20, 2025", 520000, false),
+    Payment(
+      "Plot No. 21 Shree Shyam Kunj Phase 5",
+      "Raipur Road, Hisar",
+      "Dec 05, 2025",
+      230000,
+      false,
+    ),
+    Payment(
+      "hree Shyam Kunj Phase 5 Plot",
+      "Raipur Road, Hisar",
+      "Dec 20, 2025",
+      520000,
+      false,
+    ),
   ];
 
   // Past payments
   final List<Payment> pastPayments = [
-    Payment("Plot No. 21 Shree Shyam Kunj Phase 5", "Raipur Road, Hisar", "Nov 01, 2025", 89000, true),
-    Payment("Security Deposit - Shree Shyam Kunj Plot", "Raipur Road, Hisar", "Oct 10, 2025", 3290, true),
+    Payment(
+      "Plot No. 21 Shree Shyam Kunj Phase 5",
+      "Raipur Road, Hisar",
+      "Nov 01, 2025",
+      89000,
+      true,
+    ),
+    Payment(
+      "Security Deposit - Shree Shyam Kunj Plot",
+      "Raipur Road, Hisar",
+      "Oct 10, 2025",
+      3290,
+      true,
+    ),
   ];
 
   // Transactions (sale/rent actions) with location & date & image
@@ -67,26 +124,46 @@ class ProfileController extends GetxController {
       "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
     ),
     Property(
-      "Plot No. 21 Shree Shyam Kunj Phase 5", "Raipur Road, Hisar",
+      "Plot No. 21 Shree Shyam Kunj Phase 5",
+      "Raipur Road, Hisar",
       "Rent",
       "January 05, 2025",
       true,
       "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
     ),
     Property(
-      "Plot No. 21 Shree Shyam Kunj Phase 5", "Raipur Road, Hisar",
+      "Plot No. 21 Shree Shyam Kunj Phase 5",
+      "Raipur Road, Hisar",
       "Booking",
       "September 15, 2025",
       true,
       "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
     ),
   ];
-
 }
 
-class Transaction {
-  final String name, price, location, rating, image;
-  Transaction(this.name, this.price, this.location, this.rating, this.image);
+class TransactionModel {
+  final String id;
+  final String property;
+  final String location;
+  final DateTime date;
+  final num amount;
+  final String type; // "Received" / "Paid"
+  final String status; // "Completed" / "Pending"
+  final String reference;
+  final String image;
+
+  TransactionModel({
+    required this.id,
+    required this.property,
+    required this.location,
+    required this.date,
+    required this.amount,
+    required this.type,
+    required this.status,
+    required this.reference,
+    required this.image,
+  });
 }
 
 class Property {
@@ -97,7 +174,14 @@ class Property {
   final bool completed;
   final String image; // new
 
-  Property(this.title, this.location, this.tag, this.date, this.completed, this.image);
+  Property(
+    this.title,
+    this.location,
+    this.tag,
+    this.date,
+    this.completed,
+    this.image,
+  );
 }
 
 class Payment {
@@ -119,10 +203,7 @@ class ProfileScreen extends StatelessWidget {
     final ctrl = Get.put(ProfileController());
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
         actions: [
           IconButton(
             icon: Icon(IconlyLight.document, color: Colors.black87),
@@ -130,7 +211,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(IconlyLight.setting, color: Colors.black87),
-            onPressed: () =>Get.to(PermissionsScreen()),
+            onPressed: () => Get.to(PermissionsScreen()),
           ),
         ],
       ),
@@ -152,10 +233,7 @@ class ProfileScreen extends StatelessWidget {
                   if (ctrl.selectedTab.value == 0) {
                     return _buildMyProperties(ctrl);
                   } else if (ctrl.selectedTab.value == 1) {
-                    return _buildTransactions(
-                      ctrl,
-                      "${ctrl.my_property.length} transactions",
-                    );
+                    return _buildTransactionsSummary(ctrl);
                   } else {
                     return _buildPaymentsSection(ctrl);
                   }
@@ -206,10 +284,7 @@ class ProfileScreen extends StatelessWidget {
         SizedBox(height: 12.h),
         Text(
           "Chetan Sharma",
-          style: TextStyle(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 6.h),
         Text(
@@ -220,24 +295,20 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-
   Widget _buildTabs(ProfileController c) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 4.w),
       child: Container(
         padding: EdgeInsets.all(6.w),
         decoration: BoxDecoration(
-          color: Colors.grey.shade300,
+          color: cardColor,
           borderRadius: BorderRadius.circular(32.r),
         ),
         child: Obx(
-              () => Row(
+          () => Row(
             children: [
-
               _tab("My Properties", 0, c),
-
               _tab("Transactions", 1, c),
-
               _tab("Payments", 2, c),
             ],
           ),
@@ -279,10 +350,7 @@ class ProfileScreen extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 4.w),
           child: Text(
             "${c.my_property.length} Purchased Properties",
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
           ),
         ),
         SizedBox(height: 12.h),
@@ -295,14 +363,14 @@ class ProfileScreen extends StatelessWidget {
             final t = c.my_property[i];
             return Padding(
               padding: EdgeInsets.only(bottom: 12.h, left: 4.w, right: 4.w),
-            child: _PropertyTile(
-              image: t.image,
-              title: t.title,
-              location: t.location,
-              tag: t.tag,
-              date: t.date,
-              isCompleted: t.completed,
-            ),
+              child: _PropertyTile(
+                image: t.image,
+                title: t.title,
+                location: t.location,
+                tag: t.tag,
+                date: t.date,
+                isCompleted: t.completed,
+              ),
             );
           },
         ),
@@ -311,54 +379,109 @@ class ProfileScreen extends StatelessWidget {
   }
 
   // ---------------- My Properties view ----------------
-  Widget _buildTransactions(ProfileController c, String title) {
-    final list = c.transactions;
+  // ---------------- Transaction Summary (excel-like rows) ----------------
+  Widget _buildTransactionsSummary(ProfileController c) {
+    // show first 3 recent transactions and a "View All" button
+    final recent = c.transactions.take(3).toList();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4.w),
-          child: Row(
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 4.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
               Expanded(
                 child: Text(
-                  title,
+                  'Recent Transactions',
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              IconButton(
-                icon: Icon(Icons.more_horiz, size: 20.w),
-                onPressed: () {},
-              ),
-              SizedBox(width: 8.w),
-              FloatingActionButton.small(
-                backgroundColor: secondary,
-                child: Icon(Icons.add, color: Colors.white, size: 18.w),
-                onPressed: () {},
+              TextButton(
+                onPressed: () => Get.to(
+                  () => TransactionListScreen(transactions: c.transactions),
+                ),
+                child: Text('View All'),
               ),
             ],
           ),
-        ),
-        SizedBox(height: 12.h),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12.w,
-            mainAxisSpacing: 12.h,
-            childAspectRatio: (0.70),
+          SizedBox(height: 8.h),
+
+          // header row (excel-like)
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 90.w,
+                  child: Text(
+                    'Date',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    'Property',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 90.w,
+                  child: Text(
+                    'Amount',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 70.w,
+                  child: Text(
+                    'Type',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          itemCount: list.length,
-          itemBuilder: (ctx, i) =>
-              ListingCard(transaction: list[i]),
-        ),
-      ],
+
+          SizedBox(height: 8.h),
+
+          ListView.separated(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemBuilder: (ctx, i) {
+              final t = recent[i];
+              return GestureDetector(
+                onTap: () =>
+                    Get.to(() => TransactionDetailScreen(transaction: t)),
+                child: TransactionRow(transaction: t),
+              );
+            },
+            separatorBuilder: (_, __) => SizedBox(height: 6.h),
+            itemCount: recent.length,
+          ),
+        ],
+      ),
     );
   }
 
@@ -379,8 +502,8 @@ class ProfileScreen extends StatelessWidget {
         //   ),
         // ),
         SizedBox(height: 12.h),
-        // Upcoming Payments
 
+        // Upcoming Payments
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 4.w),
           child: Text(
@@ -409,9 +532,7 @@ class ProfileScreen extends StatelessWidget {
           },
         ),
 
-
         SizedBox(height: 16.h),
-
 
         // Past Payments
         Padding(
@@ -447,76 +568,59 @@ class ProfileScreen extends StatelessWidget {
 }
 
 // ====================== Listing Card (responsive, polished) ======================
-class ListingCard extends StatelessWidget {
-  final Transaction transaction;
+// ------------------ Transaction Row (single line like excel) ------------------
+class TransactionRow extends StatelessWidget {
+  final TransactionModel transaction;
+  const TransactionRow({required this.transaction, super.key});
 
-  const ListingCard({required this.transaction, super.key});
+  String _fmtDate(DateTime d) {
+    return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  }
 
   @override
   Widget build(BuildContext context) {
-    // card dimensions responsive
-    final double cardWidth =
-        (MediaQuery.of(context).size.width - 48.w) / 2; // padding + spacing accounted
-    final double imageHeight = (cardWidth * 0.68).clamp(100.0, 160.0);
-
     return Container(
+      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(8.r),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Padding(
-            padding: EdgeInsets.all(8.w),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20.r),
-              child: AspectRatio(
-                aspectRatio: 4 / 3,
-                child: Image.network(transaction.image, fit: BoxFit.cover),
-              ),
+          SizedBox(
+            width: 90.w,
+            child: Text(
+              _fmtDate(transaction.date),
+              style: TextStyle(fontSize: 12.sp),
             ),
           ),
-          Padding(
-            padding: EdgeInsets.all(12.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  transaction.name,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+          Expanded(
+            child: Text(
+              transaction.property,
+              style: TextStyle(fontSize: 12.sp),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          SizedBox(
+            width: 90.w,
+            child: Text(
+              '₹${transaction.amount}',
+              textAlign: TextAlign.right,
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.sp),
+            ),
+          ),
+          SizedBox(
+            width: 70.w,
+            child: Center(
+              child: Text(
+                transaction.type,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: transaction.type == 'Received'
+                      ? Colors.green
+                      : Colors.orange,
                 ),
-                SizedBox(height: 6.h),
-                Row(
-                  children: [
-                    Icon(Icons.star, color: Colors.amber, size: 14.w),
-                    SizedBox(width: 6.w),
-                    Text(
-                      transaction.rating,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12.sp,
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Expanded(
-                      child: Text(
-                        transaction.location,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 11.sp,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
         ],
@@ -548,35 +652,37 @@ class _PropertyTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Get.to(() => PropertyTransactionDetailScreen(
-          image: image,
-          title: "Plot No. 21 Shree Shyam Kunj Phase 5",
-          location: "Raipur Road, Hisar",
-          tag: "Purchase",
-          date: "11/28/2021",
-          details: {
-            "checkIn": "11/28/2021",
-            "checkOut": "01/28/2022",
-            "owner": "Chetan Sharma",
-            "paymentEmail": "user@mail.com",
-          },
-          paymentDetail: {
-            "period": "2 months",
-            "monthly": 220,
-            "discount": 88,
-            "total": 31250,
-          },
-          propertyType: PropertyType.township,
-          // pass mapImage as the local path too if you want it to show as map preview:
-          mapImage: image,
-          view360Url: null,
-        ));
+        Get.to(
+          () => PropertyTransactionDetailScreen(
+            image: image,
+            title: "Plot No. 21 Shree Shyam Kunj Phase 5",
+            location: "Raipur Road, Hisar",
+            tag: "Purchase",
+            date: "11/28/2021",
+            details: {
+              "checkIn": "11/28/2021",
+              "checkOut": "01/28/2022",
+              "owner": "Chetan Sharma",
+              "paymentEmail": "user@mail.com",
+            },
+            paymentDetail: {
+              "period": "2 months",
+              "monthly": 220,
+              "discount": 88,
+              "total": 31250,
+            },
+            propertyType: PropertyType.township,
+            // pass mapImage as the local path too if you want it to show as map preview:
+            mapImage: image,
+            view360Url: null,
+          ),
+        );
       },
 
       child: Container(
         padding: EdgeInsets.all(8.w),
         decoration: BoxDecoration(
-          color: cardColor,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(12.r),
         ),
         child: Row(
@@ -584,20 +690,34 @@ class _PropertyTile extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(8.r),
               child: Container(
-                width: 78.w,
-                height: 64.h,
+                width: 100.w,
+                height: 80.h,
                 color: Colors.grey.shade200,
                 child: image.isNotEmpty
                     ? Image.network(
-                  image,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Icon(Icons.home_outlined, size: 30.w, color: Colors.grey[600]),
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Center(child: SizedBox(width: 20.w, height: 20.w, child: CircularProgressIndicator(strokeWidth: 2)));
-                  },
-                )
-                    : Icon(Icons.home_outlined, size: 30.w, color: Colors.grey[600]),
+                        image,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Icon(
+                          Icons.home_outlined,
+                          size: 30.w,
+                          color: Colors.grey[600],
+                        ),
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: SizedBox(
+                              width: 20.w,
+                              height: 20.w,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          );
+                        },
+                      )
+                    : Icon(
+                        Icons.home_outlined,
+                        size: 30.w,
+                        color: Colors.grey[600],
+                      ),
               ),
             ),
             SizedBox(width: 12.w),
@@ -620,7 +740,10 @@ class _PropertyTile extends StatelessWidget {
                       Expanded(
                         child: Text(
                           location,
-                          style: TextStyle(color: Colors.grey[600], fontSize: 12.sp),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12.sp,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -637,7 +760,10 @@ class _PropertyTile extends StatelessWidget {
                       SizedBox(width: 8.w),
                       Text(
                         "$tag • $date",
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12.sp),
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12.sp,
+                        ),
                       ),
                     ],
                   ),
@@ -650,7 +776,6 @@ class _PropertyTile extends StatelessWidget {
     );
   }
 }
-
 
 // ====================== Payment Card ======================
 class PaymentCard extends StatelessWidget {
@@ -674,7 +799,7 @@ class PaymentCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(10.w),
       decoration: BoxDecoration(
-        color: cardColor,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
@@ -699,7 +824,10 @@ class PaymentCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13.sp),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13.sp,
+                  ),
                 ),
                 SizedBox(height: 6.h),
                 Text(
@@ -712,9 +840,15 @@ class PaymentCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text("₹$amount", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.sp)),
+              Text(
+                "₹$amount",
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.sp),
+              ),
               SizedBox(height: 6.h),
-              Text(date, style: TextStyle(color: Colors.grey[600], fontSize: 12.sp)),
+              Text(
+                date,
+                style: TextStyle(color: Colors.grey[600], fontSize: 12.sp),
+              ),
             ],
           ),
         ],

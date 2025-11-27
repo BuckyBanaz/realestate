@@ -18,7 +18,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _pages = const [
     HomeScreen(),
-    // SearchScreen(),
+    SearchScreen(),
     FavoriteScreen(),
     // // Make sure you have a ChatScreen or replace with any widget.
     // ChatScreen(),
@@ -83,40 +83,37 @@ class CustomBottomNav extends StatelessWidget {
       child: InkWell(
         onTap: () => onTap(index),
         borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                selected && activeIcon != null ? activeIcon : icon,
-                size: selected ? 26 : 24,
-                color: color,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+
+          children: [
+            Icon(
+              selected && activeIcon != null ? activeIcon : icon,
+              size: selected ? 28 : 26,
+              color: color,
+            ),
+            // label - small, subtle
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                color: selected ? secondary : Colors.grey.shade600,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w200,
               ),
-              const SizedBox(height: 6),
-              // label - small, subtle
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey.shade700,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                ),
-              ),
-              // const SizedBox(height: 6),
-              // // dot indicator
-              // AnimatedContainer(
-              //   duration: const Duration(milliseconds: 250),
-              //   curve: Curves.easeInOut,
-              //   width: 8,
-              //   height: 8,
-              //   decoration: BoxDecoration(
-              //     color: selected ? secondary : Colors.transparent,
-              //     shape: BoxShape.circle,
-              //   ),
-              // ),
-            ],
-          ),
+            ),
+            // const SizedBox(height: 6),
+            // // dot indicator
+            // AnimatedContainer(
+            //   duration: const Duration(milliseconds: 250),
+            //   curve: Curves.easeInOut,
+            //   width: 8,
+            //   height: 8,
+            //   decoration: BoxDecoration(
+            //     color: selected ? secondary : Colors.transparent,
+            //     shape: BoxShape.circle,
+            //   ),
+            // ),
+          ],
         ),
       ),
     );
@@ -127,7 +124,7 @@ class CustomBottomNav extends StatelessWidget {
     // Container with rounded top corners + shadow
     return Container(
       height: height,
-      padding: const EdgeInsets.only(top: 6, bottom: 8, left: 8, right: 8),
+      padding: const EdgeInsets.only(top: 2, bottom: 2, left: 8, right: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.only(
@@ -155,11 +152,20 @@ class CustomBottomNav extends StatelessWidget {
 
           _item(
             context: context,
+            icon: IconlyLight.search,
+            activeIcon: IconlyLight.search,
+            label: 'Search',
+            index: 1,
+            selected: selectedIndex == 1,
+          ),
+
+          _item(
+            context: context,
             icon: IconlyLight.heart,
             activeIcon: IconlyBold.heart,
             label: 'Favorite',
-            index: 1,
-            selected: selectedIndex == 1,
+            index: 2,
+            selected: selectedIndex == 2,
           ),
           // _item(
           //   context: context,
@@ -174,8 +180,8 @@ class CustomBottomNav extends StatelessWidget {
             icon: IconlyLight.profile,
             activeIcon: IconlyBold.profile,
             label: 'Profile',
-            index: 2,
-            selected: selectedIndex == 2,
+            index: 3,
+            selected: selectedIndex == 3,
           ),
         ],
       ),

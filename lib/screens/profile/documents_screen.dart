@@ -1,4 +1,3 @@
-// documents_screen.dart
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -13,7 +12,7 @@ class PropertyDocument {
   final String title;
   final String propertyName;
   final String docType;
-  final String thumbnail; // network url or local path (/mnt/...)
+  final String thumbnail;
   final String uploadedDate;
   final Map<String, String> metadata; // e.g., owner history, reg date, reg no, issuer, remarks
 
@@ -284,34 +283,6 @@ class DocumentDetailScreen extends StatelessWidget {
             ]),
           ),
 
-          SizedBox(height: 18.h),
-
-          // Actions: Download / Share / Open
-          Row(children: [
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  // implement download logic
-                  // Get.snackbar("Download", "Downloading ${document.title}", snackPosition: SnackPosition.BOTTOM);
-                },
-                icon: Icon(Icons.download, size: 18.w,color: Colors.white,),
-                label: Text("Download", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600,color: Colors.white)),
-                style: ElevatedButton.styleFrom(backgroundColor: primary, padding: EdgeInsets.symmetric(vertical: 12.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  // implement share logic
-                  Get.snackbar("Share", "Share ${document.title}", snackPosition: SnackPosition.BOTTOM);
-                },
-                icon: Icon(Icons.share, size: 18.w),
-                label: Text("Share", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                style: OutlinedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 12.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
-              ),
-            ),
-          ]),
 
           SizedBox(height: 16.h),
 

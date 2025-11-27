@@ -6,7 +6,7 @@ import 'package:realestate/screens/property/property_deatils_screen.dart';
 import '../../constant/app_colors.dart';
 
 const String sitePlanImagePath =
-    'https://assets-news.housing.com/news/wp-content/uploads/2022/04/04144614/Types-of-plots-and-various-types-of-housing-plots-in-India-feature-compressed.jpg';
+    'https://media.istockphoto.com/id/1458263734/photo/land-plot-management-real-estate-concept-with-a-vacant-land-parcel-available-for-building.jpg?s=2048x2048&w=is&k=20&c=9put_u4dxBRj9VOEPG_ES52tcKYh-FyK6z6HPv0B0L4=';
 class SitePlanHeader extends StatelessWidget {
   final int availableCount;
   const SitePlanHeader({Key? key, required this.availableCount}) : super(key: key);
@@ -295,91 +295,135 @@ class _PlotCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.white,
-      elevation: 0,
+    final double cardWidth = double.infinity;
+    final double cardHeight = 130.h;
+    final double imageW = 110.w;
+    final double imageH = 92.h;
+    final borderRadius = 12.r;
+
+    return Opacity(
+      opacity: isSold ? 0.6 : 1.0,
       child: InkWell(
         onTap: isSold ? null : onTap,
-        borderRadius: BorderRadius.circular(10.r),
-        child: SizedBox(
-          height: 110.h,
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Container(
+          width: cardWidth,
+          height: cardHeight,
+          padding: EdgeInsets.all(8.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: Border.all(color: Colors.grey.shade200),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 6, offset: Offset(0, 3))],
+          ),
           child: Row(
             children: [
-              // image (rounded)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ClipRRect(
-                  borderRadius:
-                  BorderRadius.circular(10.r),
-                  child: Image.network(
-                    imageUrl,
-                    width: 100.w,
-                    height: 120.h,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      width: 110.w,
-                      height: 100.h,
-                      color: Colors.grey.shade200,
-                      child: Icon(Icons.image_not_supported,
-                          color: Colors.grey, size: 28.sp),
-                    ),
-                  ),
+              // Left image
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10.r),
+                child: Image.network(
+                  imageUrl,
+                  width: imageW,
+                  height: imageH,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) =>
+                      Container(width: imageW, height: imageH, color: Colors.grey.shade200),
                 ),
               ),
 
-              // info
+              SizedBox(width: 12.w),
+
+              // Right content
               Expanded(
-                child: Padding(
-                  padding:
-                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // title
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(title,
-                                style: TextStyle(
-                                  fontSize: 15.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.black87,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // top row: tag + optional status
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFF2F7EE),
+                            borderRadius: BorderRadius.circular(8.r),
                           ),
-                          SizedBox(width: 6.w),
+                          child: Text(
+                            type,
+                            style: TextStyle(color: secondary, fontSize: 10.sp, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                        Spacer(),
+                        if (isSold)
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            child: Text('SOLD', style: TextStyle(color: Colors.red.shade700, fontSize: 11.sp, fontWeight: FontWeight.w800)),
+                          ),
+                      ],
+                    ),
 
-                        ],
-                      ),
-                      SizedBox(height: 6.h),
-                      // size & location
-                      Text('$size • $location',
-                          style:
-                          TextStyle(fontSize: 12.sp, color: Colors.black54)),
-                      SizedBox(height: 6.h),
-                      // price and rating / sold
-                      Text('Starting From ₹$price Lac',
-                          style: TextStyle(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w800,
-                              color: primary)),
+                    SizedBox(height: 6.h),
 
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: Text('View Details',
-                            style: TextStyle(
-                                color: Colors.grey, fontSize: 11.sp)),
-                      ),
-                    ],
-                  ),
+                    // Title
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: Color(0xFF083632)),
+                    ),
+
+                    SizedBox(height: 4.h),
+
+                    // size & location
+                    Text(
+                      '$size • ${_shortLocation(location)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 11.sp, color: Colors.grey.shade700),
+                    ),
+
+                    SizedBox(height: 8.h),
+
+                    // price + CTA
+                    Row(
+                      children: [
+                        Text(
+                          'Starting From ₹$price Lac',
+                          style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: primary),
+                        ),
+                        Spacer(),
+                        // small view button
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                          decoration: BoxDecoration(
+                            color: primary,
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: Text(
+                            isSold ? 'Details' : 'View',
+                            style: TextStyle(color: Colors.white, fontSize: 12.sp, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ),
+              )
             ],
           ),
         ),
       ),
     );
+  }
+
+  String _shortLocation(String full) {
+    // keep it compact for the card
+    if (full.length > 30) return full.substring(0, 28) + '...';
+    return full;
   }
 }
 

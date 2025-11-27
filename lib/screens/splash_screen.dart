@@ -1,7 +1,7 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:realestate/screens/auth/login_screen.dart';
+import 'package:get/get.dart';
+import 'package:realestate/Routes/appRoutes.dart';
 import '../constant/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -11,33 +11,78 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Offset> _slideAnimation;
+  bool showLoader = false;
+
   @override
   void initState() {
     super.initState();
 
-    // Delay of 2–3 seconds
-    Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) =>  LoginScreen()),
-      );
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 1), // start off-screen (bottom)
+      end: Offset.zero,          // end at its Align position
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    // show loader after 1 second
+    Future.delayed(const Duration(seconds: 1), () {
+      if (!mounted) return;
+      setState(() => showLoader = true);
+      _controller.forward();
     });
+
+    // navigate after 3 seconds
+    Timer(const Duration(seconds: 3), () {
+      if (!mounted) return;
+      Get.offAllNamed(AppRoutes.login);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: primary, // same green shade
-      body: Center(
-        child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle
-          ),
-          child: Image.asset(
-            "assets/images/logo.png",
-            width: 200,
-          ),
+      backgroundColor: primary,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Logo centered
+            const Center(
+              child: Image(
+                image: AssetImage("assets/images/logo.png"),
+                width: 150,
+              ),
+            ),
+
+            // Loader slides from bottom to slightly below center (alignment y = 0.4)
+            if (showLoader)
+              Align(
+                alignment: const Alignment(0, 0.4),
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: const SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 3,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

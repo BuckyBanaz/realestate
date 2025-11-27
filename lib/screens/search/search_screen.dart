@@ -97,7 +97,7 @@ class ResultsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final results = controller.filteredEstates;
+      final results = nearbyEstates;
 
       // If searching and nothing found -> show empty state
       if (controller.searchQuery.value.isNotEmpty && results.isEmpty) {
@@ -160,15 +160,18 @@ class ResultsSection extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   itemCount: results.length,
                   itemBuilder: (ctx, i) {
-                    final estate = results[i];
+                    final e = results[i];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: ResultCard(
-                        name: estate.name,
-                        rating: estate.rating,
-                        location: estate.location,
-                        // price: estate.price,
-                        // tag: estate.tag,
+                      child: FeatureCard(
+                        imageUrl: e['image']!,
+                        title: e['title']!,
+                        location: e['location']!,
+                        price: e['price']!,
+                        beds: e['beds']!,
+                        area: e['area']!,
+                        tag: e['tag']!,
+                        rating: e['rating']!,
                       ),
                     );
                   },

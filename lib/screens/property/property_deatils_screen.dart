@@ -1,27 +1,27 @@
 // lib/screens/property/property_detail_fixed.dart
 import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:realestate/constant/app_colors.dart';
-import 'package:realestate/screens/property/plot_selection_screen.dart';
+import 'package:realestate/screens/property/property_deatils_screen.dart';
 import 'package:realestate/screens/property/property_equiery_form.dart';
 import 'package:realestate/screens/property/property_map_view_screen.dart';
+import 'package:realestate/screens/property/plot_selection_screen.dart';
 
-import '../home/home_screen.dart';
-import '../search/search_screen.dart';
-import '../property/property_deatils_screen.dart';
-
+/// Improved PropertyDetailScreen with:
+/// - better gallery (main image + thumbnails)
+/// - Property Details card (all requested attributes)
+/// - 360 view and map preview
+/// - Styled consistent plot cards maintained below
 class PropertyDetailScreen extends StatelessWidget {
-  // Use the uploaded local file path (your environment will convert to a URL)
+  // local assets or network fallback
   final String mainImageUrl = 'assets/images/Header.png';
   final String altImageUrl =
-      '/mnt/data/e16ce833-3964-4025-82d5-8cb15dfd73a0.png';
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200';
 
-  // Thumbnails - keep as assets or network as you like
   final List<String> thumbs = [
     "assets/images/1.png",
     "assets/images/2.png",
@@ -29,97 +29,75 @@ class PropertyDetailScreen extends StatelessWidget {
   ];
 
   PropertyDetailScreen({Key? key}) : super(key: key);
-  double _clamp(double value, double minVal, double maxVal) =>
-      value.clamp(minVal, maxVal);
 
-  Widget _roundIconButton({
-    required IconData icon,
-    required VoidCallback onTap,
-    Color? bg,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: bg ?? Colors.white.withOpacity(0.9),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 6,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Icon(icon, size: 20, color: Colors.black87),
+  Widget _iconCircle(IconData icon, {Color bg = Colors.white}) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: bg,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+        ],
       ),
+      child: Center(child: Icon(icon, size: 20, color: Colors.black87)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
-    final double horizontalPadding = 20.0;
-    final double cardRadius = 20.0;
-
+    final double horizontalPadding = 18.0;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(CupertinoIcons.back)),
+        leading: IconButton(
+          onPressed: () => Get.back(),
+          icon: Icon(CupertinoIcons.back),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: Icon(IconlyLight.heart, color: Colors.black87),
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 10,),
-               Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(cardRadius),
-                  child: Stack(
-                    children: [
-                       SizedBox(
-                        width: double.infinity,
-                        child: Image.asset(
-                           mainImageUrl,
-                          fit: BoxFit.fill,
-                          errorBuilder: (ctx, err, st) {
-                             return Image.network(
-                              altImageUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (c, e, s) =>
-                                  Container(color: Colors.grey.shade300),
-                            );
-                          },
-                        ),
-                      ),
-
-
-                    ],
-                  ),
+              // ---------- Gallery (main image + vertical thumbs) ----------
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding,
+                  vertical: 6,
+                ),
+                child: _Gallery(
+                  mainImagePath: mainImageUrl,
+                  altImage: altImageUrl,
+                  thumbs: thumbs,
                 ),
               ),
-        
-              SizedBox(height: 30),
 
+              SizedBox(height: 18),
+
+              // Title + Location
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Flexible(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             "Shree Shyam Kunj Phase 2",
                             style: TextStyle(
-                              fontSize: _clamp(w * 0.065, 18.0, 28.0),
+                              fontSize: 22,
                               fontWeight: FontWeight.bold,
-                              color: secondary,
+                              color: Colors.black87,
                             ),
                           ),
                           SizedBox(height: 6),
@@ -131,10 +109,10 @@ class PropertyDetailScreen extends StatelessWidget {
                                 color: Colors.grey,
                               ),
                               SizedBox(width: 6),
-                              Expanded(
+                              Flexible(
                                 child: Text(
-                                  "Raipur Road Hisar",
-                                  style: TextStyle(color: Colors.grey),
+                                  "Raipur Road, Hisar, Haryana",
+                                  style: TextStyle(color: Colors.grey[700]),
                                 ),
                               ),
                             ],
@@ -142,66 +120,149 @@ class PropertyDetailScreen extends StatelessWidget {
                         ],
                       ),
                     ),
+                    SizedBox(width: 8),
+                    // small actions
+                    Column(
+                      children: [
+                        _iconCircle(Icons.share),
+                        SizedBox(height: 8),
+                        _iconCircle(IconlyLight.download),
+                      ],
+                    ),
                   ],
                 ),
               ),
 
-              // Divider
+              SizedBox(height: 14),
+
+              // ---------- Details Card (attributes) ----------
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                child: Divider(thickness: 1.0),
-              ),
-
-              PropertyFacilitiesSection(),
-        
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: PlotSelectionWidget(
-                  onPlotSelected: (plotNo, size) {
-                    print("Selected: $plotNo ($size)");
+                child: PropertyDetailsSection(
+                  details: {
+                    "Plot Key": "Shree Shyam Kunj — Plot No. 5",
+                    "Location": "Raipur Road, Hisar, Haryana, 125033",
+                    "Plot Size / Area": "30×50 ft (150 sq yd)",
+                    "Plot Shape": "Rectangular",
+                    "Dimensions": "30 × 50 ft",
+                    "Facing / Orientation": "East Facing",
+                    "Zoning Type": "Residential",
+                    "Access Road Width": "30 ft wide internal road",
+                    "Surroundings": "Park on east, main road on north",
+                    "360 View": "Available",
+                    "Map Image": "https://media.wired.com/photos/59269cd37034dc5f91bec0f1/191:100/w_1280,c_limit/GoogleMapTA.jpg?mbid=social_retweet", // local asset preview
                   },
                 ),
               ),
-              SizedBox(height: 28),
+
+              SizedBox(height: 18),
+
+              // ---------- Plot selection (existing widget) ----------
+
+
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child:  ImagePreview(
-                  imagePath: 'assets/images/map.jpg',
-                  heroTag: 'map-1',
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                 ),
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Choose Plots",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+
+                    PlotSelectionWidget(
+                      onPlotSelected: (plotNo, size) {
+                        Get.snackbar(
+                          "Selected",
+                          "$plotNo • $size",
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                      },
+                    ),
+
+                  ],
+                ),
               ),
+
+              SizedBox(height: 18),
+
+              // // Map preview
+              // Padding(
+              //   padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+              //   child: Column(
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: [
+              //       Text("Site Plan", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              //       SizedBox(height: 10),
+              //       GestureDetector(
+              //         onTap: () => Get.to(() => PropertyMapViewScreen()),
+              //         child: ClipRRect(
+              //           borderRadius: BorderRadius.circular(12),
+              //           child: Image.asset(
+              //             'assets/images/map.jpg',
+              //             height: 180,
+              //             width: double.infinity,
+              //             fit: BoxFit.cover,
+              //             errorBuilder: (_, __, ___) => Container(height: 180, color: Colors.grey.shade200),
+              //           ),
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Site Plan",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    ImagePreview(
+                      imagePath: 'assets/images/map.jpg',
+                      heroTag: 'map-1',
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 24),
             ],
           ),
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 18),
         child: SizedBox(
-          height: 56,
+          height: 52,
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              Get.to(() => EnquiryFormScreen(
-                propertyName: "Shree Shyam Kunj Phase 2",
-                // propertyPrice: "₹ 22,000/month",
-                propertyLocation: "Raipur Road, Hisar, Haryana",
-              ));
+              Get.to(
+                () => EnquiryFormScreen(
+                  propertyName: "Shree Shyam Kunj Phase 2",
+                  propertyLocation: "Raipur Road, Hisar, Haryana",
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              elevation: 4,
             ),
             child: Text(
               "Submit Enquiry",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700,color: Colors.white),
             ),
           ),
         ),
@@ -210,32 +271,138 @@ class PropertyDetailScreen extends StatelessWidget {
   }
 }
 
-// ---------------- PropertyFacilitiesSection (no big changes, but responsive)
-class PropertyFacilitiesSection extends StatelessWidget {
-  const PropertyFacilitiesSection({super.key});
+// -------------------- Gallery Widget --------------------
+class _Gallery extends StatefulWidget {
+  final String mainImagePath;
+  final String altImage;
+  final List<String> thumbs;
 
-  Widget _buildChip({
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFD8D8DA),
-        borderRadius: BorderRadius.circular(30),
+  const _Gallery({
+    Key? key,
+    required this.mainImagePath,
+    required this.altImage,
+    required this.thumbs,
+  }) : super(key: key);
+
+  @override
+  State<_Gallery> createState() => _GalleryState();
+}
+
+class _GalleryState extends State<_Gallery> {
+  String? _current;
+  @override
+  void initState() {
+    super.initState();
+    _current = widget.mainImagePath;
+  }
+
+  void _openPreview(String image) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        pageBuilder: (_, __, ___) => _FullScreenImagePage(imagePath: image),
+        transitionsBuilder: (_, animation, __, child) =>
+            FadeTransition(opacity: animation, child: child),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: primary, size: 20),
-          if (label.isNotEmpty) ...[
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(color: primary, fontWeight: FontWeight.w600),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final double galleryHeight = 240;
+    final thumbSize = 72.0;
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: () => _openPreview(_current ?? widget.altImage),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: AspectRatio(
+                aspectRatio: 4 / 3,
+                child: _imageWidget(
+                  _current ?? widget.altImage,
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
-          ],
+          ),
+        ),
+        SizedBox(width: 12),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: widget.thumbs.map((t) {
+            final isSelected = t == _current;
+            return GestureDetector(
+              onTap: () => setState(() => _current = t),
+              child: Container(
+                margin: EdgeInsets.only(bottom: 8),
+                width: thumbSize,
+                height: thumbSize,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected ? primary : Colors.transparent,
+                    width: 2,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: _imageWidget(t, fit: BoxFit.cover),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _imageWidget(String path, {BoxFit fit = BoxFit.cover}) {
+    // prefer asset if path starts with assets, else network
+    if (path.startsWith('assets/')) {
+      return Image.asset(
+        path,
+        fit: fit,
+        errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade200),
+      );
+    } else {
+      return Image.network(
+        path,
+        fit: fit,
+        errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade200),
+      );
+    }
+  }
+}
+
+// -------------------- Property Details Section --------------------
+class PropertyDetailsSection extends StatelessWidget {
+  final Map<String, String> details;
+
+  const PropertyDetailsSection({Key? key, required this.details})
+    : super(key: key);
+
+  Widget _row(String title, String value, {Widget? trailing}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 140,
+            child: Text(
+              title,
+              style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+            ),
+          ),
+          if (trailing != null) ...[SizedBox(width: 8), trailing],
         ],
       ),
     );
@@ -243,61 +410,120 @@ class PropertyFacilitiesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
-    final double avatarRadius = max(22.0, min(30.0, w * 0.07));
-
-    return Card(
-      color: Colors.white,
-      margin: const EdgeInsets.all(20),
+    // build a card with all attributes
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: kCardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-
-      child: Column(
+        padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // header row with title and 360 button
             Row(
-
               children: [
-                const Text(
+                Text(
                   "Details",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Spacer(),
-                Container(
-                  width: 54,
-                  height: 54,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFF4F3F8), // same soft grey
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Image.asset("assets/images/360-degrees.png",fit: BoxFit.cover,height: 28,width: 28,),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                children: [
-                  Icon(IconlyLight.location, color: Colors.grey),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      "Raipur Road, Hisar, Haryana, India, 125033",
-                      style: TextStyle(fontSize: 15),
+                if (details.containsKey("360 View") &&
+                    details["360 View"]!.toLowerCase() == "available")
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      // open 360 view — replace with real implementation
+                      // Get.snackbar(
+                      //   "360",
+                      //   "Opening 360° view...",
+                      //   snackPosition: SnackPosition.BOTTOM,
+                      // );
+                    },
+                    icon: Icon(Icons.threesixty, size: 18),
+                    label: Text("360°"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey[100],
+                      foregroundColor: Colors.black87,
+                      elevation: 0,
                     ),
                   ),
-                ],
-              ),
+              ],
             ),
+            SizedBox(height: 10),
+
+            // location row in a small rounded box
+            if (details.containsKey("Location"))
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(IconlyLight.location, color: Colors.grey),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        details["Location"]!,
+                        style: TextStyle(fontSize: 13),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.map_outlined),
+                      onPressed: () => Get.to(() => PropertyMapViewScreen()),
+                    ),
+                  ],
+                ),
+              ),
+
+            SizedBox(height: 12),
+
+            // details list
+            _row("Plot Key Property Attributes", details["Plot Key"] ?? "-"),
+            _row("Plot Size / Area", details["Plot Size / Area"] ?? "-"),
+            _row("Plot Shape", details["Plot Shape"] ?? "-"),
+            _row("Dimensions (L × W)", details["Dimensions"] ?? "-"),
+            _row(
+              "Facing / Orientation",
+              details["Facing / Orientation"] ?? "-",
+            ),
+            _row("Zoning Type", details["Zoning Type"] ?? "-"),
+            _row("Access Road Width", details["Access Road Width"] ?? "-"),
+            _row("Surroundings / Neighborhood", details["Surroundings"] ?? "-"),
+
+            SizedBox(height: 8),
+
+            // map thumbnail row
+            if (details.containsKey("Map Image"))
+              GestureDetector(
+                onTap: () => Get.to(() => PropertyMapViewScreen()),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      details["Map Image"]!,
+                      height: 120,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          Container(height: 120, color: Colors.grey.shade200),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -305,218 +531,37 @@ class PropertyFacilitiesSection extends StatelessWidget {
   }
 }
 
-class CostOfLivingMapSection extends StatelessWidget {
-  const CostOfLivingMapSection({super.key});
+// ----------------- Full screen image viewer (simpler) -----------------
+class _FullScreenImagePage extends StatelessWidget {
+  final String imagePath;
+  const _FullScreenImagePage({Key? key, required this.imagePath})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
-    final mapHeight = (w * 0.48).clamp(180.0, 320.0);
+    Widget child;
+    if (imagePath.startsWith('assets/')) {
+      child = Image.asset(imagePath, fit: BoxFit.contain);
+    } else {
+      child = Image.network(imagePath, fit: BoxFit.contain);
+    }
 
-    return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            child: Stack(
-              children: [
-                Container(
-                  height: mapHeight,
-                  width: double.infinity,
-                  color: Colors.grey.shade200,
-                  child: Image.network(
-                    "https://t4.ftcdn.net/jpg/03/38/37/73/360_F_338377354_1Y6oyGrvaae2kqY3YS07b6X4NDKZntne.jpg",
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Center(
-                  child: CustomPaint(
-                    size: Size(double.infinity, mapHeight),
-                    painter: RoutePainter(),
-                  ),
-                ),
-                const Positioned(
-                  top: 50,
-                  left: 60,
-                  child: _MapPin(
-                    imageUrl: "https://randomuser.me/api/portraits/men/32.jpg",
-                    isAgent: true,
-                  ),
-                ),
-                const Positioned(
-                  top: 100,
-                  right: 50,
-                  child: _MapPin(imageUrl: null, isAgent: false),
-                ),
-                Positioned(
-                  bottom: 16,
-                  left: 0,
-                  right: 0,
-                  child: GestureDetector(
-                    onTap: () => Get.to(PropertyMapViewScreen()),
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          "View all on map",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+    return Scaffold(
+      backgroundColor: Colors.black.withOpacity(0.95),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Center(child: InteractiveViewer(child: child)),
+            Positioned(
+              top: 20,
+              left: 16,
+              child: BackButton(color: Colors.white),
             ),
-          ),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Cost of Living",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        "view details",
-                        style: TextStyle(
-                          color: secondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFF),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    children: const [
-                      Text(
-                        "₹ 22,000/month",
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        "*From average citizen spend around this location",
-                        style: TextStyle(fontSize: 13, color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
-}
-
-// Map pin
-class _MapPin extends StatelessWidget {
-  final String? imageUrl;
-  final bool isAgent;
-  const _MapPin({this.imageUrl, required this.isAgent});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8),
-        ],
-      ),
-      child: CircleAvatar(
-        radius: 22,
-        backgroundColor: Colors.white,
-        child: isAgent && imageUrl != null
-            ? CircleAvatar(radius: 19, backgroundImage: NetworkImage(imageUrl!))
-            : Icon(Icons.location_city, color: secondary, size: 28),
-      ),
-    );
-  }
-}
-
-class RoutePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = secondary
-      ..strokeWidth = 4
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final dottedPaint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final path = Path()
-      ..moveTo(size.width * 0.25, size.height * 0.35)
-      ..quadraticBezierTo(
-        size.width * 0.5,
-        size.height * 0.5,
-        size.width * 0.75,
-        size.height * 0.65,
-      );
-
-    canvas.drawPath(path, paint);
-    canvas.drawPath(path, dottedPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class ImagePreview extends StatelessWidget {
@@ -544,28 +589,27 @@ class ImagePreview extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
-          Navigator.of(context).push(PageRouteBuilder(
-            opaque: false,
-            pageBuilder: (_, __, ___) => _FullScreenImagePage(
-              imagePath: imagePath,
-              heroTag: heroTag,
-              fit: fit,
-              maxScale: maxScale,
-              minScale: minScale,
+          Navigator.of(context).push(
+            PageRouteBuilder(
+              opaque: false,
+              pageBuilder: (_, __, ___) => _ImageScreenImagePage(
+                imagePath: imagePath,
+                heroTag: heroTag,
+                fit: fit,
+                maxScale: maxScale,
+                minScale: minScale,
+              ),
+              transitionsBuilder: (_, animation, __, child) {
+                return FadeTransition(opacity: animation, child: child);
+              },
             ),
-            transitionsBuilder: (_, animation, __, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-          ));
+          );
         },
         child: Hero(
           tag: heroTag,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              imagePath,
-              fit: fit,
-            ),
+            child: Image.asset(imagePath, fit: fit),
           ),
         ),
       ),
@@ -573,14 +617,14 @@ class ImagePreview extends StatelessWidget {
   }
 }
 
-class _FullScreenImagePage extends StatefulWidget {
+class _ImageScreenImagePage extends StatefulWidget {
   final String imagePath;
   final String heroTag;
   final BoxFit fit;
   final double maxScale;
   final double minScale;
 
-  const _FullScreenImagePage({
+  const _ImageScreenImagePage({
     Key? key,
     required this.imagePath,
     required this.heroTag,
@@ -590,11 +634,12 @@ class _FullScreenImagePage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<_FullScreenImagePage> createState() => _FullScreenImagePageState();
+  State<_ImageScreenImagePage> createState() => _ImageScreenImagePageState();
 }
 
-class _FullScreenImagePageState extends State<_FullScreenImagePage> {
-  final TransformationController _transformationController = TransformationController();
+class _ImageScreenImagePageState extends State<_ImageScreenImagePage> {
+  final TransformationController _transformationController =
+      TransformationController();
 
   @override
   void dispose() {
@@ -636,15 +681,12 @@ class _FullScreenImagePageState extends State<_FullScreenImagePage> {
                   scaleEnabled: true,
                   minScale: widget.minScale,
                   maxScale: widget.maxScale,
-                  child: Image.asset(
-                    widget.imagePath,
-                    fit: widget.fit,
-                  ),
+                  child: Image.asset(widget.imagePath, fit: widget.fit),
                 ),
               ),
             ),
 
-     Positioned.fill(
+            Positioned.fill(
               child: GestureDetector(
                 onTap: () {
                   if (_transformationController.value == Matrix4.identity()) {
@@ -659,4 +701,3 @@ class _FullScreenImagePageState extends State<_FullScreenImagePage> {
     );
   }
 }
-

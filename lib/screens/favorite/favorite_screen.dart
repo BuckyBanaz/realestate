@@ -2,9 +2,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:realestate/screens/home/home_screen.dart';
 
 import '../../constant/app_colors.dart';
 
@@ -174,7 +176,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
   Widget build(BuildContext context) {
     final filtered = _filteredProperties;
     final w = MediaQuery.of(context).size.width;
-    final horizontalPadding = 16.0;
+    final horizontalPadding = 14.0;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -220,43 +222,9 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         child: Column(
           children: [
             // Search + View toggle
-            Row(
-              children: [
-                Expanded(
-                  child: _SearchField(
-                    onChanged: (v) => setState(() => searchQuery = v),
-                    hint: "Search by title, location or tag",
-                  ),
-                ),
-                SizedBox(width: 10),
-                // view toggle
-                Container(
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        tooltip: "List view",
-                        icon: Icon(
-                          Icons.list_sharp,
-                          color: isGrid ? Colors.grey : secondary,
-                        ),
-                        onPressed: () => setState(() => isGrid = false),
-                      ),
-                      IconButton(
-                        tooltip: "Grid view",
-                        icon: Icon(
-                          Icons.grid_view_rounded,
-                          color: isGrid ? secondary : Colors.grey,
-                        ),
-                        onPressed: () => setState(() => isGrid = true),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            _SearchField(
+              onChanged: (v) => setState(() => searchQuery = v),
+              hint: "Search by title, location or tag",
             ),
 
             // SizedBox(height: 12),
@@ -281,14 +249,40 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
             // ),
             SizedBox(height: 12),
 
-            // Content
             Expanded(
-              child: filtered.isEmpty
-                  ? _emptyState(context)
-                  : (isGrid
-                        ? _gridView(context, filtered)
-                        : _listView(context, filtered)),
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 0,
+                  vertical: 8,
+                ),
+                itemCount: nearbyEstates.length,
+                itemBuilder: (ctx, i) {
+                  final e = nearbyEstates[i];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: FeatureCard(
+                      imageUrl: e['image']!,
+                      title: e['title']!,
+                      location: e['location']!,
+                      price: e['price']!,
+                      beds: e['beds']!,
+                      area: e['area']!,
+                      tag: e['tag']!,
+                      rating: e['rating']!,
+                    ),
+                  );
+                },
+              ),
             ),
+
+            // Content
+            // Expanded(
+            //   child: filtered.isEmpty
+            //       ? _emptyState(context)
+            //       : (isGrid
+            //             ? _gridView(context, filtered)
+            //             : _listView(context, filtered)),
+            // ),
           ],
         ),
       ),
@@ -497,11 +491,12 @@ class _SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 50,
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: Colors.transparent),
       ),
-      padding: EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -595,14 +590,10 @@ class _SavedPropertyCard extends StatelessWidget {
     return Container(
       height: cardHeight,
       decoration: BoxDecoration(
-        color: cardColor,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 8,
-            offset: Offset(0, 6),
-          ),
+          BoxShadow(color: Colors.white, blurRadius: 8, offset: Offset(0, 6)),
         ],
       ),
       child: Row(
@@ -661,9 +652,7 @@ class _SavedPropertyCard extends StatelessWidget {
                         onTap: onHeartTap,
                         child: Container(
                           padding: EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                          ),
+                          decoration: BoxDecoration(shape: BoxShape.circle),
                           child: Icon(
                             IconlyLight.heart,
                             color: Colors.redAccent,
