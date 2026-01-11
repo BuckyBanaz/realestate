@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/screens/property/property_deatils_screen.dart';
 import '../../constant/app_colors.dart';
 
@@ -158,23 +159,22 @@ class PlotsOnlyScreen extends StatelessWidget {
       designSize: const Size(375, 812),
       builder: (context, child) {
         return Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             elevation: 0,
             leading: IconButton(onPressed: (){
               Get.back();
-            }, icon: Icon(CupertinoIcons.back)),
+            }, icon: Icon(CupertinoIcons.back, color: Theme.of(context).iconTheme.color)),
             title: Text(
               'Plots',
               style: TextStyle(
-                  color: Colors.black87, fontWeight: FontWeight.w700),
+                  color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.w700),
             ),
             centerTitle: true,
             actions: [
               IconButton(
-                icon: Icon(Icons.filter_list, color: Colors.black54),
+                icon: Icon(Icons.filter_list, color: Theme.of(context).iconTheme.color),
                 onPressed: () {
                   // optional: open filter sheet later
                 },
@@ -230,7 +230,7 @@ class PlotsOnlyScreen extends StatelessWidget {
                       isSold: p['status'] == 'sold',
                       onTap: () {
                         if (p['status'] != 'sold') {
-                          Get.to(() => PropertyDetailScreen());
+                          Get.toNamed(AppRoutes.propertyDetail);
                         }
                       },
                     );
@@ -311,9 +311,13 @@ class _PlotCard extends StatelessWidget {
           height: cardHeight,
           padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark 
+              ? Colors.grey.shade800 
+              : Colors.grey.shade200
+            ),
             boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 6, offset: Offset(0, 3))],
           ),
           child: Row(
@@ -345,12 +349,12 @@ class _PlotCard extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                           decoration: BoxDecoration(
-                            color: Color(0xFFF2F7EE),
+                            color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2C3E50) : const Color(0xFFF2F7EE),
                             borderRadius: BorderRadius.circular(8.r),
                           ),
                           child: Text(
                             type,
-                            style: TextStyle(color: secondary, fontSize: 10.sp, fontWeight: FontWeight.w700),
+                            style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white70 : secondary, fontSize: 10.sp, fontWeight: FontWeight.w700),
                           ),
                         ),
                         Spacer(),
@@ -373,7 +377,7 @@ class _PlotCard extends StatelessWidget {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: Color(0xFF083632)),
+                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: Theme.of(context).textTheme.titleLarge?.color),
                     ),
 
                     SizedBox(height: 4.h),
@@ -383,7 +387,7 @@ class _PlotCard extends StatelessWidget {
                       '$size • ${_shortLocation(location)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 11.sp, color: Colors.grey.shade700),
+                      style: TextStyle(fontSize: 11.sp, color: Theme.of(context).textTheme.bodyMedium?.color),
                     ),
 
                     SizedBox(height: 8.h),
@@ -400,7 +404,7 @@ class _PlotCard extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                           decoration: BoxDecoration(
-                            color: primary,
+                            color: Theme.of(context).brightness == Brightness.dark ? Colors.brown.shade200 : primary,
                             borderRadius: BorderRadius.circular(8.r),
                           ),
                           child: Text(

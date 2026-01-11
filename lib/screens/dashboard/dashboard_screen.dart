@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
 import '../../constant/app_colors.dart';
 import '../home/home_screen.dart';
+import '../profile/transaction_detail_screen.dart';
 import '../search/search_screen.dart';
 import '../favorite/favorite_screen.dart';
 import '../profile/profile_screen.dart';
@@ -18,8 +19,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _pages = const [
     HomeScreen(),
-    SearchScreen(),
+    Center(child: Text("Transactions"),),
     FavoriteScreen(),
+    // TransactionListScreen(transactions: [],),
+
     // // Make sure you have a ChatScreen or replace with any widget.
     // ChatScreen(),
     ProfileScreen(),
@@ -126,14 +129,16 @@ class CustomBottomNav extends StatelessWidget {
       height: height,
       padding: const EdgeInsets.only(top: 2, bottom: 2, left: 8, right: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).brightness == Brightness.dark 
+            ? const Color(0xFF1F1F1F) 
+            : Colors.white,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withOpacity(0.1), // Slightly stronger shadow
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -152,9 +157,9 @@ class CustomBottomNav extends StatelessWidget {
 
           _item(
             context: context,
-            icon: IconlyLight.search,
-            activeIcon: IconlyLight.search,
-            label: 'Search',
+            icon: IconlyLight.paper,
+            activeIcon: IconlyBold.paper,
+            label: 'Transactions',
             index: 1,
             selected: selectedIndex == 1,
           ),

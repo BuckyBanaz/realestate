@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Real Estate',
-          theme: AppTheme.lightTheme,
+          theme: AppTheme.darkTheme,
           home: child,
           initialRoute: AppRoutes.splash,
           getPages: AppRoutes.routes,

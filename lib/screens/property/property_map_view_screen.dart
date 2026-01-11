@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:realestate/constant/app_colors.dart';
 
@@ -10,17 +11,17 @@ class PropertyMapViewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).iconTheme.color),
+          onPressed: () => Get.back(),
         ),
-        title: const Text(
+        title: Text(
           "Detail / View on Map",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
       ),
@@ -44,9 +45,9 @@ class PropertyMapViewScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _facilityChip("1 Hospital", Icons.local_hospital_outlined),
-                _facilityChip("2 Gas Stations", Icons.local_gas_station_outlined),
-                _facilityChip("1 Schools", Icons.school_outlined),
+                _facilityChip(context, "1 Hospital", Icons.local_hospital_outlined),
+                _facilityChip(context, "2 Gas Stations", Icons.local_gas_station_outlined),
+                _facilityChip(context, "1 Schools", Icons.school_outlined),
               ],
             ),
           ),
@@ -112,8 +113,8 @@ class PropertyMapViewScreen extends StatelessWidget {
             right: 0,
             child: Container(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                 boxShadow: [
                   BoxShadow(color: Colors.black12, blurRadius: 20),
@@ -122,9 +123,9 @@ class PropertyMapViewScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                   Text(
                     "Location detail",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -133,8 +134,8 @@ class PropertyMapViewScreen extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: RichText(
-                          text: const TextSpan(
-                            style: TextStyle(color: Colors.black87, fontSize: 15),
+                          text: TextSpan(
+                            style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 15),
                             children: [
                               TextSpan(text: "St. Ciloko Timur, Kec. Pancoran, Jakarta Selatan, Indonesia 12770"),
                             ],
@@ -154,9 +155,9 @@ class PropertyMapViewScreen extends StatelessWidget {
             right: 20,
             child: FloatingActionButton(
               mini: true,
-              backgroundColor: Colors.white,
+              backgroundColor: Theme.of(context).cardColor,
               elevation: 6,
-              child: const Icon(Icons.explore, color: Colors.black87),
+              child: Icon(Icons.explore, color: Theme.of(context).iconTheme.color),
               onPressed: () {},
             ),
           ),
@@ -168,7 +169,7 @@ class PropertyMapViewScreen extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
               ),
@@ -177,7 +178,7 @@ class PropertyMapViewScreen extends StatelessWidget {
                 children:  [
                   Icon(Icons.location_on, color: secondary, size: 18),
                   SizedBox(width: 6),
-                  Text("Jakarta, Indonesia", style: TextStyle(fontSize: 14)),
+                  Text("Jakarta, Indonesia", style: TextStyle(fontSize: 14, color: Theme.of(context).textTheme.bodyLarge?.color)),
                   Icon(Icons.keyboard_arrow_down, color: secondary),
                 ],
               ),
@@ -188,11 +189,11 @@ class PropertyMapViewScreen extends StatelessWidget {
     );
   }
 
-  Widget _facilityChip(String label, IconData icon) {
+  Widget _facilityChip(BuildContext context, String label, IconData icon) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(30),
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
       ),
@@ -201,7 +202,7 @@ class PropertyMapViewScreen extends StatelessWidget {
         children: [
           Icon(icon, color: primary, size: 18),
           const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(label, style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
         ],
       ),
     );

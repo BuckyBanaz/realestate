@@ -14,7 +14,7 @@ import 'package:realestate/screens/dashboard/dashboard_screen.dart';
 
 import '../widgets/helpers.dart';
 
-class AuthController extends GetxController {
+class OtpController extends GetxController {
   /// OTP timer (seconds)
   final RxInt secondsRemaining = 30.obs;
 
@@ -106,13 +106,13 @@ class OTPScreen extends StatefulWidget {
 
 class _OTPScreenState extends State<OTPScreen> {
   late final TextEditingController _pinController;
-  late final AuthController _authC;
+  late final OtpController _authC;
 
   @override
   void initState() {
     super.initState();
     _pinController = TextEditingController();
-    _authC = Get.put(AuthController());
+    _authC = Get.put(OtpController());
     // start timer at 30s
     _authC.startTimer(seconds: 30);
   }
@@ -141,13 +141,13 @@ class _OTPScreenState extends State<OTPScreen> {
         color: secondary,
       ),
       decoration: BoxDecoration(
-        color: cardColor,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14.r),
       ),
     );
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 10.h),
@@ -160,24 +160,7 @@ class _OTPScreenState extends State<OTPScreen> {
                 0,
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Container(
-                    width: 60.w,
-                    height: 60.h,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: primary,  // ✔ allowed inside decoration
-                    ),
-                    child: Center(
-                      child: SizedBox(
-                        width: 40.w,
-                        height:30.h,
-                        child: Image.asset(
-                          "assets/images/logo.png",
-                          fit: BoxFit.fill,
-                        ),
-                      ),
-                    ),
-                  ),
+                  child: const Logoor(),
                 ),
               ),
               SizedBox(height: 30.h),
@@ -192,6 +175,7 @@ class _OTPScreenState extends State<OTPScreen> {
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                         fontSize: 23.sp,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       )),
                   ),
                   SizedBox(height: 8.h),
@@ -199,7 +183,7 @@ class _OTPScreenState extends State<OTPScreen> {
                     2, Text(
                       "Enter the 4 digit code that we just sent to",
 
-                      style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+                      style: TextStyle(fontSize: 14.sp, color: Theme.of(context).textTheme.bodyMedium?.color),
                     ),
                   ),
                   SizedBox(height: 4.h),

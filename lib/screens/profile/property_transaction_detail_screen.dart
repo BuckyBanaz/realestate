@@ -131,11 +131,11 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
             : _defaultPlotAttributes());
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: Theme.of(context).iconTheme.color,
         actions: [
           IconButton(
             onPressed: () => Get.to(
@@ -163,7 +163,7 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
           ),
         ],
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Get.back(),
           icon: Icon(IconlyLight.arrow_left_2),
         ),
         title: Text(
@@ -188,7 +188,7 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
                 padding: EdgeInsets.all(12.w),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20.r),
-                  color: Colors.grey.shade100,
+                  color: Theme.of(context).cardColor,
                 ),
                 child: Row(
                   children: [
@@ -209,6 +209,7 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w700,
+                              color: Theme.of(context).textTheme.bodyLarge?.color,
                             ),
                           ),
                           SizedBox(height: 6.h),
@@ -289,21 +290,21 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
             // ------------------ TRANSACTION DETAILS ------------------
             Text(
               "Transaction Detail",
-              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
             ),
             SizedBox(height: 10.h),
-            _detailTile("Check in", details["checkIn"] ?? "-"),
-            _detailTile("Check out", details["checkOut"] ?? "-"),
-            _detailTile("Owner name", details["owner"] ?? "-"),
-            _detailTile("Transaction type", tag),
-            _detailTile("Transaction Date", date),
+            _detailTile(context, "Check in", details["checkIn"] ?? "-"),
+            _detailTile(context, "Check out", details["checkOut"] ?? "-"),
+            _detailTile(context, "Owner name", details["owner"] ?? "-"),
+            _detailTile(context, "Transaction type", tag),
+            _detailTile(context, "Transaction Date", date),
 
             SizedBox(height: 20.h),
 
             // ---------------- PROPERTY ATTRIBUTES (dynamic) ----------------
             Text(
               "Property Details",
-              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
             ),
             SizedBox(height: 10.h),
 
@@ -311,7 +312,7 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
               width: double.infinity,
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Column(
@@ -360,6 +361,7 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                   SizedBox(height: 8.h),
@@ -401,23 +403,25 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
             // ---------------- PAYMENT DETAILS ----------------
             Text(
               "Payment Detail",
-              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
             ),
             SizedBox(height: 12.h),
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(16.r),
               ),
               child: Column(
                 children: [
-                  _detailTile("Period time", paymentDetail["period"] ?? "-"),
+                  _detailTile(context, "Period time", paymentDetail["period"] ?? "-"),
                   _detailTile(
+                    context,
                     "Monthly payment",
                     "₹ ${paymentDetail["monthly"] ?? '-'}",
                   ),
                   _detailTile(
+                    context,
                     "Discount",
                     "₹ ${paymentDetail["discount"] ?? '0'}",
                   ),
@@ -430,6 +434,7 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                       ),
                       Text(
@@ -451,7 +456,7 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
             // ---------------- PAYMENT METHOD ----------------
             Text(
               "Payment Method",
-              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
             ),
             SizedBox(height: 10.h),
             Container(
@@ -505,7 +510,7 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _detailTile(String title, String value) {
+  Widget _detailTile(BuildContext context, String title, String value) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 6.h),
       child: Row(
@@ -521,7 +526,7 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
           Flexible(
             child: Text(
               value,
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp, color: Theme.of(context).textTheme.bodyLarge?.color),
             ),
           ),
         ],

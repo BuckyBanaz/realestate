@@ -45,6 +45,9 @@ dependencies:
   cached_network_image: ^3.4.1
   flutter_screenutil: ^5.9.3
   flutter_animate: ^4.5.2
+  dio: ^5.9.0
+  shared_preferences: ^2.5.4
+  fluttertoast: ^9.0.0
 
 dev_dependencies:
   flutter_test:

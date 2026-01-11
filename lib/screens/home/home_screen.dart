@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/constant/app_colors.dart';
 import 'package:realestate/screens/featured/featured_screen.dart';
 import 'package:realestate/screens/search/search_screen.dart';
@@ -36,7 +37,7 @@ class HomeScreen extends StatelessWidget {
         : v * MediaQuery.of(context).textScaleFactor;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white,
       body: LayoutBuilder(
         builder: (context, constraints) {
           final screenW = constraints.maxWidth;
@@ -51,35 +52,35 @@ class HomeScreen extends StatelessWidget {
                 stagger(
                     1, SearchTextField()),
 
-                SizedBox(height: ph(17)),
+                SizedBox(height: ph(25)),
                 stagger(
                     2, _PromotionalBanners(responsiveWidth: screenW)),
-                SizedBox(height: ph(17)),
+                SizedBox(height: ph(20)),
                 stagger(
                     3, const SectionTitle(title: "OUR PROPERTIES")),
                 SizedBox(height: ph(8)),
                 stagger(
                     4, Categories()),
-                SizedBox(height: ph(17)),
+                SizedBox(height: ph(20)),
                 stagger(
                   5, SectionTitle(
                     title: "TOP LOCATIONS",
                     actionText: "Explore",
                     onActionTap: () {
-                      Get.to(TopLocationsScreen());
+                      Get.toNamed(AppRoutes.topLocations);
                     },
                   ),
                 ),
                 SizedBox(height: ph(8)),
                 stagger(
                     6, const TopLocationsSection()),
-                SizedBox(height: ph(17)),
+                SizedBox(height: ph(20)),
                 stagger(
                   7,SectionTitle(
                     title: "FEATURED PROPERTIES",
                     actionText: "View all",
                     onActionTap: () {
-                      Get.to(const FeaturedScreen());
+                      Get.toNamed(AppRoutes.featured);
                     },
                   ),
                 ),
@@ -103,28 +104,21 @@ class _GreetingText extends StatelessWidget {
     final radius = ScreenUtil().scaleWidth > 0 ? 20.r : 20.0;
     return Row(
       children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: SizedBox(
-            width: 70.w,
-            height: 50.h,
-            child: Image.asset("assets/images/logo.png", fit: BoxFit.fill),
-          ),
-        ),
+        const Logoor(),
         SizedBox(height: 30.h),
         const Spacer(),
-        // GestureDetector(
-        //   onTap: () => Get.to(SearchScreen()),
-        //   child: Container(
-        //     padding: EdgeInsets.all(10.w),
-        //     decoration: BoxDecoration(shape: BoxShape.circle, color: cardColor),
-        //     child: Icon(IconlyLight.search, size: 20.w, color: secondary),
-        //   ),
-        // ),
+        GestureDetector(
+          onTap: () => Get.toNamed(AppRoutes.search),
+          child: Container(
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(shape: BoxShape.circle,  color: Theme.of(context).cardColor,),
+            child: Icon(IconlyLight.search, size: 20.w, color: Colors.white),
+          ),
+        ),
         SizedBox(width: 6),
         GestureDetector(
           onTap: () {
-            Get.to(NotificationScreen());
+            Get.toNamed(AppRoutes.notification);
           },
           child: Stack(
             children: [
@@ -132,12 +126,12 @@ class _GreetingText extends StatelessWidget {
                 padding: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: cardColor,
+                  color: Theme.of(context).cardColor,
                 ),
                 child: Icon(
                   IconlyLight.notification,
                   size: 20.w,
-                  color: secondary,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -165,28 +159,32 @@ class SearchTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final height = max(50.h, 56.0); // ensure a reasonable min height
     return GestureDetector(
-        onTap: () => Get.to(SearchScreen()),
+        onTap: () => Get.toNamed(AppRoutes.search),
       child: Container(
         height: height,
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         decoration: BoxDecoration(
-          color: cardColor,
+           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: Colors.transparent),
+            border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark 
+              ? Colors.grey.shade800 
+              : Colors.grey.shade200
+          ),
         ),
         child: Row(
           children: [
-            Icon(IconlyLight.search, color: secondary, size: 20.w),
+            Icon(IconlyLight.search, color: Colors.white, size: 20.w),
             SizedBox(width: 12.w),
             Expanded(
               child: TextField(
                 controller: controller,
                 onChanged: onChanged,
-                style: TextStyle(fontSize: 15.sp, color: secondary),
+                style: TextStyle(fontSize: 15.sp, color: Colors.white),
                 decoration: InputDecoration(
                   fillColor: Colors.transparent,
                   hintText: "Search House, Apartment, etc.",
-                  hintStyle: TextStyle(color: secondary, fontSize: 15.sp),
+                  hintStyle: TextStyle(color: Colors.white, fontSize: 15.sp),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
                     borderSide: BorderSide.none,
@@ -205,7 +203,7 @@ class SearchTextField extends StatelessWidget {
             SizedBox(width: 12.w),
             GestureDetector(
               onTap: onMicTap,
-              child: Icon(IconlyLight.voice, color: secondary, size: 20.w),
+              child: Icon(IconlyLight.voice, color: Colors.white, size: 20.w),
             ),
           ],
         ),
@@ -264,7 +262,7 @@ class _PromotionalBannersState extends State<_PromotionalBanners> {
         final next = (_currentPage + 1) % banners.length;
         _pageController.animateToPage(
           next,
-          duration: const Duration(milliseconds: 450),
+          duration: const Duration(milliseconds: 650),
           curve: Curves.easeInOut,
         );
       }
@@ -281,7 +279,7 @@ class _PromotionalBannersState extends State<_PromotionalBanners> {
   @override
   Widget build(BuildContext context) {
     final double cardWidth = widget.responsiveWidth * 0.90;
-    final double cardHeight = cardWidth * 0.60;
+    final double cardHeight = cardWidth * 0.50;
 
     return Column(
       children: [
@@ -357,7 +355,7 @@ class _PromoCardWhite extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
@@ -366,7 +364,11 @@ class _PromoCardWhite extends StatelessWidget {
               offset: const Offset(0, 8),
             ),
           ],
-          border: Border.all(color: Colors.grey.shade100),
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark 
+              ? Colors.grey.shade800 
+              : Colors.grey.shade100
+          ),
         ),
         child: Row(
           children: [
@@ -412,7 +414,7 @@ class _PromoCardWhite extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF111827),
+                        // color: const Color(0xFF111827),
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -422,7 +424,7 @@ class _PromoCardWhite extends StatelessWidget {
                       subtitle,
                       style: TextStyle(
                         fontSize: 13.sp,
-                        color: Colors.grey[600],
+                        color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[400] : Colors.grey[600],
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 2,
@@ -436,7 +438,7 @@ class _PromoCardWhite extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w800,
-                            color: Colors.black87,
+                            // color: Colors.black87,
                           ),
                         ),
                         SizedBox(width: 8.w),
@@ -508,8 +510,8 @@ class SectionTitle extends StatelessWidget {
           title,
           style: TextStyle(
             fontSize: 16.sp,
-            fontWeight: FontWeight.w100,
-            color: secondary,
+            fontWeight: FontWeight.w600, // Make title slightly bolder
+            // color: Colors.black, // Inherit
           ),
         ),
         if (actionText != null)
@@ -519,7 +521,7 @@ class SectionTitle extends StatelessWidget {
               actionText!,
               style: TextStyle(
                 fontSize: 14.sp,
-                color: secondary,
+                color: secondary, // Use secondary color for action
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -669,14 +671,15 @@ class TopLocationsSection extends StatelessWidget {
             imageUrl: location["image"]!,
             title: location["title"]!,
             onTap: () {
-              Get.to(
-                LocationDetailScreen(
-                  locationName: location["title"]!.replaceAll('\n', ' '),
-                  rank: "+${index + 1}",
-                  heroImage: location["image"]!,
-                  subtitle:
+              Get.toNamed(
+                AppRoutes.locationDetail,
+                arguments: {
+                  'locationName': location["title"]!.replaceAll('\n', ' '),
+                  'rank': "+${index + 1}",
+                  'heroImage': location["image"]!,
+                  'subtitle':
                       "Our recommended real estates in ${location["title"]!.split(',').first}",
-                ),
+                },
               );
             },
           );
@@ -701,7 +704,7 @@ class _LocationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double cardWidth = 280.w;
+    final double cardWidth = 300.w;
     final double cardHeight = 110.h;
     final double imageWidth = 115.w;
     final double imageHeight = 100.h;
@@ -713,9 +716,13 @@ class _LocationCard extends StatelessWidget {
         height: cardHeight,
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark 
+              ? Colors.grey.shade800 
+              : Colors.grey.shade200
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.03),
@@ -774,16 +781,16 @@ class _LocationCard extends StatelessWidget {
                   SizedBox(height: 6.h),
 
                   // Title
-                  Text(
-                    title.replaceAll('\n', ' '),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF083632),
+                    Text(
+                      title.replaceAll('\n', ' '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w700,
+                        // color: Color(0xFF083632),
+                      ),
                     ),
-                  ),
 
                   SizedBox(height: 4.h),
 
@@ -805,7 +812,7 @@ class _LocationCard extends StatelessWidget {
                     children: [
                       Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 12.w,
+                          horizontal: 8.w,
                           vertical: 6.h,
                         ),
                         decoration: BoxDecoration(
@@ -816,19 +823,22 @@ class _LocationCard extends StatelessWidget {
                           "Explore",
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 12.sp,
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
-                      SizedBox(width: 6.w),
+                      SizedBox(width: 4.w),
                       Text("•", style: TextStyle(color: Colors.grey.shade500)),
-                      SizedBox(width: 6.w),
-                      Text(
-                        "${Random().nextInt(20) + 10} listings",
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: Colors.grey.shade700,
+                      SizedBox(width: 4.w),
+                      Flexible(
+                        child: Text(
+                          "${Random().nextInt(20) + 10} listings",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: Colors.grey.shade700,
+                          ),
                         ),
                       ),
                     ],
@@ -910,7 +920,7 @@ class FeaturedPropertiesList extends StatelessWidget {
         itemBuilder: (ctx, i) {
           final e = nearbyEstates[i];
           return GestureDetector(
-            onTap: () => Get.to(PropertyDetailScreen()),
+            onTap: () => Get.toNamed(AppRoutes.propertyDetail),
             // onTap: () =>
             //     Get.to(() => PlotsOnlyScreen()), // replace with detail screen
             child: FeatureCard(
@@ -966,9 +976,13 @@ class FeatureCard extends StatelessWidget {
       height: cardHeight,
       padding: EdgeInsets.all(8.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark 
+              ? Colors.grey.shade800 
+              : Colors.grey.shade200
+          ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -1052,7 +1066,7 @@ class FeatureCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF083632),
+                    color: Colors.white,
                   ),
                 ),
 
@@ -1205,8 +1219,6 @@ final List<Map<String, String>> nearbyEstates = [
 
 const Color _kPrimary = Color(0xFF0B6EFD);
 const Color _kAccent = Color(0xFF0DB6A6);
-const Color kCardBorder = Color(0xFFEFEFF1);
-const Color _kTitle = Color(0xFF004C45);
 
 /// Simple data holder for a category — only title used for now.
 class CategoryItem {
@@ -1270,7 +1282,7 @@ class Categories extends StatelessWidget {
         ];
 
     return SizedBox(
-      height: 88.h,
+      height: 100.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.zero,
@@ -1284,7 +1296,7 @@ class Categories extends StatelessWidget {
             iconUrl: item.iconUrl,
             assetIcon: item.assetIcon,
             // onTap: () => onCategoryTap?.call(item)
-              onTap: () => Get.to(PlotsOnlyScreen()),
+              onTap: () => Get.toNamed(AppRoutes.subCategory),
           );
         },
       ),
@@ -1317,11 +1329,16 @@ class PropertyCategoryCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 180.w,
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: kCardBorder),
+          
+            border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark 
+              ? Colors.grey.shade800 
+              : Colors.grey.shade200
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.03),
@@ -1332,7 +1349,7 @@ class PropertyCategoryCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            SvgPicture.asset(path, width: 50, height: 50, fit: BoxFit.contain),
+            SvgPicture.asset(path, width: 40.w, height: 40.w, fit: BoxFit.contain),
             SizedBox(width: 12.w),
             Expanded(
               child: Column(
@@ -1342,15 +1359,15 @@ class PropertyCategoryCard extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 15.sp,
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.w700,
-                      color: _kTitle,
+                      color: Colors.white,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (subtitle.isNotEmpty) ...[
-                    SizedBox(height: 4.h),
+                    SizedBox(height: 2.h),
                     Text(
                       subtitle,
                       style: TextStyle(

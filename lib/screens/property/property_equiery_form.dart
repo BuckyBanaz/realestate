@@ -76,17 +76,17 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.close, color: Colors.black87),
+          icon: Icon(Icons.close, color: Theme.of(context).iconTheme.color),
           onPressed: () => Get.back(),
         ),
         title: Text(
           "Submit Enquiry",
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -103,7 +103,7 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade800 : Colors.grey.shade200),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,6 +113,7 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     // SizedBox(height: 6),
@@ -120,7 +121,7 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
                     SizedBox(height: 4),
                     Text(
                       "You Selected Plot No. 106 ",
-                      style: TextStyle(fontSize: 18),
+                      style: TextStyle(fontSize: 18, color: Theme.of(context).textTheme.bodyMedium?.color),
                     ),
 
                     SizedBox(height: 4),
@@ -134,7 +135,7 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
                         SizedBox(width: 6),
                         Text(
                           widget.propertyLocation,
-                          style: TextStyle(color: Colors.grey[700]),
+                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
                         ),
                       ],
                     ),
@@ -155,7 +156,7 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
               //   ),
               Text(
                 "Kindly Provide Your Details We Will Be in Touch !",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color),
               ),
               SizedBox(height: 10),
               // Name, Phone, Email, Message (same as before)
@@ -163,7 +164,7 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
                 controller: _nameController,
                 decoration: InputDecoration(
                   labelText: "Full Name",
-                  fillColor: cardColor,
+                  fillColor: Theme.of(context).cardColor,
                   prefixIcon: Icon(Icons.person_outline),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -177,7 +178,7 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
                 keyboardType: TextInputType.phone,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
-                  fillColor: cardColor,
+                  fillColor: Theme.of(context).cardColor,
                   labelText: "Phone Number",
                   prefixIcon: Icon(Icons.phone_outlined),
                   border: OutlineInputBorder(
@@ -196,7 +197,7 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   labelText: "Email (Optional)",
-                  fillColor: cardColor,
+                  fillColor: Theme.of(context).cardColor,
                   prefixIcon: Icon(Icons.email_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -215,7 +216,7 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
 
                 decoration: InputDecoration(
 
-                  fillColor: cardColor,
+                  fillColor: Theme.of(context).cardColor,
                   labelText: "Message (Optional)",
                   hintText: "I'm interested in this property...",
                   border: OutlineInputBorder(
@@ -276,16 +277,16 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
         margin: EdgeInsets.only(right: 12),
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? primary : Colors.grey[100],
+          color: isSelected ? primary : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: isSelected ? primary : Colors.grey.shade300,
+            color: isSelected ? primary : Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade800 : Colors.grey.shade300,
           ),
         ),
         child: Text(
           plotNo,
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black87,
+            color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
             fontWeight: FontWeight.w600,
             fontSize: 15,
           ),

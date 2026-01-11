@@ -10,6 +10,7 @@ import 'package:realestate/screens/property/property_deatils_screen.dart';
 import 'package:realestate/screens/property/property_equiery_form.dart';
 import 'package:realestate/screens/property/property_map_view_screen.dart';
 import 'package:realestate/screens/property/plot_selection_screen.dart';
+import 'package:realestate/Routes/appRoutes.dart';
 
 /// Improved PropertyDetailScreen with:
 /// - better gallery (main image + thumbnails)
@@ -30,18 +31,18 @@ class PropertyDetailScreen extends StatelessWidget {
 
   PropertyDetailScreen({Key? key}) : super(key: key);
 
-  Widget _iconCircle(IconData icon, {Color bg = Colors.white}) {
+  Widget _iconCircle(BuildContext context, IconData icon, {Color bg = Colors.white}) {
     return Container(
       width: 44,
       height: 44,
       decoration: BoxDecoration(
-        color: bg,
+        color: Theme.of(context).cardColor,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
         ],
       ),
-      child: Center(child: Icon(icon, size: 20, color: Colors.black87)),
+      child: Center(child: Icon(icon, size: 20, color: Theme.of(context).iconTheme.color)),
     );
   }
 
@@ -49,18 +50,18 @@ class PropertyDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final double horizontalPadding = 18.0;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => Get.back(),
-          icon: Icon(CupertinoIcons.back),
+          icon: Icon(CupertinoIcons.back, color: Theme.of(context).iconTheme.color),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         actions: [
           IconButton(
             onPressed: () {},
-            icon: Icon(IconlyLight.heart, color: Colors.black87),
+            icon: Icon(IconlyLight.heart, color: Theme.of(context).iconTheme.color),
           ),
         ],
       ),
@@ -97,7 +98,7 @@ class PropertyDetailScreen extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: Theme.of(context).textTheme.bodyLarge?.color,
                             ),
                           ),
                           SizedBox(height: 6),
@@ -112,7 +113,7 @@ class PropertyDetailScreen extends StatelessWidget {
                               Flexible(
                                 child: Text(
                                   "Raipur Road, Hisar, Haryana",
-                                  style: TextStyle(color: Colors.grey[700]),
+                                  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
                                 ),
                               ),
                             ],
@@ -124,9 +125,9 @@ class PropertyDetailScreen extends StatelessWidget {
                     // small actions
                     Column(
                       children: [
-                        _iconCircle(Icons.share),
+                        _iconCircle(context, Icons.share),
                         SizedBox(height: 8),
-                        _iconCircle(IconlyLight.download),
+                        _iconCircle(context, IconlyLight.download),
                       ],
                     ),
                   ],
@@ -224,6 +225,7 @@ class PropertyDetailScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
+                         color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     SizedBox(height: 10),
@@ -247,11 +249,12 @@ class PropertyDetailScreen extends StatelessWidget {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              Get.to(
-                () => EnquiryFormScreen(
-                  propertyName: "Shree Shyam Kunj Phase 2",
-                  propertyLocation: "Raipur Road, Hisar, Haryana",
-                ),
+              Get.toNamed(
+                AppRoutes.enquiry,
+                arguments: {
+                  'propertyName': "Shree Shyam Kunj Phase 2",
+                  'propertyLocation': "Raipur Road, Hisar, Haryana",
+                },
               );
             },
             style: ElevatedButton.styleFrom(
@@ -297,13 +300,10 @@ class _GalleryState extends State<_Gallery> {
   }
 
   void _openPreview(String image) {
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        opaque: false,
-        pageBuilder: (_, __, ___) => _FullScreenImagePage(imagePath: image),
-        transitionsBuilder: (_, animation, __, child) =>
-            FadeTransition(opacity: animation, child: child),
-      ),
+    Get.to(
+      () => _FullScreenImagePage(imagePath: image),
+      opaque: false,
+      transition: Transition.fade,
     );
   }
 
@@ -383,7 +383,7 @@ class PropertyDetailsSection extends StatelessWidget {
   const PropertyDetailsSection({Key? key, required this.details})
     : super(key: key);
 
-  Widget _row(String title, String value, {Widget? trailing}) {
+  Widget _row(BuildContext context, String title, String value, {Widget? trailing}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -393,13 +393,13 @@ class PropertyDetailsSection extends StatelessWidget {
             width: 140,
             child: Text(
               title,
-              style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+              style: TextStyle(fontSize: 13, color: Theme.of(context).textTheme.bodyMedium?.color),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
             ),
           ),
           if (trailing != null) ...[SizedBox(width: 8), trailing],
@@ -414,9 +414,13 @@ class PropertyDetailsSection extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: kCardBorder),
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark 
+            ? Colors.grey.shade800 
+            : Colors.grey.shade200
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -435,7 +439,7 @@ class PropertyDetailsSection extends StatelessWidget {
               children: [
                 Text(
                   "Details",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color),
                 ),
                 Spacer(),
                 if (details.containsKey("360 View") &&
@@ -467,7 +471,7 @@ class PropertyDetailsSection extends StatelessWidget {
                 width: double.infinity,
                 padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade900 : Colors.grey.shade50,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -477,12 +481,12 @@ class PropertyDetailsSection extends StatelessWidget {
                     Expanded(
                       child: Text(
                         details["Location"]!,
-                        style: TextStyle(fontSize: 13),
+                        style: TextStyle(fontSize: 13, color: Theme.of(context).textTheme.bodyLarge?.color),
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.map_outlined),
-                      onPressed: () => Get.to(() => PropertyMapViewScreen()),
+                      icon: Icon(Icons.map_outlined, color: Theme.of(context).iconTheme.color),
+                      onPressed: () => Get.toNamed(AppRoutes.propertyMap),
                     ),
                   ],
                 ),
@@ -491,24 +495,25 @@ class PropertyDetailsSection extends StatelessWidget {
             SizedBox(height: 12),
 
             // details list
-            _row("Plot Key Property Attributes", details["Plot Key"] ?? "-"),
-            _row("Plot Size / Area", details["Plot Size / Area"] ?? "-"),
-            _row("Plot Shape", details["Plot Shape"] ?? "-"),
-            _row("Dimensions (L × W)", details["Dimensions"] ?? "-"),
+            _row(context, "Plot Key Property Attributes", details["Plot Key"] ?? "-"),
+            _row(context, "Plot Size / Area", details["Plot Size / Area"] ?? "-"),
+            _row(context, "Plot Shape", details["Plot Shape"] ?? "-"),
+            _row(context, "Dimensions (L × W)", details["Dimensions"] ?? "-"),
             _row(
+              context,
               "Facing / Orientation",
               details["Facing / Orientation"] ?? "-",
             ),
-            _row("Zoning Type", details["Zoning Type"] ?? "-"),
-            _row("Access Road Width", details["Access Road Width"] ?? "-"),
-            _row("Surroundings / Neighborhood", details["Surroundings"] ?? "-"),
+            _row(context, "Zoning Type", details["Zoning Type"] ?? "-"),
+            _row(context, "Access Road Width", details["Access Road Width"] ?? "-"),
+            _row(context, "Surroundings / Neighborhood", details["Surroundings"] ?? "-"),
 
             SizedBox(height: 8),
 
             // map thumbnail row
             if (details.containsKey("Map Image"))
               GestureDetector(
-                onTap: () => Get.to(() => PropertyMapViewScreen()),
+                onTap: () => Get.toNamed(AppRoutes.propertyMap),
                 child: Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: ClipRRect(
