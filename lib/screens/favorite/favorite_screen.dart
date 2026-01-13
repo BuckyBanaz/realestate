@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:realestate/screens/home/home_screen.dart';
+import 'package:realestate/screens/home/modules/featured_properties_list.dart';
 
 import '../../constant/app_colors.dart';
 

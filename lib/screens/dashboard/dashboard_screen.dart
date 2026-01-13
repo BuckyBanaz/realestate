@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
 import '../../constant/app_colors.dart';
 import '../home/home_screen.dart';
+import '../home/home_view_2.dart';
 import '../profile/transaction_detail_screen.dart';
 import '../search/search_screen.dart';
 import '../favorite/favorite_screen.dart';
@@ -18,7 +19,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = const [
-    HomeScreen(),
+    HomeView2(showNavBar: false),
     Center(child: Text("Transactions"),),
     FavoriteScreen(),
     // TransactionListScreen(transactions: [],),

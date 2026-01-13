@@ -258,10 +258,11 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
                                 OutlinedButton.icon(
                                   onPressed: () {
                                     // open 360 view (placeholder)
-                                    Get.snackbar(
-                                      "360 View",
-                                      "Open 360 viewer: $view360Url",
-                                      snackPosition: SnackPosition.BOTTOM,
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("360 View: Open 360 viewer: $view360Url"),
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
                                     );
                                   },
                                   icon: Icon(Icons.threed_rotation, size: 16.w),

@@ -1,14 +1,12 @@
-// ==================== LOCATION DETAIL SCREEN ====================
 import 'dart:ui';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
-import 'package:realestate/screens/search/search_screen.dart';
-
-import '../../constant/app_colors.dart';
-import '../home/home_screen.dart';
+import 'package:realestate/constant/app_colors.dart';
+import '../home/modules/featured_properties_list.dart';
 
 class LocationDetailScreen extends StatelessWidget {
   final String locationName;
@@ -29,273 +27,156 @@ class LocationDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
         slivers: [
-          // ==================== HERO HEADER ====================
+          // ==================== PREMIUM HERO HEADER ====================
           SliverAppBar(
-            expandedHeight: 400,
+            expandedHeight: 400.h,
             pinned: true,
-            backgroundColor: Colors.transparent,
+            stretch: true,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             elevation: 0,
             automaticallyImplyLeading: false,
+            leadingWidth: 70,
             leading: Padding(
-              padding: const EdgeInsets.only(left: 16, top: 8),
-              child: _circleButton(
+              padding: EdgeInsets.only(left: 20.w, top: 12.h),
+              child: _buildCircleButton(
                 Icons.arrow_back_ios_new_rounded,
                 () => Get.back(),
               ),
             ),
             actions: [
               Padding(
-                padding: const EdgeInsets.only(right: 16, top: 8),
-                child: _circleButton(
-                  Icons.more_horiz_rounded,
+                padding: EdgeInsets.only(right: 20.w, top: 12.h),
+                child: _buildCircleButton(
+                  IconlyLight.send,
                   () {},
-                ), // Changed to more_horiz for exact match
+                ),
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
+              stretchModes: const [
+                StretchMode.zoomBackground,
+                StretchMode.blurBackground,
+              ],
+              background: _buildCleanHeaderGallery(),
+            ),
+          ),
+
+          // ==================== CONTENT SECTION ====================
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Main Hero Image (Bali Temple with clouds)
-                  Image.network(
-                    "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800",
-                    fit: BoxFit.cover,
-                  ),
-                  // Misty Gradient Overlay (for cloudy premium feel)
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.2),
-                          Colors.black.withOpacity(0.5),
-                        ],
-                        stops: const [0.0, 0.6, 1.0],
-                      ),
-                    ),
-                  ),
-
-                  // Floating Cards (No Profile - Exact Image 1 Layout)
-                  Positioned(
-                    top: 60,
-                    left: 16,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Left Big Temple Card (Overlapped)
-                        Transform.translate(
-                          offset: const Offset(0, 20),
-                          child: _floatingCard(
-                            "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800",
-                            width: 140,
-                            height: 180,
-                            borderRadius: 28,
-                          ),
+                  // Rank Badge & Category
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                        decoration: BoxDecoration(
+                          color: primary.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8.r),
+                          border: Border.all(color: primary.withOpacity(0.3)),
                         ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  ),
-
-                  Positioned(
-                    top: 120,
-                    right: 16,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        // Right Small Temple Card (Overlapped on main)
-                        Transform.translate(
-                          offset: const Offset(10, 0),
-                          child: _floatingCard(
-                            "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800",
-                            width: 100,
-                            height: 120,
-                            borderRadius: 24,
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                      ],
-                    ),
-                  ),
-
-                  // Bottom Reflection Card (Water Mirror Effect)
-                  Positioned(
-                    bottom: 40,
-                    left: 40,
-                    child: Transform.translate(
-                      offset: const Offset(-20, 0),
-                      child: _floatingCard(
-                        "https://images.unsplash.com/photo-1578631618876-73e2d20a4448?w=800", // Reflection/water temple URL
-                        width: 160,
-                        height: 120,
-                        borderRadius: 24,
-                        // Add blur for mirror effect
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                            child: Image.network(
-                              "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800", // Beach sunset URL
-                              fit: BoxFit.cover,
-                            ),
+                        child: Text(
+                          "RANK #$rank",
+                          style: GoogleFonts.inter(
+                            color: primary,
+                            fontSize: 9.sp,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1,
                           ),
                         ),
                       ),
-                    ),
-                  ),
+                      SizedBox(width: 12.w),
+                      Text(
+                        "Trending Location",
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2, end: 0),
 
-                  // Bottom Right Beach Card (Sunset)
-                  Positioned(
-                    bottom: 20,
-                    right: 20,
-                    child: Transform.translate(
-                      offset: const Offset(20, 0),
-                      child: _floatingCard(
-                        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800", // Beach sunset URL
-                        width: 90,
-                        height: 80,
-                        borderRadius: 20,
-                      ),
-                    ),
-                  ),
+                  SizedBox(height: 16.h),
 
-                  // Rank Badge (#3 - Bottom Left)
-                  Positioned(
-                    bottom: 20,
-                    left: 20,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: primary,
-                        borderRadius: BorderRadius.circular(32),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.4),
-                            blurRadius: 16,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        "#$rank", // e.g., "#3"
-                        style: const TextStyle(
-                          fontSize: 18,
+                  // Title
+                  Text(
+                    locationName,
+                    style: GoogleFonts.inter(
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: -1,
+                    ),
+                  ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.2, end: 0),
+
+                  SizedBox(height: 8.h),
+
+                  // Subtitle/Description
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: Colors.grey.shade500,
+                      height: 1.6,
+                    ),
+                  ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
+
+                  SizedBox(height: 32.h),
+
+                  // Section Title
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Exclusive Listings",
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+                      Text(
+                        "Found 128",
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          color: primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ).animate().fadeIn(delay: 300.ms),
 
-          // ==================== BODY ====================
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    locationName,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    subtitle,
-                    style: TextStyle(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color,),
-                  ),
-                  SizedBox(height: 24),
+                  SizedBox(height: 20.h),
 
-                  // Search Bar
-                  // Container(
-                  //   height: 56,
-                  //   padding: EdgeInsets.symmetric(horizontal: 16),
-                  //   decoration: BoxDecoration(
-                  //     color: Color(0xFFF5F7FA),
-                  //     borderRadius: BorderRadius.circular(16),
-                  //   ),
-                  //   child: Row(
-                  //     children: [
-                  //       Icon(IconlyLight.filter, color: secondary),
-                  //       SizedBox(width: 12),
-                  //       Expanded(child: Text("Modern House", style: TextStyle(color: Colors.grey.shade600, fontSize: 16))),
-                  //       // Icon(IconlyLight.filter, color: secondary),
-                  //     ],
-                  //   ),
-                  // ),
-                  // SizedBox(height: 20),
-
-                  // Found + Filters
-                  // Row(
-                  //   children: [
-                  //     Text("Found 128 estates", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: secondary)),
-                  //     Spacer(),
-                  //     // _FilterChip(label: "House", icon: Icons.close, isActive: true),
-                  //     // SizedBox(width: 12),
-                  //     // _FilterChip(label: "₹250 - ₹450", icon: Icons.attach_money, isActive: true),
-                  //   ],
-                  // ),
-                  // SizedBox(height: 24),
-                  FeatureCard(
-                    imageUrl:
-                        "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
-                    title: "Shree Shyam Kunj",
-                    location: "Sector 15, Hisar",
-                    price: "12,00,000",
-                    beds: "—",
-                    area: "200 sq.m",
-                    tag: "Top",
-                    rating: "4.8",
-                  ),
-                  SizedBox(height: 16),
-                  FeatureCard(
-                    imageUrl:
-                        "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
-                    title: "Shree Shyam Kunj",
-                    location: "Sector 15, Hisar",
-                    price: "12,00,000",
-                    beds: "—",
-                    area: "200 sq.m",
-                    tag: "Top",
-                    rating: "4.8",
-                  ),
-                  SizedBox(height: 16),
-                  FeatureCard(
-                    imageUrl:
-                        "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
-                    title: "Shree Shyam Kunj",
-                    location: "Sector 15, Hisar",
-                    price: "12,00,000",
-                    beds: "—",
-                    area: "200 sq.m",
-                    tag: "Top",
-                    rating: "4.8",
-                  ),
-                  SizedBox(height: 16),
-                  FeatureCard(
-                    imageUrl:
-                        "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
-                    title: "Shree Shyam Kunj",
-                    location: "Sector 15, Hisar",
-                    price: "12,00,000",
-                    beds: "—",
-                    area: "200 sq.m",
-                    tag: "Top",
-                    rating: "4.8",
-                  ),
+                  // Property List (Animate each one)
+                  ..._dummyProperties.asMap().entries.map((entry) {
+                    int idx = entry.key;
+                    var property = entry.value;
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 16.h),
+                      child: FeatureCard(
+                        imageUrl: property['image'],
+                        title: property['title'],
+                        location: property['location'],
+                        price: property['price'],
+                        beds: property['beds'],
+                        area: property['area'],
+                        tag: property['tag'],
+                        rating: property['rating'],
+                      )
+                          .animate()
+                          .fadeIn(delay: (400 + (idx * 100)).ms)
+                          .slideY(begin: 0.1, end: 0),
+                    );
+                  }).toList(),
+                  
+                  SizedBox(height: 40.h),
                 ],
               ),
             ),
@@ -305,86 +186,116 @@ class LocationDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _circleButton(IconData icon, VoidCallback onTap) {
+  Widget _buildCircleButton(IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.2),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(50.r),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            width: 44.w,
+            height: 44.w,
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.3),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
+            ),
+            child: Icon(icon, color: Colors.white, size: 20.sp),
+          ),
         ),
-        child: Icon(icon, color: Colors.white, size: 20),
       ),
     );
   }
 
-  Widget _floatingCard(
-    String imageUrl, {
-    required double width,
-    required double height,
-    required double borderRadius,
-    Widget? child, // For custom like blur
-  }) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 24,
-            offset: const Offset(8, 12),
-          ),
-        ],
-      ),
-      child:
-          child ??
-          ClipRRect(
-            borderRadius: BorderRadius.circular(borderRadius),
-            child: Image.network(imageUrl, fit: BoxFit.cover),
-          ),
-    );
-  }
-}
-
-// Filter Chip
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool isActive;
-
-  const _FilterChip({
-    required this.label,
-    required this.icon,
-    this.isActive = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: isActive ? Color(0xFFE8F5E8) : Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: isActive ? primary : Colors.grey.shade300),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (isActive) Icon(icon, size: 16, color: primary),
-          if (isActive) SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: isActive ? primary : Colors.grey.shade700,
+  Widget _buildCleanHeaderGallery() {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Main Background Image
+        heroImage.startsWith('http')
+            ? Image.network(heroImage, fit: BoxFit.cover)
+            : Image.asset(heroImage, fit: BoxFit.cover),
+        
+        // Premium Dark Overlay Gradient
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withOpacity(0.4),
+                Colors.transparent,
+                Colors.black.withOpacity(0.3),
+                Theme.of(Get.context!).scaffoldBackgroundColor,
+              ],
+              stops: const [0.0, 0.4, 0.8, 1.0],
             ),
           ),
-        ],
-      ),
+        ),
+
+        // Properties Badge
+        Positioned(
+          bottom: 30.h,
+          right: 20.w,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: Colors.white.withOpacity(0.2)),
+            ),
+            child: Row(
+              children: [
+                Icon(IconlyLight.home, size: 16.sp, color: Colors.white),
+                SizedBox(width: 8.w),
+                Text(
+                  "120+ Estates",
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
+
+final List<Map<String, dynamic>> _dummyProperties = [
+  {
+    "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
+    "title": "Shree Shyam Kunj",
+    "location": "Sector 15, Hisar",
+    "price": "12,00,000",
+    "beds": "4",
+    "area": "250 sq.m",
+    "tag": "Luxury",
+    "rating": "4.9",
+  },
+  {
+    "image": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800",
+    "title": "Modern Villa",
+    "location": "Sector 15, Hisar",
+    "price": "45,00,000",
+    "beds": "5",
+    "area": "400 sq.m",
+    "tag": "Trending",
+    "rating": "4.8",
+  },
+  {
+    "image": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
+    "title": "The Penthouse",
+    "location": "Sector 15, Hisar",
+    "price": "85,00,000",
+    "beds": "3",
+    "area": "200 sq.m",
+    "tag": "Elite",
+    "rating": "5.0",
+  },
+];
+
