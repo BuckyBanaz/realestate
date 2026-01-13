@@ -13,6 +13,7 @@ import 'package:realestate/screens/notification/notification_screen.dart';
 import 'package:realestate/screens/property/property_map_view_screen.dart';
 import 'package:realestate/screens/property/property_equiery_form.dart';
 import 'package:realestate/screens/property/subcategory_screen.dart';
+import 'package:realestate/screens/property/site_plan_view_screen.dart';
 
 import '../screens/auth/login_screen.dart';
 
@@ -31,6 +32,7 @@ class AppRoutes {
   static const enquiry = '/enquiry';
   static const propertyMap = '/propertyMap';
   static const subCategory = '/subCategory';
+  static const sitePlan = '/sitePlan';
 
   static get routes => [
     GetPage(name: splash, page: () => SplashScreen()),
@@ -56,14 +58,20 @@ class AppRoutes {
     GetPage(name: notification, page: () => NotificationScreen(), transition: Transition.rightToLeft),
     GetPage(name: propertyMap, page: () => PropertyMapViewScreen(), transition: Transition.rightToLeft),
     GetPage(name: enquiry, page: () {
-        final args = Get.arguments as Map<String, dynamic>;
+        final args = Get.arguments as Map<String, dynamic>? ?? {};
         return EnquiryFormScreen(
-          propertyName: args['propertyName'],
-          propertyLocation: args['propertyLocation'],
+          propertyName: args['propertyName'] ?? "Property Enquiry",
+          propertyLocation: args['propertyLocation'] ?? "Unknown Location",
         );
       },
       transition: Transition.rightToLeft,
     ),
     GetPage(name: subCategory, page: () => PlotsOnlyScreen(), transition: Transition.rightToLeft),
+    GetPage(name: sitePlan, page: () {
+        final imagePath = Get.arguments as String;
+        return SitePlanViewScreen(imagePath: imagePath);
+      },
+      transition: Transition.fade,
+    ),
   ];
 }

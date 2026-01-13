@@ -1,26 +1,18 @@
-// ADD THIS IMPORT AT TOP (if not already)
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
-import 'package:get/get_navigation/src/snackbar/snackbar.dart';
-import 'package:get/get_utils/src/get_utils/get_utils.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
-import 'package:realestate/screens/property/plot_selection_screen.dart';
+import 'package:realestate/constant/app_colors.dart';
 
-import '../../constant/app_colors.dart';
-
-// ADD THIS FULL FORM SCREEN AFTER YOUR PropertyDetailScreen CLASS
 class EnquiryFormScreen extends StatefulWidget {
   final String propertyName;
-  // final String propertyPrice;
   final String propertyLocation;
 
   const EnquiryFormScreen({
     Key? key,
     required this.propertyName,
-    // required this.propertyPrice,
     required this.propertyLocation,
   }) : super(key: key);
 
@@ -50,214 +42,170 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-
-    // Simulate API call
-    await Future.delayed(Duration(seconds: 2));
-
+    await Future.delayed(const Duration(seconds: 2));
     setState(() => _isLoading = false);
 
-    // Get.snackbar(
-    //   "Success!",
-    //   "Your enquiry has been sent successfully.",
-    //   backgroundColor: Colors.green,
-    //   colorText: Colors.white,
-    //   snackPosition: SnackPosition.BOTTOM,
-    //   margin: EdgeInsets.all(16),
-    //   borderRadius: 12,
-    // );
-
-    Get.back(); // Close form
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text("Enquiry sent successfully!"),
+          backgroundColor: primary,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      Get.back();
+    }
   }
-
-  String? _selectedPlot; // Add this line at the top of _EnquiryFormScreenState
-  // ADD THIS INSIDE _EnquiryFormScreenState class, just after "Your Details" title
-  String? _selectedPlotSize;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: const Color(0xFF0F0F0F),
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.close, color: Theme.of(context).iconTheme.color),
+          icon: const Icon(IconlyLight.arrow_left_2, color: Colors.white),
           onPressed: () => Get.back(),
         ),
         title: Text(
-          "Submit Enquiry",
-          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold),
+          "Property Enquiry",
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.bold,
+            fontSize: 18.sp,
+            color: Colors.white,
+          ),
         ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.symmetric(horizontal: 24.w),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Property Preview Card (same as before)
+              SizedBox(height: 12.h),
+              
+              // Property Info Card
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.all(20.w),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade800 : Colors.grey.shade200),
+                  color: const Color(0xFF1A1A1A),
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(color: Colors.white.withOpacity(0.05)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       widget.propertyName,
-                      style: TextStyle(
-                        fontSize: 18,
+                      style: GoogleFonts.inter(
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                        color: Colors.white,
                       ),
                     ),
-                    // SizedBox(height: 6),
-                    // Text(widget.propertyPrice, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: primary)),
-                    SizedBox(height: 4),
-                    Text(
-                      "You Selected Plot No. 106 ",
-                      style: TextStyle(fontSize: 18, color: Theme.of(context).textTheme.bodyMedium?.color),
-                    ),
-
-                    SizedBox(height: 4),
+                    SizedBox(height: 8.h),
                     Row(
                       children: [
-                        Icon(
-                          IconlyLight.location,
-                          size: 16,
-                          color: Colors.grey,
-                        ),
-                        SizedBox(width: 6),
-                        Text(
-                          widget.propertyLocation,
-                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
+                        Icon(IconlyLight.location, size: 14.sp, color: primary),
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: Text(
+                            widget.propertyLocation,
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-
-              SizedBox(height: 28),
-
-              // // Show warning if no plot selected
-              // if (_selectedPlot == null)
-              //   Padding(
-              //     padding: EdgeInsets.only(top: 8),
-              //     child: Text(
-              //       "Please select a plot to continue",
-              //       style: TextStyle(color: Colors.red[600], fontSize: 13),
-              //     ),
-              //   ),
+              
+              SizedBox(height: 32.h),
+              
               Text(
-                "Kindly Provide Your Details We Will Be in Touch !",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color),
-              ),
-              SizedBox(height: 10),
-              // Name, Phone, Email, Message (same as before)
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: "Full Name",
-                  fillColor: Theme.of(context).cardColor,
-                  prefixIcon: Icon(Icons.person_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                "Your Details",
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-                validator: (v) => v!.trim().isEmpty ? "Name is required" : null,
               ),
-              SizedBox(height: 16),
-              TextFormField(
+              SizedBox(height: 20.h),
+
+              _buildTextField(
+                controller: _nameController,
+                label: "Full Name",
+                icon: IconlyLight.profile,
+                validator: (v) => v!.isEmpty ? "Name is required" : null,
+              ),
+              SizedBox(height: 16.h),
+
+              _buildTextField(
                 controller: _phoneController,
+                label: "Phone Number",
+                icon: IconlyLight.call,
                 keyboardType: TextInputType.phone,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: InputDecoration(
-                  fillColor: Theme.of(context).cardColor,
-                  labelText: "Phone Number",
-                  prefixIcon: Icon(Icons.phone_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                validator: (v) {
-                  if (v!.isEmpty) return "Phone is required";
-                  if (v.length < 10) return "Enter valid 10-digit number";
-                  return null;
-                },
+                validator: (v) => v!.length < 10 ? "Enter valid 10-digit number" : null,
               ),
-              SizedBox(height: 16),
-              TextFormField(
+              SizedBox(height: 16.h),
+
+              _buildTextField(
                 controller: _emailController,
+                label: "Email Address",
+                icon: IconlyLight.message,
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: "Email (Optional)",
-                  fillColor: Theme.of(context).cardColor,
-                  prefixIcon: Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none
-                  ),
-
-                ),
-                validator: (v) => v!.isNotEmpty && !GetUtils.isEmail(v)
-                    ? "Enter valid email"
-                    : null,
+                validator: (v) => (v!.isNotEmpty && !v.isEmail) ? "Enter valid email" : null,
               ),
-              SizedBox(height: 16),
-              TextFormField(
+              SizedBox(height: 16.h),
+
+              _buildTextField(
                 controller: _messageController,
+                label: "Special Message",
+                icon: IconlyLight.edit_square,
                 maxLines: 4,
-
-                decoration: InputDecoration(
-
-                  fillColor: Theme.of(context).cardColor,
-                  labelText: "Message (Optional)",
-                  hintText: "I'm interested in this property...",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: grey,width: 2)
-                  ),
-                ),
+                hint: "I'm interested in this property...",
               ),
+              
+              SizedBox(height: 40.h),
 
-              SizedBox(height: 32),
-
-              // Submit Button with Plot Validation
               SizedBox(
                 width: double.infinity,
-                height: 55,
+                height: 56.h,
                 child: ElevatedButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () {
-                          _submitEnquiry();
-                        },
+                  onPressed: _isLoading ? null : _submitEnquiry,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: primary,
+                    backgroundColor: secondary,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: secondary.withOpacity(0.5),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16.r),
                     ),
+                    elevation: 0,
                   ),
                   child: _isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                        )
                       : Text(
-                          "Send Enquiry",
-                          style: TextStyle(
-                            fontSize: 16,
+                          "Submit Enquiry",
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
                           ),
                         ),
                 ),
               ),
-
-              SizedBox(height: 20),
+              SizedBox(height: 24.h),
             ],
           ),
         ),
@@ -265,33 +213,61 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
     );
   }
 
-  // ADD THIS METHOD inside _EnquiryFormScreenState class
-  Widget _plotChip(String plotNo, bool isSelected) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedPlot = plotNo;
-        });
-      },
-      child: Container(
-        margin: EdgeInsets.only(right: 12),
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? primary : Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            color: isSelected ? primary : Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade800 : Colors.grey.shade300,
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    String? hint,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    String? Function(String?)? validator,
+    int maxLines = 1,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey.shade400,
           ),
         ),
-        child: Text(
-          plotNo,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
+        SizedBox(height: 8.h),
+        TextFormField(
+          controller: controller,
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: GoogleFonts.inter(color: Colors.white, fontSize: 14.sp),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(color: Colors.grey.shade700, fontSize: 13.sp),
+            prefixIcon: Icon(icon, size: 20.sp, color: Colors.grey.shade600),
+            filled: true,
+            fillColor: const Color(0xFF1A1A1A),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: maxLines > 1 ? 16.h : 0),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(color: secondary),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: const BorderSide(color: Colors.redAccent),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

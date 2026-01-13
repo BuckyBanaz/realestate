@@ -3,8 +3,15 @@ import 'package:iconly/iconly.dart';
 import 'package:get/get.dart';
 import 'package:realestate/constant/app_colors.dart';
 import 'package:realestate/screens/search/search_screen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../home/home_screen.dart';
+import '../home/modules/featured_properties_list.dart';
+import '../home/modules/search_text_field.dart';
+
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:realestate/Routes/appRoutes.dart';
 
 class FeaturedScreen extends StatelessWidget {
   const FeaturedScreen({Key? key}) : super(key: key);
@@ -13,252 +20,247 @@ class FeaturedScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).iconTheme.color),
-          onPressed: () => Get.back(),
-        ),
-        actions: [
-          IconButton(
-            icon:  Icon(IconlyLight.filter, color: Theme.of(context).iconTheme.color),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-
-            // ==================== HERO IMAGE GALLERY ====================
-            _buildStaggeredHeroGallery(context),
-
-            const SizedBox(height: 24),
-
-            // ==================== TITLE + SUBTITLE ====================
-             Text(
-              "Featured Estates",
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).textTheme.bodyLarge?.color,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              "Our recommended real estates exclusive for you.",
-              style: TextStyle(
-                fontSize: 15,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // ==================== SEARCH BAR ====================
-            const SearchTextField(), // jo tune pehle manga tha
-            const SizedBox(height: 20),
-
-            // ==================== ESTATES COUNT BADGE ====================
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      body: CustomScrollView(
+        slivers: [
+          // Premium Transparent AppBar
+          SliverAppBar(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            elevation: 0,
+            pinned: true,
+            leadingWidth: 70,
+            leading: Padding(
+              padding: EdgeInsets.only(left: 20.w),
+              child: GestureDetector(
+                onTap: () => Get.back(),
+                child: Container(
                   decoration: BoxDecoration(
-                    color: secondary,
-                    borderRadius: BorderRadius.circular(30),
+                    color: Theme.of(context).cardColor,
+                    shape: BoxShape.circle,
                   ),
-                  child: const Text(
-                    "70 estates",
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon:  Icon(IconlyLight.filter_2,color: Theme.of(context).iconTheme.color,),
-                  onPressed: () {},
-                ),
-                IconButton(
-                  icon:  Icon(Icons.grid_view,color: Theme.of(context).iconTheme.color,),
-                  onPressed: () {},
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-
-            // ==================== LIST OF ESTATES (tera card use kiya) ====================
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 5,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
-              itemBuilder: (_, index) {
-                final data = estatesData[index % estatesData.length];
-                return FeatureCard(
-                  imageUrl: data["image"]!,
-                  title: data["name"]!,
-                  rating: data["rating"]!,
-                  location: data["loc"]!,
-                  price: data["price"]!,
-                  tag: data["tag"]!,
-                  beds: data["beds"]!,
-                  area: data["area"]!,
-                );
-              },
-            ),
-
-            const SizedBox(height: 30),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeroImage(String url) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        image: DecorationImage(
-          image: NetworkImage(url),
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
-  }
-  // Replace pura hero section with this
-  Widget _buildStaggeredHeroGallery(BuildContext context) {
-    // use the uploaded file path (env will convert to a reachable URL)
-    const String mainImageUrl = 'assets/images/2.png';
-
-    // thumbs can be assets or other uploaded paths
-    const String thumb1 = 'assets/images/2.png';
-    const String thumb2 = 'assets/images/3.png';
-    const String bottomImg = 'assets/images/4.png';
-
-    final double screenW = MediaQuery.of(context).size.width;
-    final double pad = 20.0;
-    final double totalW = screenW - pad * 2;
-
-    // proportional sizes with clamps
-    final double leftW = (totalW * 0.60).clamp(180.0, 420.0);
-    final double rightW = (totalW - leftW - 12).clamp(110.0, 260.0);
-    final double topLeftH = (leftW * 0.68).clamp(160.0, 340.0);
-    final double topRightH = (rightW * 0.62).clamp(110.0, 220.0);
-    final double bottomH = (totalW * 0.42).clamp(140.0, 300.0);
-
-    // container height enough to fit everything (allow overlap)
-    final double containerH = topLeftH + 12 + bottomH * 0.45;
-
-    final BorderRadius bigR = BorderRadius.circular(18);
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: pad),
-      child: SizedBox(
-        height: containerH,
-        child: Stack(
-          clipBehavior: Clip.none, // important to allow overlap outside bounds
-          children: [
-            // 1) BOTTOM image first -> painted below
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: bottomH,
-                decoration: BoxDecoration(
-                  borderRadius: bigR,
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.16), blurRadius: 18, offset: Offset(0, 10))],
-                ),
-                child: ClipRRect(
-                  borderRadius: bigR,
-                  child: Image.asset(
-                    bottomImg,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: bottomH,
+                  child: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white,
+                    size: 18.sp,
                   ),
                 ),
               ),
             ),
-
-            // 2) TOP-LEFT main image (placed after bottom so it paints above)
-            Positioned(
-              top: 0,
-              left: 0,
-              child: Container(
-                width: leftW,
-                height: topLeftH,
-                decoration: BoxDecoration(
-                  borderRadius: bigR,
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.14), blurRadius: 20, offset: Offset(0, 10))],
-                ),
-                child: ClipRRect(
-                  borderRadius: bigR,
-                  child: Image.asset(
-                    mainImageUrl,
-                    fit: BoxFit.cover,
-                    width: leftW,
-                    height: topLeftH,
-                    errorBuilder: (c, e, s) => Container(color: Colors.grey.shade200),
+            actions: [
+              Padding(
+                padding: EdgeInsets.only(right: 20.w),
+                child: GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    width: 45.w,
+                    height: 45.w,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      IconlyLight.filter,
+                      color: Colors.white,
+                      size: 20.sp,
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
+          ),
 
-            // 3) TOP-RIGHT stacked small thumbnails (on top — keep them last)
-            Positioned(
-              top: topLeftH * 0.14, // slight vertical offset to make it staggered
-              right: 0,
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // small top thumbnail
-                  Container(
-                    width: rightW,
-                    height: topRightH,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.10), blurRadius: 14, offset: Offset(0, 8))],
+                  SizedBox(height: 10.h),
+
+                  // ==================== HERO IMAGE GALLERY ====================
+                  _buildStaggeredHeroGallery(context)
+                      .animate()
+                      .fadeIn(duration: 800.ms, curve: Curves.easeOutQuad)
+                      .slideY(begin: 0.1, end: 0),
+
+                  SizedBox(height: 30.h),
+
+                  // ==================== TITLE + SUBTITLE ====================
+                  Text(
+                    "Featured Estates",
+                    style: GoogleFonts.inter(
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
-                      child: Image.asset(thumb1, fit: BoxFit.cover, width: rightW, height: topRightH),
+                  ).animate().fadeIn(delay: 200.ms).slideX(begin: -0.1, end: 0),
+
+                  SizedBox(height: 8.h),
+
+                  Text(
+                    "Our recommended real estates exclusive for you.",
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: Colors.grey.shade500,
+                      height: 1.5,
                     ),
+                  ).animate().fadeIn(delay: 300.ms).slideX(begin: -0.1, end: 0),
+
+                  SizedBox(height: 28.h),
+
+                  // ==================== SEARCH BAR ====================
+                  const SearchTextField()
+                      .animate()
+                      .fadeIn(delay: 400.ms)
+                      .scale(begin: Offset(0.95, 0.95)),
+
+                  SizedBox(height: 24.h),
+
+                  // ==================== ESTATES COUNT & GRID CONTROLS ====================
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                        decoration: BoxDecoration(
+                          color: secondary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(color: secondary.withOpacity(0.3)),
+                        ),
+                        child: Text(
+                          "70 estates",
+                          style: TextStyle(
+                            color: secondary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11.sp,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      _buildIconControl(IconlyLight.filter_2),
+                      SizedBox(width: 12.w),
+                      _buildIconControl(Icons.grid_view_rounded),
+                    ],
+                  ).animate().fadeIn(delay: 500.ms),
+
+                  SizedBox(height: 24.h),
+
+                  // ==================== LIST OF ESTATES ====================
+                  ListView.separated(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: estatesData.length,
+                    separatorBuilder: (_, __) => SizedBox(height: 20.h),
+                    itemBuilder: (ctx, index) {
+                      final data = estatesData[index];
+                      return FeatureCard(
+                        imageUrl: data["image"]!,
+                        title: data["name"]!,
+                        rating: data["rating"]!,
+                        location: data["loc"]!,
+                        price: data["price"]!,
+                        tag: data["tag"]!,
+                        beds: data["beds"]!,
+                        area: data["area"]!,
+                      )
+                          .animate()
+                          .fadeIn(delay: (600 + (index * 100)).ms)
+                          .slideY(begin: 0.1, end: 0);
+                    },
                   ),
 
-                  SizedBox(height: 10),
-
-                  // small bottom thumbnail
-                  Container(
-                    width: rightW,
-                    height: topRightH * 0.78,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: Offset(0, 6))],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
-                      child: Image.asset(thumb2, fit: BoxFit.cover, width: rightW, height: topRightH * 0.78),
-                    ),
-                  ),
+                  SizedBox(height: 40.h),
                 ],
               ),
             ),
-
-            // Optional: gallery indicator or shadows if needed
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
+  Widget _buildIconControl(IconData icon) {
+    return Container(
+      padding: EdgeInsets.all(10.w),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: Icon(icon, color: Colors.white, size: 20.sp),
+    );
+  }
+
+  // Refined Hero Gallery
+  Widget _buildStaggeredHeroGallery(BuildContext context) {
+    // High quality imagery
+    final images = [
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600",
+      "https://images.unsplash.com/photo-1600596542815-e32c8ec049db?w=600",
+      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=600",
+    ];
+
+    final double totalW = MediaQuery.of(context).size.width - 40.w;
+    final double leftW = totalW * 0.62;
+    final double rightW = totalW - leftW - 12.w;
+    final double leftH = 220.h;
+    final double rightH = 100.h;
+
+    return SizedBox(
+      height: 220.h + 100.h * 0.4, // accommodate overlap
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Main Left Large Image
+          Positioned(
+            left: 0,
+            top: 0,
+            child: _galleryImage(images[0], leftW, leftH, 24),
+          ),
+          // Top Right Small
+          Positioned(
+            right: 0,
+            top: 15.h,
+            child: _galleryImage(images[1], rightW, rightH, 18),
+          ),
+          // Bottom Right Small Overlap
+          Positioned(
+            right: 15.w,
+            bottom: 0,
+            child: _galleryImage(images[2], rightW * 1.1, rightH * 1.1, 18),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _galleryImage(String url, double w, double h, double radius) {
+    return Container(
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius.r),
+        child: Image.network(
+          url,
+          fit: BoxFit.cover,
+          errorBuilder: (c, e, s) => Container(color: Colors.grey.shade900),
+        ),
+      ),
+    );
+  }
 }
+
+
+
 
 final List<Map<String, String>> estatesData = [
   {

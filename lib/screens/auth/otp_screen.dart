@@ -55,15 +55,21 @@ class OtpController extends GetxController {
       // restart timer after resend
       startTimer(seconds: 30);
 
-      Get.snackbar(
-        "OTP Sent",
-        "A new OTP has been sent to $contact",
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-        duration: const Duration(seconds: 3),
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
+        SnackBar(
+          content: Text("A new OTP has been sent to $contact"),
+          backgroundColor: secondary,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     } catch (e) {
-      Get.snackbar("Error", "Failed to resend OTP. Try again.", snackPosition: SnackPosition.BOTTOM);
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
+        const SnackBar(
+          content: Text("Failed to resend OTP. Try again."),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } finally {
       isResending.value = false;
     }
@@ -81,7 +87,13 @@ class OtpController extends GetxController {
       // On success navigate to dashboard (replace with your logic)
       Get.offAll(const DashboardScreen());
     } catch (e) {
-      Get.snackbar("Invalid OTP", "Please check the code and try again.", snackPosition: SnackPosition.BOTTOM);
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
+        const SnackBar(
+          content: Text("Invalid OTP. Please check the code and try again."),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } finally {
       isVerifying.value = false;
     }

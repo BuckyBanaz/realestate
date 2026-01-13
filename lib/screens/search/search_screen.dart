@@ -7,6 +7,7 @@ import 'package:iconly/iconly.dart';
 import 'package:realestate/constant/app_colors.dart';
 
 import '../home/home_screen.dart';
+import '../home/modules/featured_properties_list.dart';
 import '../property/property_deatils_screen.dart';
 
 // ====================== CONTROLLER ======================
