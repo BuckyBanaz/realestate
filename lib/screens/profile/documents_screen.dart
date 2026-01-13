@@ -103,14 +103,13 @@ class DocumentsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Screen scaffold
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text("Documents", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600)),
+        title: Text("Documents", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
         elevation: 0,
-        leading: IconButton(onPressed: ()=>Navigator.pop(context), icon: Icon(IconlyLight.arrow_left_2)),
+        leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(IconlyLight.arrow_left_2, color: Theme.of(context).iconTheme.color)),
 
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: Padding(
         padding: EdgeInsets.all(16.w),
@@ -119,13 +118,13 @@ class DocumentsScreen extends StatelessWidget {
             // Header / search if needed
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-              decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(12.r)),
+              decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(12.r)),
               child: Row(
                 children: [
                   Icon(Icons.file_present_outlined, color: primary),
                   SizedBox(width: 10.w),
                   Expanded(
-                    child: Text("Property Documents", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                    child: Text("Property Documents", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
                   ),
                   Text("${docs.length}", style: TextStyle(color: Colors.grey[600], fontSize: 13.sp)),
                 ],
@@ -146,14 +145,14 @@ class DocumentsScreen extends StatelessWidget {
                     },
                     child: Container(
                       padding: EdgeInsets.all(12.w),
-                      decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(14.r)),
+                      decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(14.r)),
                       child: Row(
                         children: [
                           Hero(tag: d.id, child: _thumbWidget(d.thumbnail, width: 110.w, height: 72.h)),
                           SizedBox(width: 12.w),
                           Expanded(
                             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                              Text(d.title, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700), maxLines: 2, overflow: TextOverflow.ellipsis),
+                              Text(d.title, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color), maxLines: 2, overflow: TextOverflow.ellipsis),
                               SizedBox(height: 6.h),
                               Row(children: [
                                 Icon(Icons.location_on, size: 12.w, color: Colors.grey),
@@ -165,8 +164,8 @@ class DocumentsScreen extends StatelessWidget {
                                 children: [
                                   Container(
                                     padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.r), color: Colors.white),
-                                    child: Text(d.docType, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600)),
+                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.r), color: Theme.of(context).scaffoldBackgroundColor),
+                                    child: Text(d.docType, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
                                   ),
                                   SizedBox(width: 8.w),
                                   Text(d.uploadedDate, style: TextStyle(color: Colors.grey[600], fontSize: 11.sp)),
@@ -209,14 +208,14 @@ class DocumentDetailScreen extends StatelessWidget {
     }
   }
 
-  Widget _metaRow(String label, String value) {
+  Widget _metaRow(BuildContext context, String label, String value) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(width: 140.w, child: Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 13.sp))),
-          Expanded(child: Text(value, textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp))),
+          Expanded(child: Text(value, textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp, color: Theme.of(context).textTheme.bodyLarge?.color))),
         ],
       ),
     );
@@ -225,14 +224,13 @@ class DocumentDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text("Document Detail", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600)),
+        title: Text("Document Detail", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
         elevation: 0,
-        leading: IconButton(onPressed: ()=>Navigator.pop(context), icon: Icon(IconlyLight.arrow_left_2)),
+        leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(IconlyLight.arrow_left_2, color: Theme.of(context).iconTheme.color)),
 
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
@@ -240,7 +238,7 @@ class DocumentDetailScreen extends StatelessWidget {
           // Top card with image and basic info
           Container(
             padding: EdgeInsets.all(12.w),
-            decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(16.r)),
+            decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(16.r)),
             child: Row(children: [
               GestureDetector(
                 onTap: () {
@@ -251,12 +249,12 @@ class DocumentDetailScreen extends StatelessWidget {
               SizedBox(width: 12.w),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(document.title, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700)),
+                  Text(document.title, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color)),
                   SizedBox(height: 6.h),
                   Text(document.propertyName, style: TextStyle(fontSize: 12.sp, color: Colors.grey[600])),
                   SizedBox(height: 8.h),
                   Row(children: [
-                    Container(padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h), decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.r), color: Colors.white), child: Text(document.docType, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600))),
+                    Container(padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h), decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.r), color: Theme.of(context).scaffoldBackgroundColor), child: Text(document.docType, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color))),
                     SizedBox(width: 8.w),
                     Text(document.uploadedDate, style: TextStyle(color: Colors.grey[600], fontSize: 11.sp)),
                   ]),
@@ -268,18 +266,18 @@ class DocumentDetailScreen extends StatelessWidget {
           SizedBox(height: 18.h),
 
           // Document metadata
-          Text("Document Information", style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700)),
+          Text("Document Information", style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color)),
           SizedBox(height: 10.h),
           Container(
             padding: EdgeInsets.all(12.w),
-            decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(12.r)),
+            decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(12.r)),
             child: Column(children: [
-              _metaRow("Registration No.", document.metadata["Registration No."] ?? "-"),
-              _metaRow("Registered On", document.metadata["Registered On"] ?? "-"),
-              _metaRow("Previous Owner", document.metadata["Previous Owner"] ?? "-"),
-              _metaRow("Current Owner", document.metadata["Current Owner"] ?? "-"),
-              _metaRow("Issued By", document.metadata["Issued By"] ?? "-"),
-              _metaRow("Remarks", document.metadata["Remarks"] ?? "-"),
+              _metaRow(context, "Registration No.", document.metadata["Registration No."] ?? "-"),
+              _metaRow(context, "Registered On", document.metadata["Registered On"] ?? "-"),
+              _metaRow(context, "Previous Owner", document.metadata["Previous Owner"] ?? "-"),
+              _metaRow(context, "Current Owner", document.metadata["Current Owner"] ?? "-"),
+              _metaRow(context, "Issued By", document.metadata["Issued By"] ?? "-"),
+              _metaRow(context, "Remarks", document.metadata["Remarks"] ?? "-"),
             ]),
           ),
 

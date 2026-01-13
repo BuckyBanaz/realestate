@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:realestate/screens/search/search_screen.dart';
 
@@ -26,7 +27,7 @@ class LocationDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
           // ==================== HERO HEADER ====================
@@ -40,7 +41,7 @@ class LocationDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.only(left: 16, top: 8),
               child: _circleButton(
                 Icons.arrow_back_ios_new_rounded,
-                () => Navigator.pop(context),
+                () => Get.back(),
               ),
             ),
             actions: [
@@ -208,13 +209,13 @@ class LocationDetailScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                   SizedBox(height: 8),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                    style: TextStyle(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color,),
                   ),
                   SizedBox(height: 24),
 

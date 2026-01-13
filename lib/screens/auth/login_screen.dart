@@ -10,6 +10,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/screens/auth/register_screen.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
+import 'package:realestate/screens/auth/controller/auth_controller.dart';
 
 import '../../constant/app_colors.dart';
 
@@ -21,15 +22,14 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+
+  final AuthController _authController = Get.put(AuthController());
   bool _obscure = true;
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _password_controllerDisposeSafety();
-    _passwordController.dispose();
+    // Controllers are now managed by AuthController, so we don't dispose them here directly 
+    // or we leave them to GetX to manage if we used Get.put
     super.dispose();
   }
 
@@ -45,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: SafeArea(
         child: Container(
-          color: Colors.white,
+          color: Theme.of(context).scaffoldBackgroundColor,
           padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 10.h),
           child: SingleChildScrollView(
             child: Column(
@@ -54,27 +54,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: 20.h),
             stagger(
               0,
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  width: 60.w,
-                  height: 60.h,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: primary,  // ✔ allowed inside decoration
-                  ),
-                  child: Center(
-                    child: SizedBox(
-                      width: 40.w,
-                      height:30.h,
-                      child: Image.asset(
-                        "assets/images/logo.png",
-                        fit: BoxFit.fill,
-                      ),
-                    ),
-                  ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: const Logoor(),
                 ),
-              ),
             ),
             SizedBox(height: 30.h,),
 
@@ -99,22 +82,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                                 fontWeight: FontWeight.w800,
                                 fontSize: 23.sp,
+                                color: Theme.of(context).textTheme.bodyLarge?.color,
                               ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                    // SizedBox(height: 0.6.h),
-                    // Container(
-                    //   width: 20.w,
-                    //   height: 5.h,
-                    //   decoration: BoxDecoration(
-                    //     color:primary,
-                    //     borderRadius: BorderRadius.circular(12),
-                    //   ),
-                    // ),
-
+                    
                     SizedBox(height: 6.h),
 
                     stagger(
@@ -122,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         "Welcome back! Please login to your account.",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w400,
                         ),
@@ -137,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Email field with outline + inside icon right
                 stagger(
                   3,TextFormField(
-                    controller: _emailController,
+                    controller: _authController.emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       hintText: 'Email / Phone Number',
@@ -153,9 +128,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
-                      fillColor: cardColor,
+                      fillColor: Theme.of(context).cardColor,
                     ),
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(fontSize: 14.sp, color: Theme.of(context).textTheme.bodyLarge?.color),
                   ),
                 ),
 
@@ -164,18 +139,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Password field card (rounded, subtle bg)
                 stagger(
                   4, TextFormField(
-                    controller: _passwordController,
+                    controller: _authController.passwordController,
                     obscureText: _obscure,
                     decoration: InputDecoration(
 
-                      suffixIcon: Icon(
-                        _obscure ? IconlyLight.lock:  IconlyLight.unlock,
-                        color: secondary,
-                        size: 20.sp,
+                      suffixIcon: GestureDetector(
+                        onTap: _togglePassword,
+                        child: Icon(
+                          _obscure ? IconlyLight.lock:  IconlyLight.unlock,
+                          color: secondary,
+                          size: 20.sp,
+                        ),
                       ),
                       hintText: '••••••••',
                       filled: true,
-                      fillColor: cardColor,
+                      fillColor: Theme.of(context).cardColor,
                       contentPadding:
                       EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
                       border: OutlineInputBorder(
@@ -184,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
 
-                    style: TextStyle(letterSpacing: 4.0, fontSize: 14.sp),
+                    style: TextStyle(letterSpacing: 4.0, fontSize: 14.sp, color: Theme.of(context).textTheme.bodyLarge?.color),
                   ),
                 ),
 
@@ -229,9 +207,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: SizedBox(
                       width: 150.w,
                       height: 50.h,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Get.toNamed(AppRoutes.signup);
+                      child: Obx(() => ElevatedButton(
+                        onPressed: _authController.isLoading.value ? null : () {
+                          _authController.login();
                         },
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white,
@@ -241,14 +219,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           backgroundColor: primary,
                         ),
-                        child: Text(
+                        child: _authController.isLoading.value 
+                        ? SizedBox(
+                            height: 20.h,
+                            width: 20.h,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          )
+                        : Text(
                           'Login',
                           style: TextStyle(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                      ),
+                      )),
                     ),
                   ),
                 ),
@@ -363,7 +347,7 @@ class _LoginScreenState extends State<LoginScreen> {
           onPressed: onTap,
           style: OutlinedButton.styleFrom(
             shape: const CircleBorder(),
-            backgroundColor: cardColor,
+            backgroundColor: Theme.of(context).cardColor,
             padding: EdgeInsets.zero,
             side: BorderSide(color: Colors.transparent),
           ),
@@ -387,7 +371,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           child: CupertinoAlertDialog(
-            title: Text("Forgot Password", style: TextStyle(fontWeight: FontWeight.w600)),
+            title: Text("Forgot Password", style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
             content: Padding(
               padding: EdgeInsets.only(top: 12),
               child: Column(
@@ -398,10 +382,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     placeholder: "you@example.com",
                     padding: EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    style: TextStyle(fontSize: 15.sp),
+                    style: TextStyle(fontSize: 15.sp, color: Theme.of(context).textTheme.bodyLarge?.color),
                   ),
                 ],
               ),
@@ -442,19 +426,20 @@ class _LoginScreenState extends State<LoginScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("We'll send a password reset link to your email.", style: TextStyle(fontSize: 14.sp)),
+              Text("We'll send a password reset link to your email.", style: TextStyle(fontSize: 14.sp, color: Theme.of(context).textTheme.bodyLarge?.color)),
               SizedBox(height: 16),
               TextField(
                 decoration: InputDecoration(
                   hintText: "you@example.com",
                   filled: true,
-                  fillColor: cardColor,
+                  fillColor: Theme.of(context).cardColor,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
                   contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 ),
+                style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
               ),
             ],
           ),

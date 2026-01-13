@@ -206,11 +206,11 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         actions: [
           IconButton(
-            icon: Icon(IconlyLight.document, color: Colors.black87),
+            icon: Icon(IconlyLight.document, color: Theme.of(context).iconTheme.color),
             onPressed: () => Get.to(DocumentsScreen()),
           ),
           IconButton(
-            icon: Icon(IconlyLight.setting, color: Colors.black87),
+            icon: Icon(IconlyLight.setting, color: Theme.of(context).iconTheme.color),
             onPressed: () => Get.to(PermissionsScreen()),
           ),
         ],
@@ -233,7 +233,7 @@ class ProfileScreen extends StatelessWidget {
                   if (ctrl.selectedTab.value == 0) {
                     return _buildMyProperties(ctrl);
                   } else if (ctrl.selectedTab.value == 1) {
-                    return _buildTransactionsSummary(ctrl);
+                    return _buildTransactionsSummary(context, ctrl);
                   } else {
                     return _buildPaymentsSection(ctrl);
                   }
@@ -296,28 +296,32 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildTabs(ProfileController c) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.w),
-      child: Container(
-        padding: EdgeInsets.all(6.w),
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(32.r),
-        ),
-        child: Obx(
-          () => Row(
-            children: [
-              _tab("My Properties", 0, c),
-              _tab("Transactions", 1, c),
-              _tab("Payments", 2, c),
-            ],
+    return Builder(
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4.w),
+          child: Container(
+            padding: EdgeInsets.all(6.w),
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: BorderRadius.circular(32.r),
+            ),
+            child: Obx(
+              () => Row(
+                children: [
+                  _tab(context, "My Properties", 0, c),
+                  _tab(context, "Transactions", 1, c),
+                  _tab(context, "Payments", 2, c),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 
-  Widget _tab(String text, int index, ProfileController c) {
+  Widget _tab(BuildContext context, String text, int index, ProfileController c) {
     final bool active = c.selectedTab.value == index;
     return Expanded(
       child: GestureDetector(
@@ -325,7 +329,9 @@ class ProfileScreen extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 10.h),
           decoration: BoxDecoration(
-            color: active ? Colors.white : Colors.transparent,
+            color: active 
+                ? Theme.of(context).cardColor 
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(28.r),
           ),
           child: Text(
@@ -380,7 +386,7 @@ class ProfileScreen extends StatelessWidget {
 
   // ---------------- My Properties view ----------------
   // ---------------- Transaction Summary (excel-like rows) ----------------
-  Widget _buildTransactionsSummary(ProfileController c) {
+  Widget _buildTransactionsSummary(BuildContext context, ProfileController c) {
     // show first 3 recent transactions and a "View All" button
     final recent = c.transactions.take(3).toList();
 
@@ -414,7 +420,9 @@ class ProfileScreen extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey.shade800 
+                  : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Row(
@@ -682,7 +690,7 @@ class _PropertyTile extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(8.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12.r),
         ),
         child: Row(
@@ -799,7 +807,7 @@ class PaymentCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(10.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
@@ -808,7 +816,9 @@ class PaymentCard extends StatelessWidget {
             width: 64.w,
             height: 52.h,
             decoration: BoxDecoration(
-              color: paid ? Colors.green.shade50 : Colors.orange.shade50,
+              color: paid 
+                  ? Colors.green.withOpacity(0.15) 
+                  : Colors.orange.withOpacity(0.15),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Icon(
@@ -832,7 +842,7 @@ class PaymentCard extends StatelessWidget {
                 SizedBox(height: 6.h),
                 Text(
                   location,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12.sp),
+                  style: TextStyle(color:  Theme.of(context).brightness == Brightness.dark ? Colors.grey[400] : Colors.grey[600], fontSize: 12.sp),
                 ),
               ],
             ),
@@ -847,7 +857,7 @@ class PaymentCard extends StatelessWidget {
               SizedBox(height: 6.h),
               Text(
                 date,
-                style: TextStyle(color: Colors.grey[600], fontSize: 12.sp),
+                style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[400] : Colors.grey[600], fontSize: 12.sp),
               ),
             ],
           ),

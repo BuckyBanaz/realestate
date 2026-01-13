@@ -4,50 +4,66 @@ import 'package:google_fonts/google_fonts.dart';
 import '../constant/app_colors.dart';
 
 class AppTheme {
-  static ThemeData lightTheme = ThemeData(
-    brightness: Brightness.light,
+  static ThemeData darkTheme = ThemeData(
+    brightness: Brightness.dark,
     primaryColor: primary,
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: scaffoldColor, // 0xFF090909
+    cardColor: const Color(0xFF1A1A1A),
 
-    // 👇 Calibri alternative font (Carlito)
-    textTheme: GoogleFonts.carlitoTextTheme() ,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: Colors.white,
+    // Use Carlito for text, ensure it's suitable for dark mode
+    textTheme: GoogleFonts.carlitoTextTheme(ThemeData.dark().textTheme).apply(
+      bodyColor: Colors.white,
+      displayColor: Colors.white,
+    ),
+    
+    colorScheme: ColorScheme.dark(
       primary: primary,
       secondary: secondary,
+      surface: const Color(0xFF161616), // Slightly lighter than scaffold
+      onPrimary: Colors.black, // High contrast on light gold primary
+      onSecondary: Colors.white,
+      onSurface: Colors.white,
+      error: Colors.redAccent,
+    ),
+
+    appBarTheme: AppBarTheme(
+      backgroundColor: scaffoldColor,
+      foregroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      centerTitle: true,
+      iconTheme: const IconThemeData(color: Colors.white, size: 22),
+      titleTextStyle: GoogleFonts.carlito(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+      ),
     ),
 
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: primary,
+        foregroundColor: Colors.black, // Text color on button
+        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
         padding: const EdgeInsets.symmetric(vertical: 16),
         textStyle: GoogleFonts.inter(
           fontSize: 16,
-          color: Colors.white
+          fontWeight: FontWeight.w600,
+          color: Colors.black,
         ),
-      ),
-    ),
-
-    appBarTheme: AppBarTheme(
-      backgroundColor: Colors.white,
-      elevation: 0,
-      iconTheme: const IconThemeData(size: 22),
-      titleTextStyle: GoogleFonts.carlito(
-        color: Colors.black,
-        fontSize: 20,
       ),
     ),
 
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: cardColor,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      fillColor: const Color(0xFF1F1F1F), // Dark card-like fill
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: primary, width: 3.5),
+        borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -57,7 +73,28 @@ class AppTheme {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: primary, width: 1.5),
       ),
-      hintStyle: TextStyle(color: secondary),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+      ),
+      hintStyle: TextStyle(color: Colors.grey[600]),
+      prefixIconColor: secondary,
     ),
+
+    // cardTheme: CardTheme(
+    //   color: const Color(0xFF1A1A1A),
+    //   elevation: 0,
+    //   shape: RoundedRectangleBorder(
+    //     borderRadius: BorderRadius.circular(12),
+    //   ),
+    //   margin: EdgeInsets.zero,
+    // ),
+    
+    iconTheme: IconThemeData(
+      color: primary,
+      size: 24,
+    ),
+    
+    dividerColor: Colors.grey[800],
   );
 }

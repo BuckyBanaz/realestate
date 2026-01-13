@@ -13,16 +13,18 @@ class EditProfileScreen extends StatelessWidget {
     final _phoneController = TextEditingController();
     final _emailController = TextEditingController();
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(CupertinoIcons.back),
+          icon: Icon(CupertinoIcons.back, color: Theme.of(context).iconTheme.color),
           onPressed: () {
             Get.back();
           },
         ),
-        backgroundColor: Colors.white,
-        title: Text("Edit Profile"),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 0,
+        title: Text("Edit Profile", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
       ),
       body: SafeArea(
         child: Padding(
@@ -32,8 +34,8 @@ class EditProfileScreen extends StatelessWidget {
               Center(
                 child: CircleAvatar(
                   radius: 50,
-                  child: const Icon(IconlyLight.profile,size: 30,),
-                  backgroundColor: cardColor,
+                  child: Icon(IconlyLight.profile, size: 30, color: Theme.of(context).iconTheme.color),
+                  backgroundColor: Theme.of(context).cardColor,
                   // backgroundImage: NetworkImage("https://i.pravatar.cc/300?u=mathew"),
                 ),
               ),
@@ -46,7 +48,7 @@ class EditProfileScreen extends StatelessWidget {
                   hintText: 'Jhone Doe',
                   suffixIcon: Icon(IconlyLight.message, color: secondary),
                 ),
-                style: const TextStyle(fontSize: 14),
+                style: TextStyle(fontSize: 14, color: Theme.of(context).textTheme.bodyLarge?.color),
               ),
               const SizedBox(height: 20),
 
@@ -57,8 +59,9 @@ class EditProfileScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: '+62 112-3288-9111 ',
                   suffixIcon: Icon(IconlyLight.call, color: secondary),
+                  hintStyle: TextStyle(color: Colors.grey),
                 ),
-                style: const TextStyle(fontSize: 14),
+                style: TextStyle(fontSize: 14, color: Theme.of(context).textTheme.bodyLarge?.color),
               ),
               const SizedBox(height: 20),
 
@@ -69,8 +72,9 @@ class EditProfileScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'chetan@email.com',
                   suffixIcon: Icon(IconlyLight.message, color: secondary),
+                  hintStyle: TextStyle(color: Colors.grey),
                 ),
-                style: const TextStyle(fontSize: 14),
+                style: TextStyle(fontSize: 14, color: Theme.of(context).textTheme.bodyLarge?.color),
               ),
               Spacer(),
               // Login button

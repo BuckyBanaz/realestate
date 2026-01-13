@@ -25,7 +25,7 @@ class LoginOptionScreen extends StatelessWidget {
     final double gridGap = 12.w;
 
     return Scaffold(
-      backgroundColor: Colors.white, // page background like screenshot
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // page background like screenshot
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -46,14 +46,14 @@ class LoginOptionScreen extends StatelessWidget {
                       TextSpan(
                         text: 'Ready to ',
                         style: TextStyle(
-                            color: secondary,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                             fontSize: 22.sp,
                             fontWeight: FontWeight.w600),
                       ),
                       TextSpan(
                         text: 'explore?',
                         style: TextStyle(
-                          color: secondary,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                           fontSize: 22.sp,
                           fontWeight: FontWeight.w800,
                         ),
@@ -139,7 +139,7 @@ class LoginOptionScreen extends StatelessWidget {
                           onPressed: () {},
                           style: OutlinedButton.styleFrom(
                             padding: EdgeInsets.symmetric(vertical: 12.h),
-                            backgroundColor: cardColor,
+                            backgroundColor: Theme.of(context).cardColor,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(25.r),
                             ),
@@ -161,7 +161,7 @@ class LoginOptionScreen extends StatelessWidget {
                           onPressed: () {},
                           style: OutlinedButton.styleFrom(
                             padding: EdgeInsets.symmetric(vertical: 12.h),
-                            backgroundColor: cardColor,
+                            backgroundColor: Theme.of(context).cardColor,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(25.r),
                             ),
@@ -183,7 +183,7 @@ class LoginOptionScreen extends StatelessWidget {
                           onPressed: () {},
                           style: OutlinedButton.styleFrom(
                             padding: EdgeInsets.symmetric(vertical: 12.h),
-                            backgroundColor: cardColor,
+                            backgroundColor: Theme.of(context).cardColor,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(25.r),
                             ),
@@ -216,7 +216,7 @@ class LoginOptionScreen extends StatelessWidget {
                             TextSpan(
                               text: "Don't have an account? ",
                               style: TextStyle(
-                                color: Colors.grey[500],
+                                color: Theme.of(context).textTheme.bodyMedium?.color,
                                 fontSize: 14.sp,
                               ),
                             ),

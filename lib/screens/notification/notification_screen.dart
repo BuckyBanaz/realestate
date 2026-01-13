@@ -100,17 +100,17 @@ class NotificationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 16),
-          child: _circleIconButton(Icons.arrow_back_ios_new_rounded, () => Navigator.pop(context)),
+          child: _circleIconButton(context, Icons.arrow_back_ios_new_rounded, () => Get.back()),
         ),
         title: Text(
           "Notification",
-          style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
+          style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color),
         ),
       ),
       body: Obx(() {
@@ -129,7 +129,7 @@ class NotificationScreen extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[800],
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               const SizedBox(height: 12),
@@ -143,7 +143,7 @@ class NotificationScreen extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
             const SizedBox(height: 12),
@@ -156,16 +156,16 @@ class NotificationScreen extends StatelessWidget {
   }
 
 
-  Widget _circleIconButton(IconData icon, VoidCallback onTap) {
+  Widget _circleIconButton(BuildContext context, IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: cardColor,
+          color: Theme.of(context).cardColor,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 20, color: secondary),
+        child: Icon(icon, size: 20, color: Theme.of(context).iconTheme.color),
       ),
     );
   }
@@ -206,12 +206,17 @@ class NotificationTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+            border: Border.all(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey.shade800 
+                  : const Color(0xFFE5E7EB), 
+              width: 1
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.08),
+                color: Colors.black.withOpacity(0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -222,8 +227,8 @@ class NotificationTile extends StatelessWidget {
               // Avatar
               CircleAvatar(
                 radius: 26,
-                child: Icon(IconlyLight.profile),
-                backgroundColor: cardColor,
+                child: Icon(IconlyLight.profile, color: Theme.of(context).iconTheme.color),
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 // backgroundImage: NetworkImage(item.avatar),
               ),
               const SizedBox(width: 14),
@@ -238,7 +243,7 @@ class NotificationTile extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
-                        color: const Color(0xFF111827),
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -246,7 +251,7 @@ class NotificationTile extends StatelessWidget {
                       item.message,
                       style: GoogleFonts.inter(
                         fontSize: 13.5,
-                        color: Colors.grey[600],
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
                         height: 1.4,
                       ),
                       maxLines: 2,

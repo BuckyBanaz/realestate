@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
+import 'package:get/get.dart';
 import 'package:realestate/constant/app_colors.dart';
 import 'package:realestate/screens/search/search_screen.dart';
 
@@ -11,17 +12,17 @@ class FeaturedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
-          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).iconTheme.color),
+          onPressed: () => Get.back(),
         ),
         actions: [
           IconButton(
-            icon:  Icon(IconlyLight.filter, color: secondary),
+            icon:  Icon(IconlyLight.filter, color: Theme.of(context).iconTheme.color),
             onPressed: () {},
           ),
           const SizedBox(width: 8),
@@ -44,7 +45,7 @@ class FeaturedScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
-                color: secondary,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
             const SizedBox(height: 6),
@@ -52,7 +53,7 @@ class FeaturedScreen extends StatelessWidget {
               "Our recommended real estates exclusive for you.",
               style: TextStyle(
                 fontSize: 15,
-                color: Colors.grey.shade600,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
               ),
             ),
 
@@ -78,11 +79,11 @@ class FeaturedScreen extends StatelessWidget {
                 ),
                 const Spacer(),
                 IconButton(
-                  icon:  Icon(IconlyLight.filter_2,color: secondary,),
+                  icon:  Icon(IconlyLight.filter_2,color: Theme.of(context).iconTheme.color,),
                   onPressed: () {},
                 ),
                 IconButton(
-                  icon:  Icon(Icons.grid_view,color: secondary,),
+                  icon:  Icon(Icons.grid_view,color: Theme.of(context).iconTheme.color,),
                   onPressed: () {},
                 ),
               ],
@@ -98,12 +99,15 @@ class FeaturedScreen extends StatelessWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 16),
               itemBuilder: (_, index) {
                 final data = estatesData[index % estatesData.length];
-                return ResultCard(
-                  name: data["name"]!,
+                return FeatureCard(
+                  imageUrl: data["image"]!,
+                  title: data["name"]!,
                   rating: data["rating"]!,
                   location: data["loc"]!,
-                  // price: data["price"]!,
-                  // tag: data["tag"]!,
+                  price: data["price"]!,
+                  tag: data["tag"]!,
+                  beds: data["beds"]!,
+                  area: data["area"]!,
                 );
               },
             ),
@@ -262,34 +266,49 @@ final List<Map<String, String>> estatesData = [
     "rating": "4.8",
     "loc": "Sector 15, Hisar",
     "price": "230",
-    "tag": "Apartment"
+    "tag": "Apartment",
+    "image": "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
+    "beds": "3 BHK",
+    "area": "180 sq.m"
   },
   {
     "name": "The Aurelia Villa - Hisar",
     "rating": "4.9",
     "loc": "Rajguru Nagar, Hisar",
     "price": "520",
-    "tag": "Villa"
+    "tag": "Villa",
+    "image": "https://www.deccanproperties.com/assets/images/property_images/property2856.jpg",
+    "beds": "5 BHK",
+    "area": "400 sq.m"
   },
   {
     "name": "Mill Sper House (Hisar)",
     "rating": "4.7",
     "loc": "Model Town, Hisar",
     "price": "271",
-    "tag": "House"
+    "tag": "House",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_pWH24HG5pnZvjYuP5Z85ZYgT3cYMFdUXMw&s",
+    "beds": "4 BHK",
+    "area": "250 sq.m"
   },
   {
     "name": "Wings Tower Hisar",
     "rating": "4.6",
     "loc": "Camp Chowk, Hisar",
     "price": "220",
-    "tag": "Apartment"
+    "tag": "Apartment",
+    "image": "https://assets-news.housing.com/news/wp-content/uploads/2022/04/04144614/Types-of-plots-and-various-types-of-housing-plots-in-India-feature-compressed.jpg",
+    "beds": "2 BHK",
+    "area": "120 sq.m"
   },
   {
     "name": "Green Valley Residence",
     "rating": "4.7",
     "loc": "Hisar Cantt",
     "price": "350",
-    "tag": "Villa"
+    "tag": "Villa",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuDC_Szol-NA_sCgrIcS33Mkzklznk2UGY0Q&s",
+    "beds": "3 BHK",
+    "area": "210 sq.m"
   },
 ];

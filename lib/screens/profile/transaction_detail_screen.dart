@@ -17,12 +17,15 @@ class TransactionListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: Icon(IconlyLight.arrow_left_2),
+          onPressed: () => Get.back(),
+          icon: Icon(IconlyLight.arrow_left_2, color: Theme.of(context).iconTheme.color),
         ),
-        title: Text('All Transactions'),
+        title: Text('All Transactions', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 0,
       ),
       body: Padding(
         padding: EdgeInsets.all(12.w),
@@ -32,7 +35,7 @@ class TransactionListScreen extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Row(
@@ -41,13 +44,13 @@ class TransactionListScreen extends StatelessWidget {
                     width: 90.w,
                     child: Text(
                       'Date',
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                   ),
                   Expanded(
                     child: Text(
                       'Property',
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                   ),
                   SizedBox(
@@ -55,7 +58,7 @@ class TransactionListScreen extends StatelessWidget {
                     child: Text(
                       'Amount',
                       textAlign: TextAlign.right,
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                   ),
                   SizedBox(
@@ -63,7 +66,7 @@ class TransactionListScreen extends StatelessWidget {
                     child: Text(
                       'Type',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                   ),
                 ],
@@ -86,7 +89,7 @@ class TransactionListScreen extends StatelessWidget {
                         horizontal: 8.w,
                       ),
                       decoration: BoxDecoration(
-                        color: cardColor,
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Row(
@@ -103,7 +106,7 @@ class TransactionListScreen extends StatelessWidget {
                             child: Text(
                               '₹${t.amount}',
                               textAlign: TextAlign.right,
-                              style: TextStyle(fontWeight: FontWeight.w600),
+                              style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color),
                             ),
                           ),
                           SizedBox(
@@ -135,10 +138,17 @@ class TransactionDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-          leading: IconButton(onPressed: ()=>Navigator.pop(context), icon: Icon(IconlyLight.arrow_left_2)),
+        leading: IconButton(
+          onPressed: () => Get.back(),
+          icon: Icon(IconlyLight.arrow_left_2, color: Theme.of(context).iconTheme.color),
+        ),
 
-          title: Text('Transaction ${transaction.id}')),
+          title: Text('Transaction ${transaction.id}', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          elevation: 0,
+          ),
       body: Padding(
         padding: EdgeInsets.all(16.w),
         child: Column(
@@ -146,7 +156,7 @@ class TransactionDetailScreen extends StatelessWidget {
           children: [
             Text(
               transaction.property,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp, color: Theme.of(context).textTheme.bodyLarge?.color),
             ),
             SizedBox(height: 8.h),
             Row(
@@ -160,32 +170,32 @@ class TransactionDetailScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Amount', style: TextStyle(fontWeight: FontWeight.w700)),
-                Text('₹${transaction.amount}'),
+                Text('Amount', style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color)),
+                Text('₹${transaction.amount}', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
               ],
             ),
             SizedBox(height: 8.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Date', style: TextStyle(fontWeight: FontWeight.w700)),
-                Text(_fmtDate(transaction.date)),
+                Text('Date', style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color)),
+                Text(_fmtDate(transaction.date), style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
               ],
             ),
             SizedBox(height: 8.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Type', style: TextStyle(fontWeight: FontWeight.w700)),
-                Text(transaction.type),
+                Text('Type', style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color)),
+                Text(transaction.type, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
               ],
             ),
             SizedBox(height: 8.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Status', style: TextStyle(fontWeight: FontWeight.w700)),
-                Text(transaction.status),
+                Text('Status', style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color)),
+                Text(transaction.status, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
               ],
             ),
             SizedBox(height: 8.h),
@@ -194,9 +204,9 @@ class TransactionDetailScreen extends StatelessWidget {
               children: [
                 Text(
                   'Reference',
-                  style: TextStyle(fontWeight: FontWeight.w700),
+                  style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
                 ),
-                Text(transaction.reference),
+                Text(transaction.reference, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
               ],
             ),
             SizedBox(height: 16.h),

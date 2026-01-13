@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:realestate/screens/auth/login_options_screen.dart';
 
 import '../../constant/app_colors.dart';
+import '../../screens/widgets/helpers.dart';
 
 class OpeningScreen extends StatelessWidget {
   const OpeningScreen({super.key});
@@ -53,10 +54,7 @@ class OpeningScreen extends StatelessWidget {
               // Center logo/text
               Positioned.fill(
                 child: Center(
-                  child: Image.asset(
-                    "assets/images/logo.png",
-                    width: 200,
-                  ),
+                  child: Logoor(),
                 ),
               ),
 
@@ -175,11 +173,12 @@ class _OnboardingScreensState extends State<OnboardingScreens> {
   @override
   Widget build(BuildContext context) {
     // final Size s = MediaQuery.of(context).size; // not needed now since using ScreenUtil
+  
     return Scaffold(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white,
       body: SafeArea(
         child: Container(
-          color: Colors.white,
+          // color: Colors.white,
           child: Stack(
             children: [
               PageView.builder(
@@ -203,8 +202,8 @@ class _OnboardingScreensState extends State<OnboardingScreens> {
                                 Get.to(const LoginOptionScreen());
                               },
                               style: TextButton.styleFrom(
-                                backgroundColor: Colors.grey.shade200,
-                                foregroundColor: Colors.black,
+                                backgroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade800 : Colors.grey.shade200,
+                                foregroundColor: Theme.of(context).textTheme.bodyMedium?.color,
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 14.w, vertical: 8.h),
                                 shape: RoundedRectangleBorder(
@@ -288,7 +287,7 @@ class _OnboardingScreensState extends State<OnboardingScreens> {
                                                     width: 44.w,
                                                     height: 44.w,
                                                     decoration: BoxDecoration(
-                                                      color: Colors.white,
+                                                      color: Theme.of(context).cardColor,
                                                       shape: BoxShape.circle,
                                                       boxShadow: [
                                                         BoxShadow(
@@ -302,7 +301,7 @@ class _OnboardingScreensState extends State<OnboardingScreens> {
                                                     child: Icon(
                                                       Icons.arrow_back,
                                                       size: 20.sp,
-                                                      color: Colors.black87,
+                                                      color: Theme.of(context).iconTheme.color,
                                                     ),
                                                   ),
                                                 ),
@@ -365,12 +364,12 @@ class _OnboardingScreensState extends State<OnboardingScreens> {
       spans.add(TextSpan(
         text: data.titleParts[0],
         style: TextStyle(
-            color: Colors.black87, fontSize: 28.sp, height: 1.2.h),
+            color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 28.sp, height: 1.2.h),
       ));
       spans.add(TextSpan(
         text: data.titleParts[1],
         style: TextStyle(
-            color: const Color(0xFF14335D),
+            color: secondary,
             fontSize: 28.sp,
             fontWeight: FontWeight.w700,
             height: 1.2.h),
@@ -379,12 +378,12 @@ class _OnboardingScreensState extends State<OnboardingScreens> {
       spans.add(TextSpan(
         text: data.titleParts[0],
         style: TextStyle(
-            color: Colors.black87, fontSize: 28.sp, height: 1.2.h),
+            color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 28.sp, height: 1.2.h),
       ));
       spans.add(TextSpan(
         text: data.titleParts[1],
         style: TextStyle(
-            color: const Color(0xFF14335D),
+            color: secondary,
             fontSize: 28.sp,
             fontWeight: FontWeight.w700,
             height: 1.2.h),
@@ -392,7 +391,7 @@ class _OnboardingScreensState extends State<OnboardingScreens> {
       spans.add(TextSpan(
         text: data.titleParts[2],
         style: TextStyle(
-            color: Colors.black87, fontSize: 28.sp, height: 1.2.h),
+            color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 28.sp, height: 1.2.h),
       ));
     }
 

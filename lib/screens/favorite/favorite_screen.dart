@@ -179,27 +179,27 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     final horizontalPadding = 14.0;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         title: Text(
           "Saved Properties",
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: Colors.black87,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(IconlyLight.search, color: Colors.black87),
+            icon: Icon(IconlyLight.search, color: Theme.of(context).iconTheme.color),
             onPressed: () {
               // focus into search field (we use bottom search bar)
             },
           ),
           PopupMenuButton<String>(
-            icon: Icon(IconlyLight.more_circle, color: Colors.black87),
+            icon: Icon(IconlyLight.more_circle, color: Theme.of(context).iconTheme.color),
             onSelected: (v) {
               // demo actions
               if (v == 'Clear') {
@@ -493,14 +493,18 @@ class _SearchField extends StatelessWidget {
       height: 50,
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
-        color: cardColor,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.transparent),
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark 
+            ? Colors.grey.shade800 
+            : Colors.transparent
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(IconlyLight.search, color: Colors.grey[600]),
+          Icon(IconlyLight.search, color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[400] : Colors.grey[600]),
           const SizedBox(width: 8),
           Expanded(
             child: TextField(
@@ -590,10 +594,19 @@ class _SavedPropertyCard extends StatelessWidget {
     return Container(
       height: cardHeight,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark 
+            ? Colors.grey.shade800 
+            : Colors.grey.shade100
+        ),
         boxShadow: [
-          BoxShadow(color: Colors.white, blurRadius: 8, offset: Offset(0, 6)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04), 
+            blurRadius: 8, 
+            offset: Offset(0, 6)
+          ),
         ],
       ),
       child: Row(
@@ -641,7 +654,7 @@ class _SavedPropertyCard extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: secondary,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -667,13 +680,13 @@ class _SavedPropertyCard extends StatelessWidget {
                       Icon(
                         IconlyLight.location,
                         size: 16,
-                        color: Colors.grey[600],
+                        color: Colors.grey[500],
                       ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           location,
-                          style: TextStyle(color: Colors.grey[600]),
+                          style: TextStyle(color: Colors.grey[500]),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -684,7 +697,7 @@ class _SavedPropertyCard extends StatelessWidget {
                     children: [
                       Text(
                         price,
-                        style: TextStyle(fontWeight: FontWeight.w700),
+                        style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
                       ),
                       // Row(
                       //   children: [
@@ -729,7 +742,7 @@ class _SavedPropertyGridCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: cardColor,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -758,7 +771,7 @@ class _SavedPropertyGridCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: secondary,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:realestate/Routes/appRoutes.dart';
 
 import '../../constant/app_colors.dart';
 import 'locations_details_screen.dart';
@@ -10,26 +11,26 @@ class TopLocationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 12),
           child: Center(
             child: GestureDetector(
-              onTap: () => Navigator.pop(context),
+              onTap: () => Get.back(),
               child: Container(
                 width: 44,
                 height: 44,
                 decoration:  BoxDecoration(
-                  color: cardColor,
+                  color: Theme.of(context).cardColor,
                   shape: BoxShape.circle,
                 ),
                 child:  Center(
                   child: Icon(
                     Icons.arrow_back_ios_new_rounded,
-                    color: secondary,  // exact dark blue
+                    color: Theme.of(context).iconTheme.color,
                     size: 18,
                   ),
                 ),
@@ -51,7 +52,7 @@ class TopLocationsScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
-                color: secondary,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
             const SizedBox(height: 6),
@@ -59,7 +60,7 @@ class TopLocationsScreen extends StatelessWidget {
               "Our recommended real estates exclusive for you.",
               style: TextStyle(
                 fontSize: 15,
-                color: Colors.grey.shade600,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
               ),
             ),
             const SizedBox(height: 30),
@@ -104,12 +105,15 @@ class _LocationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: (){
-        Get.to(LocationDetailScreen(
-          locationName: title,
-          rank: rank,
-          heroImage: imageUrl,
-          subtitle: "Our recommended real estates in $title",
-        ));
+        Get.toNamed(
+          AppRoutes.locationDetail,
+          arguments: {
+            'locationName': title,
+            'rank': rank,
+            'heroImage': imageUrl,
+            'subtitle': "Our recommended real estates in $title",
+          },
+        );
       },
       child: Container(
         decoration: BoxDecoration(

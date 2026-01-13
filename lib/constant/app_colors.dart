@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 
-  Color primary = Color(0xFF8BC83F);
-Color secondary = Color(0xFF143C34);
+  Color primary = Color(0xFFD9BAA0);
+Color secondary = Color(0xFFB08D57);
+Color scaffoldColor = Color(0xFF090909);
   Color cardColor = secondary.withOpacity(0.1);
   Color grey = Color(0xFFFFFFFF);
 const Color _kPrimary = Color(0xFF0B6EFD);

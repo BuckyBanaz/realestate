@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:realestate/Routes/appRoutes.dart';
+import 'package:realestate/domain/app/local_storage.dart';
 import '../constant/app_colors.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -41,7 +43,13 @@ class _SplashScreenState extends State<SplashScreen>
     // navigate after 3 seconds
     Timer(const Duration(seconds: 3), () {
       if (!mounted) return;
-      Get.offAllNamed(AppRoutes.login);
+      
+      final token = LocalStorage().getToken();
+      if (token != null && token.isNotEmpty) {
+         Get.offAllNamed(AppRoutes.home);
+      } else {
+         Get.offAllNamed(AppRoutes.login);
+      }
     });
   }
 
@@ -54,15 +62,16 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: primary,
+      backgroundColor: scaffoldColor,
       body: SafeArea(
         child: Stack(
           children: [
             // Logo centered
-            const Center(
-              child: Image(
-                image: AssetImage("assets/images/logo.png"),
-                width: 150,
+            // Logo centered
+            Center(
+              child: Transform.scale(
+                scale: 2.0,
+                child: const Logoor(animate: true),
               ),
             ),
 
