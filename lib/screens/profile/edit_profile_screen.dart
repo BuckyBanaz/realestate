@@ -24,81 +24,87 @@ class EditProfileScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         title: Text("Edit Profile"),
       ),
-      body: SafeArea(child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            Center(child: const CircleAvatar(radius: 80, backgroundImage: NetworkImage("https://i.pravatar.cc/300?u=mathew"))),
-            SizedBox(height: 30,),
-            // Email field with outline + inside icon right
-            TextFormField(
-              controller: _emailController,
-              keyboardType: TextInputType.name,
-              decoration: InputDecoration(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              Center(
+                child: CircleAvatar(
+                  radius: 50,
+                  child: const Icon(IconlyLight.profile,size: 30,),
+                  backgroundColor: cardColor,
+                  // backgroundImage: NetworkImage("https://i.pravatar.cc/300?u=mathew"),
+                ),
+              ),
+              SizedBox(height: 30),
+              // Email field with outline + inside icon right
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.name,
+                decoration: InputDecoration(
                   hintText: 'Jhone Doe',
-                  suffixIcon: Icon( IconlyLight.message,color: secondary,)
+                  suffixIcon: Icon(IconlyLight.message, color: secondary),
+                ),
+                style: const TextStyle(fontSize: 14),
               ),
-              style: const TextStyle(fontSize: 14),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            // Email field with outline + inside icon right
-            TextFormField(
-              controller: _emailController,
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
+              // Email field with outline + inside icon right
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
                   hintText: '+62 112-3288-9111 ',
-                  suffixIcon: Icon( IconlyLight.call,color: secondary,)
+                  suffixIcon: Icon(IconlyLight.call, color: secondary),
+                ),
+                style: const TextStyle(fontSize: 14),
               ),
-              style: const TextStyle(fontSize: 14),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            // Email field with outline + inside icon right
-            TextFormField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                  hintText: 'jonathan@email.com',
-                  suffixIcon: Icon( IconlyLight.message,color: secondary,)
+              // Email field with outline + inside icon right
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  hintText: 'chetan@email.com',
+                  suffixIcon: Icon(IconlyLight.message, color: secondary),
+                ),
+                style: const TextStyle(fontSize: 14),
               ),
-              style: const TextStyle(fontSize: 14),
-            ),
-            Spacer(),
-            // Login button
-            Center(
-              child: SizedBox(
-                width: 200,
-                height: 63,
+              Spacer(),
+              // Login button
+              Center(
+                child: SizedBox(
+                  width: 200,
+                  height: 63,
 
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Get.to(RegisterScreen());
-                  },
-                  style: ElevatedButton.styleFrom(
-                    // backgroundColor: const Color(0xFF8BD63A), // green
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Get.to(RegisterScreen());
+                    },
+                    style: ElevatedButton.styleFrom(
+                      // backgroundColor: const Color(0xFF8BD63A), // green
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    'Edit',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                    child: const Text(
+                      'Edit',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-
-
-          ],
+            ],
+          ),
         ),
-      )),
+      ),
     );
   }
-
 }

@@ -10,11 +10,10 @@ class AppTheme {
     scaffoldBackgroundColor: Colors.white,
 
     // 👇 Calibri alternative font (Carlito)
-    textTheme: GoogleFonts.carlitoTextTheme(),
-
+    textTheme: GoogleFonts.carlitoTextTheme() ,
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.white,
-      primary: secondary,
+      primary: primary,
       secondary: secondary,
     ),
 
@@ -25,9 +24,9 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
         ),
         padding: const EdgeInsets.symmetric(vertical: 16),
-        textStyle: GoogleFonts.carlito(
+        textStyle: GoogleFonts.inter(
           fontSize: 16,
-          fontWeight: FontWeight.w600,
+          color: Colors.white
         ),
       ),
     ),
@@ -45,7 +44,7 @@ class AppTheme {
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: cardColor,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 30),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: primary, width: 3.5),
@@ -56,9 +55,9 @@ class AppTheme {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: secondary, width: 1.5),
+        borderSide: BorderSide(color: primary, width: 1.5),
       ),
-      hintStyle: GoogleFonts.carlito(color: secondary),
+      hintStyle: TextStyle(color: secondary),
     ),
   );
 }

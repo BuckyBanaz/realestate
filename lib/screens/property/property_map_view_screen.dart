@@ -30,8 +30,8 @@ class PropertyMapViewScreen extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             height: double.infinity,
-            child: Image.network(
-              "https://t4.ftcdn.net/jpg/03/38/37/73/360_F_338377354_1Y6oyGrvaae2kqY3YS07b6X4NDKZntne.jpg",
+            child: Image.asset(
+              "assets/images/download.jpg",
               fit: BoxFit.cover,
             ),
           ),

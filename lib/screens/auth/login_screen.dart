@@ -7,7 +7,9 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/screens/auth/register_screen.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 
 import '../../constant/app_colors.dart';
 
@@ -44,112 +46,176 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Container(
           color: Colors.white,
-          padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 40.h),
+          padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 10.h),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Title
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Let's ",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 22.sp,
-                          fontWeight: FontWeight.w600,
+                SizedBox(height: 20.h),
+            stagger(
+              0,
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  width: 60.w,
+                  height: 60.h,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: primary,  // ✔ allowed inside decoration
+                  ),
+                  child: Center(
+                    child: SizedBox(
+                      width: 40.w,
+                      height:30.h,
+                      child: Image.asset(
+                        "assets/images/logo.png",
+                        fit: BoxFit.fill,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 30.h,),
+
+                // Title + Subtitle
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    stagger(
+                      1, RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "",
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 24.sp,
+                              ),
+                            ),
+                            TextSpan(
+                              text: "Sign In",
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 23.sp,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      TextSpan(
-                        text: "Sign In",
+                    ),
+                    // SizedBox(height: 0.6.h),
+                    // Container(
+                    //   width: 20.w,
+                    //   height: 5.h,
+                    //   decoration: BoxDecoration(
+                    //     color:primary,
+                    //     borderRadius: BorderRadius.circular(12),
+                    //   ),
+                    // ),
+
+                    SizedBox(height: 6.h),
+
+                    stagger(
+                      2, Text(
+                        "Welcome back! Please login to your account.",
+                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: secondary,
-                          fontSize: 22.sp,
-                          fontWeight: FontWeight.w800,
+                          color: Colors.grey[600],
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-
-                SizedBox(height: 8.h),
-
-                // small subtitle
-                Text(
-                  'quis nostrud exercitation ullamco laboris nisi ut',
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 14.sp,
-                  ),
-                ),
-
-                SizedBox(height: 40.h),
-
-                // Email field with outline + inside icon right
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    hintText: 'jonathan@email.com',
-                    suffixIcon: Icon(
-                      IconlyLight.message,
-                      color: secondary,
-                      size: 20.sp,
                     ),
-                    contentPadding:
-                    EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: cardColor,
-                  ),
-                  style: TextStyle(fontSize: 14.sp),
+                  ],
                 ),
+
 
                 SizedBox(height: 20.h),
 
-                // Password field card (rounded, subtle bg)
-                Container(
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(12.r),
+                // Email field with outline + inside icon right
+                stagger(
+                  3,TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      hintText: 'Email / Phone Number',
+                      suffixIcon: Icon(
+                        IconlyLight.message,
+                        color: secondary,
+                        size: 20.sp,
+                      ),
+                      contentPadding:
+                      EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: cardColor,
+                    ),
+                    style: TextStyle(fontSize: 14.sp),
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  child: Row(
+                ),
+
+                SizedBox(height: 10.h),
+
+                // Password field card (rounded, subtle bg)
+                stagger(
+                  4, TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscure,
+                    decoration: InputDecoration(
+
+                      suffixIcon: Icon(
+                        _obscure ? IconlyLight.lock:  IconlyLight.unlock,
+                        color: secondary,
+                        size: 20.sp,
+                      ),
+                      hintText: '••••••••',
+                      filled: true,
+                      fillColor: cardColor,
+                      contentPadding:
+                      EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+
+                    style: TextStyle(letterSpacing: 4.0, fontSize: 14.sp),
+                  ),
+                ),
+
+                SizedBox(height: 10.h),
+
+                // small row: forgot password & show password
+                stagger(
+                  5, Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _passwordController,
-                          obscureText: _obscure,
-                          decoration: InputDecoration(
-                            hintText: '••••••••',
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(vertical: 18.h),
+                      GestureDetector(
+                       onTap: _showForgotPasswordDialog,
+                        child: Text(
+                          'Forgot password?',
+                          style: TextStyle(
+                            color: secondary,
+                            fontWeight: FontWeight.w200,
+                            fontSize: 14.sp,
                           ),
-                          style: TextStyle(letterSpacing: 4.0, fontSize: 14.sp),
                         ),
                       ),
                       GestureDetector(
                         onTap: _togglePassword,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.w),
-                          child: Text(
-                            _obscure ? 'Show' : 'Hide',
-                            style: TextStyle(
-                              color: secondary,
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
+                        child: Text(
+                          _obscure ? 'Show password' : 'Hide password',
+                          style: TextStyle(
+                            color: secondary,
+                            fontWeight: FontWeight.w200,
+                            fontSize: 14.sp,
                           ),
                         ),
-                      ),
-                      Icon(
-                        IconlyLight.lock,
-                        color: secondary,
-                        size: 20.sp,
                       ),
                     ],
                   ),
@@ -157,177 +223,123 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 SizedBox(height: 20.h),
 
-                // small row: forgot password & show password
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                     onTap: _showForgotPasswordDialog,
-                      child: Text(
-                        'Forgot password?',
-                        style: TextStyle(
-                          color: secondary,
-                          fontWeight: FontWeight.w200,
-                          fontSize: 14.sp,
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: _togglePassword,
-                      child: Text(
-                        _obscure ? 'Show password' : 'Hide password',
-                        style: TextStyle(
-                          color: secondary,
-                          fontWeight: FontWeight.w200,
-                          fontSize: 14.sp,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: 30.h),
-
                 // Login button
-                Center(
-                  child: SizedBox(
-                    width: 150.w,
-                    height: 50.h,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Get.to(const RegisterScreen());
-                      },
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
+                stagger(
+                  6, Center(
+                    child: SizedBox(
+                      width: 150.w,
+                      height: 50.h,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Get.toNamed(AppRoutes.signup);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          backgroundColor: primary,
                         ),
-                        backgroundColor: primary,
-                      ),
-                      child: Text(
-                        'Login',
-                        style: TextStyle(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w700,
+                        child: Text(
+                          'Login',
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
 
-                SizedBox(height: 18.h),
+                SizedBox(height: 10.h),
 
                 // OR divider
-                Row(
-                  children: [
-                    Expanded(
-                      child: Divider(color: Colors.grey[300], thickness: 1.h),
-                    ),
-                    SizedBox(width: 10.w),
-                    Text(
-                      'OR',
-                      style: TextStyle(color: Colors.grey[500], fontSize: 12.sp),
-                    ),
-                    SizedBox(width: 10.w),
-                    Expanded(
-                      child: Divider(color: Colors.grey[300], thickness: 1.h),
-                    ),
-                  ],
+                stagger(
+                  7, Row(
+                    children: [
+                      Expanded(
+                        child: Divider(color: Colors.grey[300], thickness: 1.h),
+                      ),
+                      SizedBox(width: 10.w),
+                      Text(
+                        'OR',
+                        style: TextStyle(color: Colors.grey[500], fontSize: 12.sp),
+                      ),
+                      SizedBox(width: 10.w),
+                      Expanded(
+                        child: Divider(color: Colors.grey[300], thickness: 1.h),
+                      ),
+                    ],
+                  ),
                 ),
 
-                SizedBox(height: 18.h),
+                SizedBox(height: 10.h),
 
                 // Social buttons row (three rounded boxes)
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 70.h,
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(vertical: 12.h),
-                            backgroundColor: cardColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25.r),
-                            ),
-                            side: BorderSide(color: Colors.transparent),
-                          ),
-                          child: Image.asset(
-                            "assets/images/google_icon.png",
-                            width: 22.w,
-                            height: 22.h,
-                          ),
+                stagger(
+                  8, Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _circleSocialButton(
+                        child: Image.asset(
+                          "assets/images/google_icon.png",
+                          width: 22.w,
+                          height: 22.h,
                         ),
+                        onTap: () {},
                       ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: SizedBox(
-                        height: 70.h,
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(vertical: 12.h),
-                            backgroundColor: cardColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25.r),
-                            ),
-                            side: BorderSide(color: Colors.transparent),
-                          ),
-                          child: Icon(FontAwesomeIcons.facebook,
-                              size: 22.sp, color: Colors.blueAccent),
+                      SizedBox(width: 10.w,),
+                      _circleSocialButton(
+                        child: Icon(
+                          FontAwesomeIcons.facebookF,
+                          size: 22.sp,
+                          color: Colors.blueAccent,
                         ),
+                        onTap: () {},
                       ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: SizedBox(
-                        height: 70.h,
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(vertical: 12.h),
-                            backgroundColor: cardColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25.r),
-                            ),
-                            side: BorderSide(color: Colors.transparent),
-                          ),
-                          child:
-                          Icon(FontAwesomeIcons.apple, size: 22.sp, color: Colors.black),
+                      SizedBox(width: 10.w,),
+                      _circleSocialButton(
+                        child: Icon(
+                          FontAwesomeIcons.apple,
+                          size: 22.sp,
+                          color: Colors.black,
                         ),
+                        onTap: () {},
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
 
-                SizedBox(height: 22.h),
+
+                SizedBox(height: 20.h),
 
                 // bottom register text
-                GestureDetector(
-                  onTap: () {
-                    Get.to(const RegisterScreen());
-                  },
-                  child: Center(
-                    child: Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        Text(
-                          "Don't have an account? ",
-                          style: TextStyle(color: Colors.grey[600], fontSize: 14.sp),
-                        ),
-                        Text(
-                          'Register',
-                          style: TextStyle(
-                            color: secondary,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14.sp,
+                stagger(
+                  9, GestureDetector(
+                    onTap: () {
+                      Get.toNamed(AppRoutes.signup);
+                    },
+                    child: Center(
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          Text(
+                            "Don't have an account? ",
+                            style: TextStyle(color: Colors.grey[600], fontSize: 12.sp),
                           ),
-                        ),
-                      ],
+                          Text(
+                            'Register',
+                            style: TextStyle(
+                              color: secondary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12.sp,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -342,6 +354,24 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ... your existing code
+  Widget _circleSocialButton({required Widget child, required VoidCallback onTap}) {
+    return Center(
+      child: SizedBox(
+        height: 50.h,
+        width: 50.h, // Circular, so width = height
+        child: OutlinedButton(
+          onPressed: onTap,
+          style: OutlinedButton.styleFrom(
+            shape: const CircleBorder(),
+            backgroundColor: cardColor,
+            padding: EdgeInsets.zero,
+            side: BorderSide(color: Colors.transparent),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
 
   // Yeh function add kar de
   void _showForgotPasswordDialog() {

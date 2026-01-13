@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="160" viewBox="0 0 240 160">
+  <rect width="240" height="160" rx="16" fill="#FFFFFF"/>
+  <g transform="translate(36,34)">
+    <!-- fields -->
+    <rect x="0" y="0" width="40" height="56" rx="4" fill="#8BC83F" />
+    <rect x="46" y="0" width="40" height="56" rx="4" fill="#8BC83F" />
+    <rect x="92" y="0" width="40" height="56" rx="4" fill="#143C34" />
+    <!-- plant icon -->
+    <path d="M170 30 C166 18, 152 18, 150 30 C148 18, 134 18, 130 30 C138 38, 154 36, 170 30 Z" fill="#8BC83F"/>
+    <rect x="164" y="44" width="6" height="18" rx="3" fill="#143C34"/>
+  </g>
+</svg>

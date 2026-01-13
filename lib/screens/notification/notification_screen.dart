@@ -8,55 +8,59 @@ import 'package:realestate/constant/app_colors.dart';
 class NotificationController extends GetxController {
   var selectedTab = 0.obs; // 0=All, 1=Review, 2=Sold, 3=House
 
-  final List<NotificationItem> allNotifications = [
+  // Use RxList for GetX reactivity
+  var allNotifications = <NotificationItem>[
     // Today
     NotificationItem(
       id: 1,
       avatar: "https://i.pravatar.cc/150?img=1",
-      name: "Emmet Perry",
-      message: "Just messaged you. Check the message in message tab.",
+      name: "Chetan Sharma",
+      message: "Payment due of ₹2,500. Please pay to avoid penalty.",
       timeAgo: "10 mins ago",
-      type: NotifType.message,
+      type: NotifType.payment,
       isToday: true,
     ),
     NotificationItem(
       id: 2,
       avatar: "https://i.pravatar.cc/150?img=2",
-      name: "Geraldo",
-      message: "Just giving 5 Star review on your listing Fairview Apartment",
+      name: "Chetan Sharma",
+      message: "Payment due of ₹4,750 for maintenance. Due in 3 days.",
       timeAgo: "40 mins ago",
-      propertyImage: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
-      type: NotifType.review,
+      propertyImage:
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
+      type: NotifType.payment,
       isToday: true,
     ),
     NotificationItem(
       id: 3,
       avatar: "https://i.pravatar.cc/150?img=3",
-      name: "Walter Lindsey",
-      message: "Just buy your listing Schoolview House",
+      name: "Chetan Sharma",
+      message: "Payment due of ₹12,000 for monthly rent. Pay now.",
       timeAgo: "4 hours ago",
-      propertyImage: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800",
-      type: NotifType.sold,
+      propertyImage:
+      "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800",
+      type: NotifType.payment,
       isToday: true,
     ),
     // Older
     NotificationItem(
       id: 4,
       avatar: "https://i.pravatar.cc/150?img=5",
-      name: "Velma Cole",
-      message: "Just favorited your listing Schoolview House",
+      name: "Chetan Sharma",
+      message: "Payment due of ₹850 for parking. Please clear the dues.",
       timeAgo: "2 Days ago",
-      propertyImage: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800",
-      type: NotifType.favorite,
+      propertyImage:
+      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800",
+      type: NotifType.payment,
       isToday: false,
     ),
     NotificationItem(
       id: 5,
       avatar: "https://i.pravatar.cc/150?img=7",
-      name: "Sarah Johnson",
-      message: "Just messaged you about Downtown Villa",
+      name: "Chetan Sharma",
+      message: "Payment due of ₹3,200. Last reminder sent.",
       timeAgo: "3 Days ago",
-      type: NotifType.message,
+      type: NotifType.payment,
       isToday: false,
     ),
   ].obs;
@@ -85,7 +89,7 @@ class NotificationItem {
   });
 }
 
-enum NotifType { message, review, sold, favorite }
+enum NotifType { message, review, sold, favorite, payment }
 
 // ====================== MAIN SCREEN ======================
 class NotificationScreen extends StatelessWidget {
@@ -104,35 +108,9 @@ class NotificationScreen extends StatelessWidget {
           padding: const EdgeInsets.only(left: 16),
           child: _circleIconButton(Icons.arrow_back_ios_new_rounded, () => Navigator.pop(context)),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: _circleIconButton(IconlyLight.delete, () {}),
-          ),
-        ],
         title: Text(
           "Notification",
           style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(100),
-          child: Column(
-            children: [
-              // Tabs: All, Review, Sold, House
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Obx(() => Row(
-                  children: [
-                    _tabButton("All", 0),
-                    _tabButton("Review", 1),
-                    _tabButton("Sold", 2),
-                    _tabButton("House", 3),
-                  ],
-                )),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
         ),
       ),
       body: Obx(() {
@@ -177,36 +155,6 @@ class NotificationScreen extends StatelessWidget {
     );
   }
 
-  Widget _tabButton(String title, int index) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => controller.selectedTab.value = index,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            decoration: BoxDecoration(
-              color: controller.selectedTab.value == index
-                  ? secondary
-                  : cardColor,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: controller.selectedTab.value == index
-                    ? Colors.white
-                    : Colors.grey[600],
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _circleIconButton(IconData icon, VoidCallback onTap) {
     return GestureDetector(
@@ -224,7 +172,6 @@ class NotificationScreen extends StatelessWidget {
 }
 
 // ====================== NOTIFICATION TILE ======================
-// ====================== NOTIFICATION TILE WITH SWIPE DELETE ======================
 class NotificationTile extends StatelessWidget {
   final NotificationItem item;
 
@@ -255,16 +202,6 @@ class NotificationTile extends StatelessWidget {
           Get.find<NotificationController>()
               .allNotifications
               .removeWhere((e) => e.id == item.id);
-
-          Get.snackbar(
-            "Deleted",
-            "Notification removed",
-            backgroundColor: Colors.grey[800],
-            colorText: Colors.white,
-            snackPosition: SnackPosition.BOTTOM,
-            margin: const EdgeInsets.all(20),
-            borderRadius: 12,
-          );
         },
         child: Container(
           padding: const EdgeInsets.all(16),
@@ -285,7 +222,9 @@ class NotificationTile extends StatelessWidget {
               // Avatar
               CircleAvatar(
                 radius: 26,
-                backgroundImage: NetworkImage(item.avatar),
+                child: Icon(IconlyLight.profile),
+                backgroundColor: cardColor,
+                // backgroundImage: NetworkImage(item.avatar),
               ),
               const SizedBox(width: 14),
 

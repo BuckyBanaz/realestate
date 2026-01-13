@@ -1,47 +1,196 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
+import 'package:realestate/screens/permission/permisson_screen.dart';
+import 'package:realestate/screens/profile/documents_screen.dart';
+import 'package:realestate/screens/profile/property_transaction_detail_screen.dart';
+import 'package:realestate/screens/profile/transaction_detail_screen.dart';
 
 import '../../constant/app_colors.dart';
 import 'edit_profile_screen.dart';
 
-// IMPORTANT: Initialize ScreenUtil in your main.dart like:
-// ScreenUtilInit(
-//   designSize: Size(375, 812),
-//   builder: (_, __) => const MyApp(),
-// );
-
 class ProfileController extends GetxController {
-  var selectedTab = 0.obs; // 0=Transaction, 1=Listings, 2=Sold
+  var selectedTab = 0.obs; // 0=Transaction, 1=my_property, 2=payments
 
-  final List<Property> listings = [
-    Property("Fairview Apartment", "370", "Jakarta, Indonesia", "4.9", "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800"),
-    Property("Shoolview House", "320", "Jakarta, Indonesia", "4.8", "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800"),
-    Property("Greenwood Villa", "450", "Bali, Indonesia", "5.0", "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800"),
+  // Purchased / owned properties
+  final List<TransactionModel> transactions = [
+    TransactionModel(
+      id: 'TXN001',
+      property: 'Plot No. 21 Shree Shyam Kunj Phase 5',
+      location: 'Raipur Road, Hisar',
+      date: DateTime(2025, 11, 24),
+      amount: 230000,
+      type: 'Received',
+      status: 'Completed',
+      reference: 'REF-20251124-001',
+      image:
+          'https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg',
+    ),
+    TransactionModel(
+      id: 'TXN002',
+      property: 'Plot No. 78 Galaxy Residency',
+      location: 'Sector 12, Hisar',
+      date: DateTime(2025, 11, 18),
+      amount: 520000,
+      type: 'Received',
+      status: 'Completed',
+      reference: 'REF-20251118-002',
+      image:
+          'https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg',
+    ),
+    TransactionModel(
+      id: 'TXN003',
+      property: 'Block A - Park View Apartment',
+      location: 'MG Road, Hisar',
+      date: DateTime(2025, 10, 29),
+      amount: 310000,
+      type: 'Paid',
+      status: 'Pending',
+      reference: 'REF-20251029-003',
+      image:
+          'https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg',
+    ),
+    // more dummy transactions for the View All screen
+    TransactionModel(
+      id: 'TXN004',
+      property: 'Plot No. 9 Sunny Acres',
+      location: 'Ring Road, Hisar',
+      date: DateTime(2025, 9, 5),
+      amount: 125000,
+      type: 'Received',
+      status: 'Completed',
+      reference: 'REF-20250905-004',
+      image:
+          'https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg',
+    ),
+    TransactionModel(
+      id: 'TXN005',
+      property: 'Shop No. 12 Market Plaza',
+      location: 'Old Bazar, Hisar',
+      date: DateTime(2025, 8, 23),
+      amount: 45000,
+      type: 'Paid',
+      status: 'Completed',
+      reference: 'REF-20250823-005',
+      image:
+          'https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg',
+    ),
+  ];
+  // Upcoming payments (scheduled / due)
+  final List<Payment> upcomingPayments = [
+    Payment(
+      "Plot No. 21 Shree Shyam Kunj Phase 5",
+      "Raipur Road, Hisar",
+      "Dec 05, 2025",
+      230000,
+      false,
+    ),
+    Payment(
+      "hree Shyam Kunj Phase 5 Plot",
+      "Raipur Road, Hisar",
+      "Dec 20, 2025",
+      520000,
+      false,
+    ),
   ];
 
-  final List<Property> sold = [
-    Property("Bridgeland House", "520", "Semarang", "4.7", "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800"),
-    Property("Palm Spring", "680", "Bandung", "4.9", "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800"),
+  // Past payments
+  final List<Payment> pastPayments = [
+    Payment(
+      "Plot No. 21 Shree Shyam Kunj Phase 5",
+      "Raipur Road, Hisar",
+      "Nov 01, 2025",
+      89000,
+      true,
+    ),
+    Payment(
+      "Security Deposit - Shree Shyam Kunj Plot",
+      "Raipur Road, Hisar",
+      "Oct 10, 2025",
+      3290,
+      true,
+    ),
   ];
 
-  final List<Transaction> transactions = [
-    Transaction("Wings Tower", "Rent", "November 21, 2021", true),
-    Transaction("Bridgeland Modern House", "Rent", "December 17, 2021", true),
+  // Transactions (sale/rent actions) with location & date & image
+  final List<Property> my_property = [
+    Property(
+      "Plot No. 21 Shree Shyam Kunj Phase 5",
+      "Raipur Road, Hisar",
+      "Sale",
+      "January 10, 2025",
+      true,
+      "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
+    ),
+    Property(
+      "Plot No. 21 Shree Shyam Kunj Phase 5",
+      "Raipur Road, Hisar",
+      "Rent",
+      "January 05, 2025",
+      true,
+      "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
+    ),
+    Property(
+      "Plot No. 21 Shree Shyam Kunj Phase 5",
+      "Raipur Road, Hisar",
+      "Booking",
+      "September 15, 2025",
+      true,
+      "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
+    ),
   ];
+}
+
+class TransactionModel {
+  final String id;
+  final String property;
+  final String location;
+  final DateTime date;
+  final num amount;
+  final String type; // "Received" / "Paid"
+  final String status; // "Completed" / "Pending"
+  final String reference;
+  final String image;
+
+  TransactionModel({
+    required this.id,
+    required this.property,
+    required this.location,
+    required this.date,
+    required this.amount,
+    required this.type,
+    required this.status,
+    required this.reference,
+    required this.image,
+  });
 }
 
 class Property {
-  final String name, price, location, rating, image;
-  Property(this.name, this.price, this.location, this.rating, this.image);
+  final String title;
+  final String location;
+  final String tag; // Sale / Rent / Booking
+  final String date;
+  final bool completed;
+  final String image; // new
+
+  Property(
+    this.title,
+    this.location,
+    this.tag,
+    this.date,
+    this.completed,
+    this.image,
+  );
 }
 
-class Transaction {
-  final String title, tag, date;
-  final bool completed;
-  Transaction(this.title, this.tag, this.date, this.completed);
+class Payment {
+  final String title;
+  final String location;
+  final String date;
+  final num amount;
+  final bool paid;
+  Payment(this.title, this.location, this.date, this.amount, this.paid);
 }
 
 // ====================== PROFILE SCREEN (RESPONSIVE) ======================
@@ -54,11 +203,17 @@ class ProfileScreen extends StatelessWidget {
     final ctrl = Get.put(ProfileController());
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        actions: [IconButton(icon: Icon(IconlyLight.setting, color: Colors.black87), onPressed: () {})],
+        actions: [
+          IconButton(
+            icon: Icon(IconlyLight.document, color: Colors.black87),
+            onPressed: () => Get.to(DocumentsScreen()),
+          ),
+          IconButton(
+            icon: Icon(IconlyLight.setting, color: Colors.black87),
+            onPressed: () => Get.to(PermissionsScreen()),
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -69,18 +224,18 @@ class ProfileScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _buildHeader(context),
-                SizedBox(height: 16.h),
-                _buildStatsRow(),
+                // SizedBox(height: 16.h),
+                // _buildStatsRow(),
                 SizedBox(height: 18.h),
                 _buildTabs(ctrl),
                 SizedBox(height: 18.h),
                 Obx(() {
                   if (ctrl.selectedTab.value == 0) {
-                    return _buildTransactions(ctrl);
+                    return _buildMyProperties(ctrl);
                   } else if (ctrl.selectedTab.value == 1) {
-                    return _buildListings(ctrl, "${ctrl.listings.length} listings");
+                    return _buildTransactionsSummary(ctrl);
                   } else {
-                    return _buildListings(ctrl, "${ctrl.sold.length} sold", isSold: true);
+                    return _buildPaymentsSection(ctrl);
                   }
                 }),
                 SizedBox(height: 24.h),
@@ -101,44 +256,41 @@ class ProfileScreen extends StatelessWidget {
           alignment: Alignment.bottomRight,
           children: [
             CircleAvatar(
-              radius: avatarSize / 2,
-              backgroundImage: NetworkImage("https://i.pravatar.cc/300?u=mathew"),
+              radius: avatarSize / 2.5,
+              child: Icon(IconlyLight.profile, size: 30),
+              backgroundColor: Colors.grey.shade300,
+              // backgroundImage: NetworkImage("https://i.pravatar.cc/300?u=mathew"),
             ),
             GestureDetector(
               onTap: () => Get.to(EditProfileScreen()),
               child: Container(
                 padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(color: primary, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8, offset: Offset(0, 4))]),
-                child: Icon(IconlyLight.edit, size: 20.w, color: Colors.white),
+                decoration: BoxDecoration(
+                  color: primary,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Icon(IconlyLight.edit, size: 14.w, color: Colors.white),
               ),
             ),
           ],
         ),
         SizedBox(height: 12.h),
-        Text("Mathew Adam", style: GoogleFonts.inter(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+        Text(
+          "Chetan Sharma",
+          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+        ),
         SizedBox(height: 6.h),
-        Text("mathew@gmail.com", style: TextStyle(color: Colors.grey[600], fontSize: 13.sp)),
-      ],
-    );
-  }
-
-  Widget _buildStatsRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _stat("30", "Listings"),
-        _stat("12", "Sold"),
-        _stat("28", "Reviews"),
-      ],
-    );
-  }
-
-  Widget _stat(String num, String label) {
-    return Column(
-      children: [
-        Text(num, style: GoogleFonts.inter(fontSize: 20.sp, fontWeight: FontWeight.bold)),
-        SizedBox(height: 4.h),
-        Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12.sp)),
+        Text(
+          "8906327912",
+          style: TextStyle(color: Colors.grey[600], fontSize: 13.sp),
+        ),
       ],
     );
   }
@@ -148,12 +300,19 @@ class ProfileScreen extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 4.w),
       child: Container(
         padding: EdgeInsets.all(6.w),
-        decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(32.r)),
-        child: Obx(() => Row(children: [
-          _tab("Transactions", 0, c),
-          _tab("Listings", 1, c),
-          _tab("Sold", 2, c),
-        ])),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(32.r),
+        ),
+        child: Obx(
+          () => Row(
+            children: [
+              _tab("My Properties", 0, c),
+              _tab("Transactions", 1, c),
+              _tab("Payments", 2, c),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -163,82 +322,51 @@ class ProfileScreen extends StatelessWidget {
     return Expanded(
       child: GestureDetector(
         onTap: () => c.selectedTab.value = index,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 240),
+        child: Container(
           padding: EdgeInsets.symmetric(vertical: 10.h),
           decoration: BoxDecoration(
             color: active ? Colors.white : Colors.transparent,
             borderRadius: BorderRadius.circular(28.r),
           ),
-          child: Text(text, textAlign: TextAlign.center, style: TextStyle(fontWeight: active ? FontWeight.w700 : FontWeight.w500, fontSize: 13.sp)),
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+              fontSize: 13.sp,
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildListings(ProfileController c, String title, {bool isSold = false}) {
-    final list = isSold ? c.sold : c.listings;
-
+  // ---------------- Transactions view ----------------
+  Widget _buildMyProperties(ProfileController c) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 4.w),
-          child: Row(
-            children: [
-              Expanded(child: Text(title, style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.bold))),
-              IconButton(icon: Icon(Icons.more_horiz, size: 20.w), onPressed: () {}),
-              SizedBox(width: 8.w),
-              FloatingActionButton.small(
-                backgroundColor: secondary,
-                child: Icon(Icons.add, color: Colors.white, size: 18.w),
-                onPressed: () {},
-              ),
-            ],
+          child: Text(
+            "${c.my_property.length} Purchased Properties",
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
           ),
         ),
         SizedBox(height: 12.h),
-
-        // GridView: shrinkWrap + NeverScrollableScrollPhysics because parent scrolls
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12.w,
-            mainAxisSpacing: 12.h,
-            childAspectRatio: (0.68),
-          ),
-          itemCount: list.length,
-          itemBuilder: (ctx, i) => ListingCard(property: list[i], isSold: isSold),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTransactions(ProfileController c) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4.w),
-          child: Text("${c.transactions.length} transactions", style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600)),
-        ),
-        SizedBox(height: 12.h),
-
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           padding: EdgeInsets.zero,
-          itemCount: c.transactions.length,
+          itemCount: c.my_property.length,
           itemBuilder: (ctx, i) {
-            final t = c.transactions[i];
+            final t = c.my_property[i];
             return Padding(
-              padding: EdgeInsets.only(bottom: 12.h),
-              child: TransactionCard(
-                image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
+              padding: EdgeInsets.only(bottom: 12.h, left: 4.w, right: 4.w),
+              child: _PropertyTile(
+                image: t.image,
                 title: t.title,
+                location: t.location,
                 tag: t.tag,
                 date: t.date,
                 isCompleted: t.completed,
@@ -249,90 +377,480 @@ class ProfileScreen extends StatelessWidget {
       ],
     );
   }
-}
 
-// ====================== Listing Card (responsive, polished) ======================
-class ListingCard extends StatelessWidget {
-  final Property property;
-  final bool isSold;
+  // ---------------- My Properties view ----------------
+  // ---------------- Transaction Summary (excel-like rows) ----------------
+  Widget _buildTransactionsSummary(ProfileController c) {
+    // show first 3 recent transactions and a "View All" button
+    final recent = c.transactions.take(3).toList();
 
-  const ListingCard({required this.property, this.isSold = false, super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    // card dimensions responsive
-    final double cardWidth = (MediaQuery.of(context).size.width - 48.w) / 2; // padding + spacing accounted
-    final double imageHeight = (cardWidth * 0.68).clamp(100.0, 160.0);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 12.r, offset: Offset(0, 6.h))],
-      ),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 4.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-            child: AspectRatio(
-              aspectRatio: 4 / 3,
-              child: Image.network(property.image, fit: BoxFit.cover),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Recent Transactions',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Get.to(
+                  () => TransactionListScreen(transactions: c.transactions),
+                ),
+                child: Text('View All'),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.h),
+
+          // header row (excel-like)
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 90.w,
+                  child: Text(
+                    'Date',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    'Property',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 90.w,
+                  child: Text(
+                    'Amount',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 70.w,
+                  child: Text(
+                    'Type',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          Padding(
-            padding: EdgeInsets.all(12.w),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text("\$${property.price}/mo", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: secondary)),
-              SizedBox(height: 6.h),
-              Text(property.name, style: GoogleFonts.inter(fontSize: 13.sp, fontWeight: FontWeight.w700), maxLines: 2, overflow: TextOverflow.ellipsis),
-              SizedBox(height: 6.h),
-              Row(children: [
-                Icon(Icons.star, color: Colors.amber, size: 14.w),
-                SizedBox(width: 6.w),
-                Text(property.rating, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.sp)),
-                SizedBox(width: 8.w),
-                Expanded(child: Text(property.location, style: TextStyle(color: Colors.grey[600], fontSize: 11.sp), overflow: TextOverflow.ellipsis)),
-              ])
-            ]),
+
+          SizedBox(height: 8.h),
+
+          ListView.separated(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemBuilder: (ctx, i) {
+              final t = recent[i];
+              return GestureDetector(
+                onTap: () =>
+                    Get.to(() => TransactionDetailScreen(transaction: t)),
+                child: TransactionRow(transaction: t),
+              );
+            },
+            separatorBuilder: (_, __) => SizedBox(height: 6.h),
+            itemCount: recent.length,
           ),
-          // overlay icons
-          Positioned.fill(child: Container()),
+        ],
+      ),
+    );
+  }
+
+  // ---------------- Payments view (past + upcoming) ----------------
+  Widget _buildPaymentsSection(ProfileController c) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        // Padding(
+        //   padding: EdgeInsets.symmetric(horizontal: 4.w),
+        //   child: Text(
+        //     "Payments",
+        //     style: TextStyle(
+        //       fontSize: 16.sp,
+        //       fontWeight: FontWeight.w600,
+        //     ),
+        //   ),
+        // ),
+        SizedBox(height: 12.h),
+
+        // Upcoming Payments
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4.w),
+          child: Text(
+            "Upcoming Payments",
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+          ),
+        ),
+        SizedBox(height: 8.h),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: 4.w),
+          itemCount: c.upcomingPayments.length,
+          itemBuilder: (ctx, i) {
+            final p = c.upcomingPayments[i];
+            return Padding(
+              padding: EdgeInsets.only(bottom: 10.h),
+              child: PaymentCard(
+                title: p.title,
+                location: p.location,
+                date: p.date,
+                amount: p.amount,
+                paid: p.paid,
+              ),
+            );
+          },
+        ),
+
+        SizedBox(height: 16.h),
+
+        // Past Payments
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4.w),
+          child: Text(
+            "Past Payments",
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+          ),
+        ),
+        SizedBox(height: 8.h),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: 4.w),
+          itemCount: c.pastPayments.length,
+          itemBuilder: (ctx, i) {
+            final p = c.pastPayments[i];
+            return Padding(
+              padding: EdgeInsets.only(bottom: 10.h),
+              child: PaymentCard(
+                title: p.title,
+                location: p.location,
+                date: p.date,
+                amount: p.amount,
+                paid: p.paid,
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+// ====================== Listing Card (responsive, polished) ======================
+// ------------------ Transaction Row (single line like excel) ------------------
+class TransactionRow extends StatelessWidget {
+  final TransactionModel transaction;
+  const TransactionRow({required this.transaction, super.key});
+
+  String _fmtDate(DateTime d) {
+    return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 90.w,
+            child: Text(
+              _fmtDate(transaction.date),
+              style: TextStyle(fontSize: 12.sp),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              transaction.property,
+              style: TextStyle(fontSize: 12.sp),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          SizedBox(
+            width: 90.w,
+            child: Text(
+              '₹${transaction.amount}',
+              textAlign: TextAlign.right,
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.sp),
+            ),
+          ),
+          SizedBox(
+            width: 70.w,
+            child: Center(
+              child: Text(
+                transaction.type,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: transaction.type == 'Received'
+                      ? Colors.green
+                      : Colors.orange,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-// ====================== Transaction Card (responsive) ======================
-class TransactionCard extends StatelessWidget {
-  final String image, title, tag, date;
+// ====================== Transaction Tile ======================
+class _PropertyTile extends StatelessWidget {
+  final String image;
+  final String title;
+  final String location;
+  final String tag;
+  final String date;
   final bool isCompleted;
 
-  const TransactionCard({super.key, required this.image, required this.title, required this.tag, required this.date, this.isCompleted = false});
+  const _PropertyTile({
+    Key? key,
+    required this.image,
+    required this.title,
+    required this.location,
+    required this.tag,
+    required this.date,
+    this.isCompleted = false,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Get.to(
+          () => PropertyTransactionDetailScreen(
+            image: image,
+            title: "Plot No. 21 Shree Shyam Kunj Phase 5",
+            location: "Raipur Road, Hisar",
+            tag: "Purchase",
+            date: "11/28/2021",
+            details: {
+              "checkIn": "11/28/2021",
+              "checkOut": "01/28/2022",
+              "owner": "Chetan Sharma",
+              "paymentEmail": "user@mail.com",
+            },
+            paymentDetail: {
+              "period": "2 months",
+              "monthly": 220,
+              "discount": 88,
+              "total": 31250,
+            },
+            propertyType: PropertyType.township,
+            // pass mapImage as the local path too if you want it to show as map preview:
+            mapImage: image,
+            view360Url: null,
+          ),
+        );
+      },
+
+      child: Container(
+        padding: EdgeInsets.all(8.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.r),
+              child: Container(
+                width: 100.w,
+                height: 80.h,
+                color: Colors.grey.shade200,
+                child: image.isNotEmpty
+                    ? Image.network(
+                        image,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Icon(
+                          Icons.home_outlined,
+                          size: 30.w,
+                          color: Colors.grey[600],
+                        ),
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: SizedBox(
+                              width: 20.w,
+                              height: 20.w,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          );
+                        },
+                      )
+                    : Icon(
+                        Icons.home_outlined,
+                        size: 30.w,
+                        color: Colors.grey[600],
+                      ),
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 6.h),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on, size: 12.w, color: Colors.grey),
+                      SizedBox(width: 6.w),
+                      Expanded(
+                        child: Text(
+                          location,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12.sp,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 6.h),
+                  Row(
+                    children: [
+                      Icon(
+                        isCompleted ? Icons.check_circle : Icons.access_time,
+                        size: 14.w,
+                        color: isCompleted ? primary : Colors.grey,
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        "$tag • $date",
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ====================== Payment Card ======================
+class PaymentCard extends StatelessWidget {
+  final String title;
+  final String location;
+  final String date;
+  final num amount;
+  final bool paid;
+
+  const PaymentCard({
+    Key? key,
+    required this.title,
+    required this.location,
+    required this.date,
+    required this.amount,
+    this.paid = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(12.w),
+      padding: EdgeInsets.all(10.w),
       decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8.r, offset: Offset(0, 4.h))],
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
         children: [
-          ClipRRect(borderRadius: BorderRadius.circular(12.r), child: Image.network(image, width: 88.w, height: 68.h, fit: BoxFit.cover)),
+          Container(
+            width: 64.w,
+            height: 52.h,
+            decoration: BoxDecoration(
+              color: paid ? Colors.green.shade50 : Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Icon(
+              paid ? Icons.check : Icons.schedule,
+              color: paid ? primary : Colors.orange,
+              size: 28.w,
+            ),
+          ),
           SizedBox(width: 12.w),
           Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [Icon(IconlyBold.heart, color: Colors.grey[400], size: 18.w), Spacer(), Container(padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h), decoration: BoxDecoration(color: Colors.green.shade100, borderRadius: BorderRadius.circular(16.r)), child: Text(tag, style: TextStyle(color: primary, fontWeight: FontWeight.w600, fontSize: 12.sp)))]),
-              SizedBox(height: 8.h),
-              Text(title, style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w700)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13.sp,
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Text(
+                  location,
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12.sp),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                "₹$amount",
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.sp),
+              ),
               SizedBox(height: 6.h),
-              Row(children: [Icon(isCompleted ? Icons.check_circle : Icons.access_time, size: 14.w, color: isCompleted ? primary : Colors.grey), SizedBox(width: 6.w), Text(date, style: TextStyle(color: Colors.grey[600], fontSize: 12.sp))])
-            ]),
-          )
+              Text(
+                date,
+                style: TextStyle(color: Colors.grey[600], fontSize: 12.sp),
+              ),
+            ],
+          ),
         ],
       ),
     );
