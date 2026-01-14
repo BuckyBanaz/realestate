@@ -1,13 +1,12 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconly/iconly.dart';
 import '../../constant/app_colors.dart';
-import '../home/home_screen.dart';
 import '../home/home_view_2.dart';
-import '../profile/transaction_detail_screen.dart';
-import '../search/search_screen.dart';
 import '../favorite/favorite_screen.dart';
 import '../profile/profile_screen.dart';
-
+import '../transaction/transaction_screen.dart';
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
 
@@ -20,12 +19,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _pages = const [
     HomeView2(showNavBar: false),
-    Center(child: Text("Transactions"),),
+    TransactionListScreen(),
     FavoriteScreen(),
-    // TransactionListScreen(transactions: [],),
-
-    // // Make sure you have a ChatScreen or replace with any widget.
-    // ChatScreen(),
     ProfileScreen(),
   ];
 
@@ -36,160 +31,126 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // compute nav height responsively if you want:
-    final screenHeight = MediaQuery.of(context).size.height;
-    final navHeight = (screenHeight * 0.085).clamp(64.0, 88.0);
-
     return Scaffold(
-      body: SafeArea(
-        top: true,
-        bottom: false,
-        child: IndexedStack(
-          index: _selectedIndex,
-          children: _pages,
-        ),
-      ),
-      bottomNavigationBar: CustomBottomNav(
-        selectedIndex: _selectedIndex,
-        onTap: _onTap,
-        height: navHeight,
+      backgroundColor: scaffoldColor, 
+      extendBody: true, // Important for content to show behind nav bar
+      body: Stack(
+        children: [
+          // 1. Content
+          IndexedStack(
+            index: _selectedIndex,
+            children: _pages,
+          ),
+
+          // 2. Floating Glass Navbar
+          Positioned(
+            bottom: 30.h,
+            left: 20.w,
+            right: 20.w,
+            child: _buildGlassNavBar(),
+          ),
+        ],
       ),
     );
   }
-}
 
+  Widget _buildGlassNavBar() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(30.r),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 30.0, sigmaY: 30.0), // Increased blur for liquid feel
+        child: Container(
+          height: 70.h,
+          padding: EdgeInsets.symmetric(horizontal: 10.w),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.2), // Much more transparent
+            // Optional: You could use a gradient for even more depth
+            // gradient: LinearGradient(
+            //   begin: Alignment.topLeft,
+            //   end: Alignment.bottomRight,
+            //   colors: [
+            //     Colors.black.withOpacity(0.2),
+            //     Colors.black.withOpacity(0.1),
+            //   ],
+            // ),
+            borderRadius: BorderRadius.circular(30.r),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.08), // More subtle border
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1), // Softer shadow
+                blurRadius: 20,
+                spreadRadius: 2,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _navItem(IconlyLight.home, IconlyBold.home, "Home", 0),
+              _navItem(IconlyLight.paper, IconlyBold.paper, "Transactions", 1),
+              _navItem(IconlyLight.heart, IconlyBold.heart, "Favorite", 2),
+              _navItem(IconlyLight.profile, IconlyBold.profile, "Profile", 3),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-typedef OnNavTap = void Function(int index);
-
-class CustomBottomNav extends StatelessWidget {
-  final int selectedIndex;
-  final OnNavTap onTap;
-  final double height;
-
-  const CustomBottomNav({
-    Key? key,
-    required this.selectedIndex,
-    required this.onTap,
-    this.height = 72,
-  }) : super(key: key);
-
-  Widget _item({
-    required BuildContext context,
-    required IconData icon,
-    IconData? activeIcon,
-    required String label,
-    required int index,
-    required bool selected,
-  }) {
-    final color = selected ? secondary : Colors.grey.shade600;
-
-    return Expanded(
-      child: InkWell(
-        onTap: () => onTap(index),
-        borderRadius: BorderRadius.circular(16),
+  Widget _navItem(IconData icon, IconData activeIcon, String label, int index) {
+    final bool isSelected = _selectedIndex == index;
+    
+    return GestureDetector(
+      onTap: () => _onTap(index),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        decoration: isSelected 
+            ? BoxDecoration(
+                color: Colors.white.withOpacity(0.1), // Soft highlight
+                borderRadius: BorderRadius.circular(20.r),
+              )
+            : BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(20.r),
+              ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-
           children: [
-            Icon(
-              selected && activeIcon != null ? activeIcon : icon,
-              size: selected ? 28 : 26,
-              color: color,
+             Icon(
+              isSelected ? activeIcon : icon,
+              size: 24.sp,
+              color: isSelected ? secondary : Colors.grey.shade400,
             ),
-            // label - small, subtle
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                color: selected ? secondary : Colors.grey.shade600,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w200,
-              ),
-            ),
-            // const SizedBox(height: 6),
-            // // dot indicator
-            // AnimatedContainer(
-            //   duration: const Duration(milliseconds: 250),
-            //   curve: Curves.easeInOut,
-            //   width: 8,
-            //   height: 8,
-            //   decoration: BoxDecoration(
-            //     color: selected ? secondary : Colors.transparent,
-            //     shape: BoxShape.circle,
-            //   ),
-            // ),
+            if (isSelected) ...[
+               SizedBox(height: 4.h),
+              // Optional: Label or Dot
+              Container(
+                width: 4.w,
+                height: 4.w,
+                decoration: BoxDecoration(
+                  color: secondary,
+                  shape: BoxShape.circle,
+                ),
+              )
+            ] else ...[
+               SizedBox(height: 4.h),
+               Text(
+                 label,
+                 style: TextStyle(
+                   fontSize: 10.sp,
+                   color: Colors.grey.shade500,
+                 ),
+               )
+            ]
           ],
         ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Container with rounded top corners + shadow
-    return Container(
-      height: height,
-      padding: const EdgeInsets.only(top: 2, bottom: 2, left: 8, right: 8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark 
-            ? const Color(0xFF1F1F1F) 
-            : Colors.white,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1), // Slightly stronger shadow
-            blurRadius: 20,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _item(
-            context: context,
-            icon: IconlyLight.home,
-            activeIcon: IconlyBold.home,
-            label: 'Home',
-            index: 0,
-            selected: selectedIndex == 0,
-          ),
-
-          _item(
-            context: context,
-            icon: IconlyLight.paper,
-            activeIcon: IconlyBold.paper,
-            label: 'Transactions',
-            index: 1,
-            selected: selectedIndex == 1,
-          ),
-
-          _item(
-            context: context,
-            icon: IconlyLight.heart,
-            activeIcon: IconlyBold.heart,
-            label: 'Favorite',
-            index: 2,
-            selected: selectedIndex == 2,
-          ),
-          // _item(
-          //   context: context,
-          //   icon: IconlyLight.message,
-          //   activeIcon: IconlyBold.message,
-          //   label: 'Chat',
-          //   index: 3,
-          //   selected: selectedIndex == 3,
-          // ),
-          _item(
-            context: context,
-            icon: IconlyLight.profile,
-            activeIcon: IconlyBold.profile,
-            label: 'Profile',
-            index: 3,
-            selected: selectedIndex == 3,
-          ),
-        ],
       ),
     );
   }

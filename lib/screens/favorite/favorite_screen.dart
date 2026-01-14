@@ -184,10 +184,11 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
+       
         title: Text(
           "Saved Properties",
           style: GoogleFonts.inter(
-            fontSize: 18,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w700,
             color: Theme.of(context).textTheme.bodyLarge?.color,
           ),
@@ -213,7 +214,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
           ),
         ],
         automaticallyImplyLeading: true,
-        centerTitle: false,
+        centerTitle: true,
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(

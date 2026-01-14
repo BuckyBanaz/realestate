@@ -15,7 +15,7 @@ class TopLocationsSection extends StatelessWidget {
     return SizedBox(
       height: 140.h,
       child: ListView.separated(
-        padding: EdgeInsets.symmetric(horizontal: 4.w),
+        // padding: EdgeInsets.symmetric(horizontal: 4.w),
         scrollDirection: Axis.horizontal,
         itemCount: topLocations.length,
         clipBehavior: Clip.none,
@@ -68,10 +68,10 @@ class LocationCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 300.w,
-        height: 125.h,
+        height: 140.h,
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A1A),
+          color: const Color(0xFF1E1E1E), // Slightly lighter? Or keep 1A1A1A
           borderRadius: BorderRadius.circular(24.r),
           border: Border.all(color: Colors.white.withOpacity(0.05)),
           boxShadow: [
@@ -88,8 +88,8 @@ class LocationCard extends StatelessWidget {
             Hero(
               tag: imageUrl + title,
               child: Container(
-                width: 100.w,
-                height: 100.h,
+                width: 110.w,
+                height: 116.h,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(color: Colors.white.withOpacity(0.05)),

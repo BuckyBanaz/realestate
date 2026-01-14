@@ -3,7 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:realestate/screens/auth/controller/auth_controller.dart';
+import 'package:realestate/data/controllers/auth_controller.dart';
 import 'package:realestate/screens/auth/login_screen.dart';
 
 import '../../Routes/appRoutes.dart';

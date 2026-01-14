@@ -10,6 +10,22 @@ Widget stagger(int i, Widget child) => child
     .fadeIn(duration: baseDur, curve: baseCurve)
     .slideY(begin: 0.15, end: 0, duration: baseDur, curve: baseCurve);
 
+  Widget circleIconButton(BuildContext context, IconData icon, VoidCallback onTap) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 20, color: Theme.of(context).iconTheme.color),
+        ),
+      ),
+    );
+  }
 class Logoor extends StatelessWidget {
   final bool animate;
   const Logoor({super.key, this.animate = false});

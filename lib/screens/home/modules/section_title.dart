@@ -4,10 +4,12 @@ import 'package:realestate/constant/app_colors.dart';
 
 class SectionTitle extends StatelessWidget {
   final String title;
+  final String? subtitle;
   final String? actionText;
   final VoidCallback? onActionTap;
   const SectionTitle({
     required this.title,
+    this.subtitle,
     this.actionText,
     this.onActionTap,
     Key? key,
@@ -18,13 +20,30 @@ class SectionTitle extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600, // Make title slightly bolder
-            // color: Colors.black, // Inherit
-          ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+            if (subtitle != null)
+              Padding(
+                padding: EdgeInsets.only(top: 4.h),
+                child: Text(
+                  subtitle!,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: Colors.grey.shade400,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
+          ],
         ),
         if (actionText != null)
           GestureDetector(

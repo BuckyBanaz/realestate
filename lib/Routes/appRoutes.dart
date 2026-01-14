@@ -15,6 +15,8 @@ import 'package:realestate/screens/property/property_equiery_form.dart';
 import 'package:realestate/screens/property/subcategory_screen.dart';
 import 'package:realestate/screens/property/site_plan_view_screen.dart';
 
+import 'package:realestate/screens/news/news_list_screen.dart';
+import 'package:realestate/screens/news/news_detail_screen.dart';
 import '../screens/auth/login_screen.dart';
 
 class AppRoutes {
@@ -33,6 +35,8 @@ class AppRoutes {
   static const propertyMap = '/propertyMap';
   static const subCategory = '/subCategory';
   static const sitePlan = '/sitePlan';
+  static const newsList = '/newsList';
+  static const newsDetail = '/newsDetail';
 
   static get routes => [
     GetPage(name: splash, page: () => SplashScreen()),
@@ -73,5 +77,7 @@ class AppRoutes {
       },
       transition: Transition.fade,
     ),
+    GetPage(name: newsList, page: () => const NewsListScreen(), transition: Transition.rightToLeft),
+    GetPage(name: newsDetail, page: () => const NewsDetailScreen(), transition: Transition.rightToLeft),
   ];
 }

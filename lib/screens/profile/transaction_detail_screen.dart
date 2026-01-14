@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
-import 'package:realestate/screens/profile/profile_screen.dart';
+import 'package:realestate/data/models/profile_models.dart';
 
 import '../../constant/app_colors.dart';
 
-class TransactionListScreen extends StatelessWidget {
+class RecentTransactionListScreen extends StatelessWidget {
   final List<TransactionModel> transactions;
-  const TransactionListScreen({required this.transactions, super.key});
+  const RecentTransactionListScreen({required this.transactions, super.key});
 
   String _fmtDate(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}-${d.month.toString().padLeft(2, '0')}-${d.year}';

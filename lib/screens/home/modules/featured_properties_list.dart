@@ -5,6 +5,7 @@ import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/constant/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class FeaturedPropertiesList extends StatelessWidget {
   const FeaturedPropertiesList({Key? key}) : super(key: key);
@@ -16,7 +17,7 @@ class FeaturedPropertiesList extends StatelessWidget {
     return SizedBox(
       height: listHeight,
       child: ListView.separated(
-        padding: EdgeInsets.symmetric(horizontal: 20.w), // Match home padding
+        // padding: EdgeInsets.symmetric(horizontal: 20.w), // Match home padding
         scrollDirection: Axis.horizontal,
         itemCount: nearbyEstates.length,
         clipBehavior: Clip.none,
@@ -41,7 +42,10 @@ class FeaturedPropertiesList extends StatelessWidget {
                 },
               ),
             ),
-          );
+          )
+          .animate()
+          .fadeIn(delay: (100 * i).ms)
+          .slideX(begin: 0.2, end: 0, curve: Curves.easeOutQuad);
         },
       ),
     );

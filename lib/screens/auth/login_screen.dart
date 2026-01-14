@@ -10,7 +10,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/screens/auth/register_screen.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
-import 'package:realestate/screens/auth/controller/auth_controller.dart';
+import 'package:realestate/data/controllers/auth_controller.dart';
 
 import '../../constant/app_colors.dart';
 
