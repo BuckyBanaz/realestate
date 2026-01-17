@@ -7,7 +7,9 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:realestate/screens/profile/documents_screen.dart';
+import 'package:realestate/data/models/owner_document_model.dart';
 import '../../constant/app_colors.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 
 enum PropertyType { township, plot }
 
@@ -99,25 +101,16 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
       }
     } else {
       // network
-      return Image.network(
-        path,
+      return CustomImage(
+        imageUrl: path,
         width: width,
         height: height,
-        fit: fit,
-        errorBuilder: (_, __, ___) => Container(
+        errorWidget: (_, __, ___) => Container(
           width: width,
           height: height,
           color: Colors.grey.shade200,
           child: Icon(Icons.broken_image, size: 36.w, color: Colors.grey[500]),
         ),
-        loadingBuilder: (context, child, progress) {
-          if (progress == null) return child;
-          return SizedBox(
-            width: width,
-            height: height,
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-          );
-        },
       );
     }
   }
@@ -140,22 +133,18 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
           IconButton(
             onPressed: () => Get.to(
               DocumentDetailScreen(
-                document: PropertyDocument(
-                  id: "doc2",
-                  title: "Sale Agreement - Unit 302",
-                  propertyName: "Plot No. 21 Shree Shyam Kunj Phase 5",
-                  docType: "Sale Agreement",
-                  thumbnail:
-                      "https://b3103330.smushcdn.com/3103330/wp-content/uploads/2016/04/mutation-procedure-transfer-of-title-of-property-in-municpality-limits-pic.jpg?lossy=2&strip=1&webp=1",
-                  uploadedDate: "2022-05-14",
-                  metadata: {
-                    "Registered On": "05/10/2022",
-                    "Registration No.": "REG-UH-00421",
-                    "Previous Owner": "Mr. Ramesh",
-                    "Current Owner": "Chetan Sharma",
-                    "Issued By": "District Registrar",
-                    "Remarks": "Standard sale agreement",
-                  },
+                owner: OwnerDocumentGroup(
+                  ownerId: 74,
+                  name: "Himanshu Kumawat",
+                  email: "sssssdddd@gmail.com",
+                  phone: "1234567890",
+                  address: "kazipura",
+                  documents: [],
+                ),
+                doc: DocumentItem(
+                  id: 8,
+                  documentName: "Sale Agreement - Unit 302",
+                  documentUrl: "http://108.181.185.27/bladmin/public/uploads/documents/1768568662_WhatsApp Image 2026-01-16 at 10.37.20 AM.jpeg",
                 ),
               ),
             ),
@@ -418,20 +407,35 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
                   _detailTile(context, "Period time", paymentDetail["period"] ?? "-"),
                   _detailTile(
                     context,
+                    "Total Amount",
+                    "₹ ${formatPrice(paymentDetail["total"])}",
+                  ),
+                  _detailTile(
+                    context,
                     "Monthly payment",
-                    "₹ ${paymentDetail["monthly"] ?? '-'}",
+                    "₹ ${formatPrice(paymentDetail["monthly"])}",
+                  ),
+                  _detailTile(
+                    context,
+                    "Paid Amount",
+                    "₹ ${formatPrice(paymentDetail["paid"])}",
+                  ),
+                  _detailTile(
+                    context,
+                    "Balance Amount",
+                    "₹ ${formatPrice(paymentDetail["balance"])}",
                   ),
                   _detailTile(
                     context,
                     "Discount",
-                    "₹ ${paymentDetail["discount"] ?? '0'}",
+                    "₹ ${formatPrice(paymentDetail["discount"])}",
                   ),
                   Divider(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Total",
+                        "Net Payable",
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
@@ -439,7 +443,7 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        "₹ ${paymentDetail["total"] ?? '0'}",
+                        "₹ ${formatPrice(paymentDetail["total"])}",
                         style: TextStyle(
                           fontSize: 16.sp,
                           color: primary,
@@ -459,52 +463,52 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
               "Payment Method",
               style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
             ),
-            SizedBox(height: 10.h),
-            Container(
-              padding: EdgeInsets.all(12.w),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.email_outlined, color: Colors.grey),
-                  SizedBox(width: 10.w),
-                  Text(
-                    details["paymentEmail"] ?? "•••••••@gmail.com",
-                    style: TextStyle(fontSize: 13.sp),
-                  ),
-                ],
-              ),
-            ),
+            // SizedBox(height: 10.h),
+            // Container(
+            //   padding: EdgeInsets.all(12.w),
+            //   decoration: BoxDecoration(
+            //     borderRadius: BorderRadius.circular(12.r),
+            //     border: Border.all(color: Colors.grey.shade300),
+            //   ),
+            //   child: Row(
+            //     children: [
+            //       Icon(Icons.email_outlined, color: Colors.grey),
+            //       SizedBox(width: 10.w),
+            //       Text(
+            //         details["paymentEmail"] ?? "•••••••@gmail.com",
+            //         style: TextStyle(fontSize: 13.sp),
+            //       ),
+            //     ],
+            //   ),
+            // ),
 
-            SizedBox(height: 25.h),
+            // SizedBox(height: 25.h),
 
-            // ---------------- ADD REVIEW BUTTON ----------------
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primary,
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.r),
-                  ),
-                ),
-                onPressed: () {
-                  // open review flow
-                  // Get.snackbar("Review", "Open review flow", snackPosition: SnackPosition.BOTTOM);
-                },
-                child: Text(
-                  "Click here to make payment ",
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+            // // ---------------- ADD REVIEW BUTTON ----------------
+            // SizedBox(
+            //   width: double.infinity,
+            //   child: ElevatedButton(
+            //     style: ElevatedButton.styleFrom(
+            //       backgroundColor: primary,
+            //       padding: EdgeInsets.symmetric(vertical: 14.h),
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(16.r),
+            //       ),
+            //     ),
+            //     onPressed: () {
+            //       // open review flow
+            //       // Get.snackbar("Review", "Open review flow", snackPosition: SnackPosition.BOTTOM);
+            //     },
+            //     child: Text(
+            //       "Click here to make payment ",
+            //       style: TextStyle(
+            //         fontSize: 15.sp,
+            //         fontWeight: FontWeight.w600,
+            //         color: Colors.white,
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
@@ -556,11 +560,8 @@ class FullscreenImageScreen extends StatelessWidget {
         return Center(child: Icon(Icons.broken_image, size: 64));
       }
     } else {
-      return Image.network(
-        path,
-        fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) =>
-            Center(child: Icon(Icons.broken_image, size: 64)),
+      return CustomImage(
+        imageUrl: path,
       );
     }
   }

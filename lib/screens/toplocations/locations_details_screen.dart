@@ -6,13 +6,17 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:realestate/constant/app_colors.dart';
+import 'package:realestate/data/controllers/location_details_controller.dart';
+import 'package:realestate/Routes/appRoutes.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 import '../home/modules/featured_properties_list.dart';
 
-class LocationDetailScreen extends StatelessWidget {
+class LocationDetailScreen extends StatefulWidget {
   final String locationName;
   final String rank;
   final String heroImage;
   final String subtitle;
+  final int addressId;
 
   const LocationDetailScreen({
     Key? key,
@@ -20,7 +24,21 @@ class LocationDetailScreen extends StatelessWidget {
     required this.rank,
     required this.heroImage,
     required this.subtitle,
+    required this.addressId,
   }) : super(key: key);
+
+  @override
+  State<LocationDetailScreen> createState() => _LocationDetailScreenState();
+}
+
+class _LocationDetailScreenState extends State<LocationDetailScreen> {
+  final LocationDetailsController controller = Get.put(LocationDetailsController());
+
+  @override
+  void initState() {
+    super.initState();
+    controller.fetchLocationDetails(widget.addressId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +99,7 @@ class LocationDetailScreen extends StatelessWidget {
                           border: Border.all(color: primary.withOpacity(0.3)),
                         ),
                         child: Text(
-                          "RANK #$rank",
+                          "RANK #${widget.rank}",
                           style: GoogleFonts.inter(
                             color: primary,
                             fontSize: 9.sp,
@@ -105,21 +123,21 @@ class LocationDetailScreen extends StatelessWidget {
                   SizedBox(height: 16.h),
 
                   // Title
-                  Text(
-                    locationName,
+                  Obx(() => Text(
+                    controller.locationData.value?.address ?? widget.locationName,
                     style: GoogleFonts.inter(
                       fontSize: 24.sp,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
                       letterSpacing: -1,
                     ),
-                  ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.2, end: 0),
+                  )).animate().fadeIn(delay: 100.ms).slideY(begin: 0.2, end: 0),
 
                   SizedBox(height: 8.h),
 
                   // Subtitle/Description
                   Text(
-                    subtitle,
+                    widget.subtitle,
                     style: TextStyle(
                       fontSize: 13.sp,
                       color: Colors.grey.shade500,
@@ -141,40 +159,51 @@ class LocationDetailScreen extends StatelessWidget {
                           color: Colors.white,
                         ),
                       ),
-                      Text(
-                        "Found 128",
+                      Obx(() => Text(
+                        "Found ${controller.properties.length}",
                         style: TextStyle(
                           fontSize: 11.sp,
                           color: primary,
                           fontWeight: FontWeight.w600,
                         ),
-                      ),
+                      )),
                     ],
                   ).animate().fadeIn(delay: 300.ms),
 
                   SizedBox(height: 20.h),
 
                   // Property List (Animate each one)
-                  ..._dummyProperties.asMap().entries.map((entry) {
-                    int idx = entry.key;
-                    var property = entry.value;
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: 16.h),
-                      child: FeatureCard(
-                        imageUrl: property['image'],
-                        title: property['title'],
-                        location: property['location'],
-                        price: property['price'],
-                        beds: property['beds'],
-                        area: property['area'],
-                        tag: property['tag'],
-                        rating: property['rating'],
-                      )
-                          .animate()
-                          .fadeIn(delay: (400 + (idx * 100)).ms)
-                          .slideY(begin: 0.1, end: 0),
+                  Obx(() {
+                    if (controller.isLoading.value) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (controller.properties.isEmpty) {
+                      return const Center(child: Text("No properties found", style: TextStyle(color: Colors.white)));
+                    }
+                    return Column(
+                      children: controller.properties.asMap().entries.map((entry) {
+                        int idx = entry.key;
+                        var property = entry.value;
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 16.h),
+                          child: FeatureCard(
+                            imageUrl: property.propertyImage,
+                            title: property.title,
+                            location: property.address,
+                            price: property.price,
+                            beds: "—", 
+                            area: "${property.area} sq.ft",
+                            tag: "Featured",
+                            rating: "4.5",
+                            onTap: () => Get.toNamed(AppRoutes.propertyDetail, arguments: property.id),
+                          )
+                              .animate()
+                              .fadeIn(delay: (400 + (idx * 100)).ms)
+                              .slideY(begin: 0.1, end: 0),
+                        );
+                      }).toList(),
                     );
-                  }).toList(),
+                  }),
                   
                   SizedBox(height: 40.h),
                 ],
@@ -213,9 +242,18 @@ class LocationDetailScreen extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         // Main Background Image
-        heroImage.startsWith('http')
-            ? Image.network(heroImage, fit: BoxFit.cover)
-            : Image.asset(heroImage, fit: BoxFit.cover),
+        Obx(() {
+          final imageUrl = controller.locationData.value?.mainImage ?? widget.heroImage;
+          return imageUrl.startsWith('http')
+              ? CustomImage(
+                  imageUrl: imageUrl, 
+                  width: double.infinity, 
+                  height: double.infinity,
+                )
+              : widget.heroImage.isNotEmpty 
+                  ? Image.asset(widget.heroImage, fit: BoxFit.cover)
+                  : Container(color: Colors.grey.shade900);
+        }),
         
         // Premium Dark Overlay Gradient
         Container(
@@ -249,14 +287,14 @@ class LocationDetailScreen extends StatelessWidget {
               children: [
                 Icon(IconlyLight.home, size: 16.sp, color: Colors.white),
                 SizedBox(width: 8.w),
-                Text(
-                  "120+ Estates",
+                Obx(() => Text(
+                  "${controller.properties.length}+ Estates",
                   style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
                   ),
-                ),
+                )),
               ],
             ),
           ),
@@ -266,36 +304,4 @@ class LocationDetailScreen extends StatelessWidget {
   }
 }
 
-final List<Map<String, dynamic>> _dummyProperties = [
-  {
-    "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
-    "title": "Shree Shyam Kunj",
-    "location": "Sector 15, Hisar",
-    "price": "12,00,000",
-    "beds": "4",
-    "area": "250 sq.m",
-    "tag": "Luxury",
-    "rating": "4.9",
-  },
-  {
-    "image": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800",
-    "title": "Modern Villa",
-    "location": "Sector 15, Hisar",
-    "price": "45,00,000",
-    "beds": "5",
-    "area": "400 sq.m",
-    "tag": "Trending",
-    "rating": "4.8",
-  },
-  {
-    "image": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
-    "title": "The Penthouse",
-    "location": "Sector 15, Hisar",
-    "price": "85,00,000",
-    "beds": "3",
-    "area": "200 sq.m",
-    "tag": "Elite",
-    "rating": "5.0",
-  },
-];
 

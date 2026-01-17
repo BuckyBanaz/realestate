@@ -6,6 +6,7 @@ import 'package:realestate/constant/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 
 class FeaturedPropertiesList extends StatelessWidget {
   const FeaturedPropertiesList({Key? key}) : super(key: key);
@@ -63,6 +64,7 @@ class FeatureCard extends StatelessWidget {
   final String rating;
   final double? width;
   final VoidCallback? onFavoritePressed;
+  final VoidCallback? onTap;
 
   const FeatureCard({
     Key? key,
@@ -76,6 +78,7 @@ class FeatureCard extends StatelessWidget {
     required this.rating,
     this.width,
     this.onFavoritePressed,
+    this.onTap,
   }) : super(key: key);
 
   @override
@@ -86,183 +89,188 @@ class FeatureCard extends StatelessWidget {
     final double imageH = double.infinity;
     final borderRadius = 18.r;
 
-    return Container(
-      width: width ?? double.infinity,
-      height: cardHeight,
-      constraints: width == null ? null : BoxConstraints(maxWidth: 300), 
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E),
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.06),
-          width: 0.8,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: width ?? double.infinity,
+        height: cardHeight,
+        constraints: width == null ? null : BoxConstraints(maxWidth: 300),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(borderRadius),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.06),
+            width: 0.8,
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: Row(
-          children: [
-            // Left: Image with Overlay Elements
-            Stack(
-              children: [
-                Image.network(
-                  imageUrl,
-                  width: imageW,
-                  height: imageH,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    width: imageW,
-                    height: imageH,
-                    color: Colors.grey.shade900,
-                    child: Icon(IconlyLight.image, color: Colors.grey.shade700, size: 20.sp),
-                  ),
-                ),
-                Container(
-                  width: imageW,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.2),
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.4),
-                      ],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 8.h,
-                  left: 8.w,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
-                    decoration: BoxDecoration(
-                      color: secondary.withOpacity(0.85),
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
-                    child: Text(
-                      tag.toUpperCase(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 8.sp,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            // Right: Content
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 10.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.star_rounded, size: 14.sp, color: Colors.amber),
-                            SizedBox(width: 3.w),
-                            Text(
-                              rating,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        GestureDetector(
-                          onTap: onFavoritePressed,
-                          child: Icon(
-                            IconlyLight.heart,
-                            size: 16.sp,
-                            color: Colors.white.withOpacity(0.5),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 6.h),
-
-                    Text(
-                      title,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-
-                    SizedBox(height: 4.h),
-
-                    Row(
-                      children: [
-                        Icon(IconlyLight.location, size: 10.sp, color: secondary),
-                        SizedBox(width: 4.w),
-                        Expanded(
-                          child: Text(
-                            location,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 9.sp,
-                              color: Colors.grey.shade500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const Spacer(),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildMiniDetail(IconlyLight.info_square, beds),
-                            SizedBox(height: 2.h),
-                            _buildMiniDetail(IconlyLight.discovery, area),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              "₹$price",
-                              style: TextStyle(
-                                color: primary,
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
             ),
           ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(borderRadius),
+          child: Row(
+            children: [
+              // Left: Image with Overlay Elements
+              Stack(
+                children: [
+                  CustomImage(
+                    imageUrl: imageUrl,
+                    width: imageW,
+                    height: imageH,
+                    errorWidget: (context, url, _) => Container(
+                      width: imageW,
+                      height: imageH,
+                      color: Colors.grey.shade900,
+                      child: Icon(IconlyLight.image, color: Colors.grey.shade700, size: 20.sp),
+                    ),
+                  ),
+                  Container(
+                    width: imageW,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.2),
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.4),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 8.h,
+                    left: 8.w,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
+                      decoration: BoxDecoration(
+                        color: secondary.withOpacity(0.85),
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      child: Text(
+                        tag.toUpperCase(),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 8.sp,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              // Right: Content
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 10.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.star_rounded, size: 14.sp, color: Colors.amber),
+                              SizedBox(width: 3.w),
+                              Text(
+                                rating,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          GestureDetector(
+                            onTap: onFavoritePressed,
+                            child: Icon(
+                              IconlyLight.heart,
+                              size: 16.sp,
+                              color: Colors.white.withOpacity(0.5),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: 6.h),
+
+                      Text(
+                        title,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+
+                      SizedBox(height: 4.h),
+
+                      Row(
+                        children: [
+                          Icon(IconlyLight.location, size: 10.sp, color: secondary),
+                          SizedBox(width: 4.w),
+                          Expanded(
+                            child: Text(
+                              location,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 9.sp,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const Spacer(),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildMiniDetail(IconlyLight.info_square, beds),
+                                SizedBox(height: 2.h),
+                                _buildMiniDetail(IconlyLight.discovery, area),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                "₹${formatPrice(price)}",
+                                style: TextStyle(
+                                  color: primary,
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -270,14 +278,19 @@ class FeatureCard extends StatelessWidget {
 
   Widget _buildMiniDetail(IconData icon, String label) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 10.sp, color: Colors.white.withOpacity(0.5)),
         SizedBox(width: 4.w),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
-            fontSize: 10.sp,
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.7),
+              fontSize: 10.sp,
+            ),
           ),
         ),
       ],

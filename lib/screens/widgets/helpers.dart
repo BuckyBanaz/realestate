@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../constant/app_colors.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:get/get.dart';
+import 'dart:ui';
+
+import 'package:cached_network_image/cached_network_image.dart';
 
 const baseDur = Duration(milliseconds: 300);
 const baseCurve = Curves.easeOutCubic;
@@ -9,6 +13,28 @@ Widget stagger(int i, Widget child) => child
     .animate(delay: (150 * i).ms)
     .fadeIn(duration: baseDur, curve: baseCurve)
     .slideY(begin: 0.15, end: 0, duration: baseDur, curve: baseCurve);
+    
+String formatPrice(dynamic price) {
+  if (price == null) return "0";
+  double? priceNum;
+  if (price is String) {
+    priceNum = double.tryParse(price);
+  } else if (price is num) {
+    priceNum = price.toDouble();
+  }
+
+  if (priceNum == null) return price.toString();
+
+  if (priceNum >= 10000000) {
+    return "${(priceNum / 10000000).toStringAsFixed(2)} Cr";
+  } else if (priceNum >= 100000) {
+    return "${(priceNum / 100000).toStringAsFixed(2)} L";
+  } else if (priceNum >= 1000) {
+    return "${(priceNum / 1000).toStringAsFixed(2)} K";
+  } else {
+    return priceNum.toStringAsFixed(0);
+  }
+}
 
   Widget circleIconButton(BuildContext context, IconData icon, VoidCallback onTap) {
     return Padding(
@@ -116,6 +142,116 @@ class Logoor extends StatelessWidget {
         SizedBox(width: 6.w),
         textsRight,
       ],
+    );
+  }
+}
+
+void showCustomToast(String message, {bool isError = false}) {
+  final context = Get.context;
+  if (context == null) return;
+
+  ScaffoldMessenger.of(context).clearSnackBars();
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: ClipRRect(
+        borderRadius: BorderRadius.circular(15.r),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            decoration: BoxDecoration(
+              color: isError 
+                ? Colors.red.withOpacity(0.12) 
+                : Theme.of(context).scaffoldBackgroundColor.withOpacity(0.85),
+              borderRadius: BorderRadius.circular(15.r),
+              border: Border.all(
+                color: isError 
+                  ? Colors.red.withOpacity(0.3) 
+                  : primary.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  isError ? Icons.error_outline : Icons.check_circle_outline,
+                  color: isError ? Colors.redAccent : primary,
+                  size: 20.sp,
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.95) ?? Colors.white,
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 4.w),
+              ],
+            ),
+          ),
+        ),
+      ),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.only(
+        bottom: 40.h,
+        left: 20.w,
+        right: 20.w,
+      ),
+      duration: const Duration(seconds: 3),
+    ),
+  );
+}
+
+class CustomImage extends StatelessWidget {
+  final String imageUrl;
+  final double? width;
+  final double? height;
+  final BoxFit fit;
+  final double? borderRadius;
+  final PlaceholderWidgetBuilder? placeholder;
+  final LoadingErrorWidgetBuilder? errorWidget;
+
+  const CustomImage({
+    Key? key,
+    required this.imageUrl,
+    this.width,
+    this.height,
+    this.fit = BoxFit.cover,
+    this.borderRadius,
+    this.placeholder,
+    this.errorWidget,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(borderRadius ?? 0),
+      child: CachedNetworkImage(
+        imageUrl: imageUrl,
+        width: width,
+        height: height,
+        fit: fit,
+        placeholder: placeholder ?? (context, url) => Center(
+          child: SizedBox(
+            width: 20.w,
+            height: 20.w,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: primary.withOpacity(0.5),
+            ),
+          ),
+        ),
+        errorWidget: errorWidget ?? (context, url, error) => Container(
+          color: Colors.grey.shade900,
+          child: const Icon(Icons.error_outline, color: Colors.white24),
+        ),
+      ),
     );
   }
 }

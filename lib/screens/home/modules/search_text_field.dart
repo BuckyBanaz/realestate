@@ -42,17 +42,21 @@ class SearchTextField extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: controller,
-                onChanged: onChanged,
+                enabled: false,
                 style: TextStyle(fontSize: 15.sp, color: Colors.white),
                 decoration: InputDecoration(
                   fillColor: Colors.transparent,
                   hintText: "Search House, Apartment, etc.",
-                  hintStyle: TextStyle(color: Colors.white, fontSize: 15.sp),
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 15.sp),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
                     borderSide: BorderSide.none,
                   ),
                   focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: BorderSide.none,
+                  ),
+                  disabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
                     borderSide: BorderSide.none,
                   ),

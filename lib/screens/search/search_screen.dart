@@ -1,285 +1,259 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' hide SearchController;
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:realestate/constant/app_colors.dart';
-
-import '../home/home_screen.dart';
-import '../home/modules/featured_properties_list.dart';
-import '../property/property_deatils_screen.dart';
-
+import 'package:realestate/Routes/appRoutes.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 import 'package:realestate/data/controllers/search_controller.dart';
-import 'package:realestate/data/models/estate_model.dart';
+import 'package:realestate/data/models/property_list_model.dart';
 
-// ====================== REST OF IMPORTS ARE ABOVE ======================
-
-// ====================== MAIN SEARCH SCREEN ======================
 class SearchScreen extends StatelessWidget {
-  const SearchScreen({super.key});
+  SearchScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(SearchController());
+    final controller = Get.put(PropertySearchController());
 
     return Scaffold(
+      backgroundColor: scaffoldColor,
       appBar: AppBar(
-        // backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(CupertinoIcons.back)),
-        title: const Text("Search results", style: TextStyle(color: Colors.black87, fontSize: 18)),
-        // actions: [
-        //   // IconButton(onPressed: () {}, icon: const Icon(IconlyLight.search, color: Colors.black87)),
-        //   IconButton(
-        //     icon: const Icon(IconlyLight.filter, color: Colors.black87),
-        //     onPressed: () {},
-        //   ),
-        // ],
+        backgroundColor: scaffoldColor,
+        leading: IconButton(
+          onPressed: () => Get.back(),
+          icon: const Icon(CupertinoIcons.back, color: Colors.white),
+        ),
+        title: Text(
+          'Search Properties',
+          style: GoogleFonts.inter(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20.sp,
+          ),
+        ),
       ),
       body: SafeArea(
         child: Column(
           children: [
-            // Optional Search Bar if you want it here
+            // Search Bar & Filter Button
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              child: TextField(
-                controller: controller.searchController,
-                onChanged: (val) => controller.searchQuery.value = val,
-                decoration: InputDecoration(
-                  hintText: 'Search houses, apartments... ',
-                  prefixIcon: const Icon(IconlyLight.search),
-                  filled: true,
-                  fillColor: cardColor,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                ),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(color: Colors.white.withOpacity(0.05)),
+                      ),
+                      child: TextField(
+                        controller: controller.searchController,
+                        onChanged: (val) => controller.updateSearchQuery(val),
+                        style: TextStyle(color: Colors.white, fontSize: 16.sp),
+                        decoration: InputDecoration(
+                          hintText: 'Search city, title, address...',
+                          hintStyle: TextStyle(color: Colors.grey.shade500),
+                          prefixIcon: const Icon(IconlyLight.search, color: Colors.grey),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(vertical: 14.h),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Container(
+                    height: 52.h,
+                    width: 52.h,
+                    decoration: BoxDecoration(
+                      color: secondary,
+                      borderRadius: BorderRadius.circular(16.r),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(IconlyLight.filter, color: Colors.white),
+                      onPressed: () {
+                        // TODO: Open Filter Modal
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
 
-            // Results (uses LayoutBuilder to avoid unbounded constraints)
-            Expanded(child: ResultsSection(controller: controller)),
+            // Category Filters (Horizontal)
+            SizedBox(
+              height: 55.h,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                children: [
+                  _buildCategoryChip(controller, "All"),
+                  SizedBox(width: 10.w),
+                  _buildCategoryChip(controller, "Residential"),
+                  SizedBox(width: 10.w),
+                  _buildCategoryChip(controller, "Commercial"),
+                  SizedBox(width: 10.w),
+                  _buildCategoryChip(controller, "Plot"),
+                  SizedBox(width: 10.w),
+                  _buildCategoryChip(controller, "Agricultural"),
+                  SizedBox(width: 10.w),
+                  _buildCategoryChip(controller, "Farmhouse"),
+                ],
+              ),
+            ),
+
+            // Results Section
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value && controller.searchResults.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (controller.searchResults.isEmpty) {
+                  return _buildEmptyState();
+                }
+
+                return CustomScrollView(
+                  controller: controller.scrollController,
+                  physics: const BouncingScrollPhysics(),
+                  slivers: [
+                    SliverPadding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                      sliver: SliverToBoxAdapter(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Find results in your area",
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              "${controller.searchResults.length} Results",
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: secondary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SliverPadding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final property = controller.searchResults[index];
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 16.h),
+                              child: PropertyCard(property: property),
+                            );
+                          },
+                          childCount: controller.searchResults.length,
+                        ),
+                      ),
+                    ),
+                    if (controller.isMoreLoading.value)
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                      ),
+                    if (!controller.hasNextPage && controller.searchResults.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.all(24.0),
+                          child: Center(
+                            child: Text(
+                              "You've reached the end of results",
+                              style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              }),
+            ),
           ],
         ),
       ),
     );
   }
-}
 
-// ====================== RESULTS OR EMPTY STATE (Fixed) ======================
-class ResultsSection extends StatelessWidget {
-  final SearchController controller;
-  const ResultsSection({required this.controller, super.key});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildCategoryChip(PropertySearchController controller, String category) {
     return Obx(() {
-      final results = nearbyEstates;
-
-      // If searching and nothing found -> show empty state
-      if (controller.searchQuery.value.isNotEmpty && results.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: primary,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.search_off_rounded, color: Colors.white, size: 40),
-              ),
-              const SizedBox(height: 24),
-              Text("Search not found", style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 50),
-                child: Text(
-                  "Sorry we can't find the real estate you are looking for. Maybe, a little spelling mistake?",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 15, color: Colors.grey[600], height: 1.5),
-                ),
-              ),
-            ],
+      final isActive = controller.selectedCategory.value == category;
+      return GestureDetector(
+        onTap: () => controller.selectCategory(category),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+          decoration: BoxDecoration(
+            color: isActive ? secondary : cardColor,
+            borderRadius: BorderRadius.circular(25.r),
+            border: Border.all(
+              color: isActive ? secondary : Colors.white.withOpacity(0.05),
+            ),
+            boxShadow: isActive ? [
+              BoxShadow(
+                color: secondary.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              )
+            ] : null,
           ),
-        );
-      }
-
-      // Default state + results
-      // inside ResultsSection.build(...)
-      return LayoutBuilder(builder: (context, constraints) {
-        return SizedBox(
-          width: constraints.maxWidth,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  children: [
-                    Text(
-                      "Found ${results.length} estates",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: secondary),
-                    ),
-                    // const Spacer(),
-                    // _filterChip("House", true),
-                    // const SizedBox(width: 8),
-                    // _filterChip("₹50 - ₹250", false),
-                  ],
-                ),
+          child: Center(
+            child: Text(
+              category,
+              style: GoogleFonts.inter(
+                color: isActive ? Colors.white : Colors.grey.shade400,
+                fontSize: 13.sp,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
               ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  itemCount: results.length,
-                  itemBuilder: (ctx, i) {
-                    final e = results[i];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: FeatureCard(
-                        imageUrl: e['image']!,
-                        title: e['title']!,
-                        location: e['location']!,
-                        price: e['price']!,
-                        beds: e['beds']!,
-                        area: e['area']!,
-                        tag: e['tag']!,
-                        rating: e['rating']!,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+            ),
           ),
-        );
-      });
-
+        ),
+      );
     });
   }
 
-  Widget _filterChip(String label, bool active) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: active ? secondary : cardColor,
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: active ? Colors.white : Colors.grey[700],
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
-class ResultCard extends StatelessWidget {
-  const ResultCard({
-    Key? key,
-    required this.name,
-    required this.rating,
-    required this.location,
-  }) : super(key: key);
-
-  final String name, rating, location;
-
-  @override
-  Widget build(BuildContext context) {
-    final screenW = MediaQuery.of(context).size.width;
-
-    final cardHeight = (screenW * 0.24).clamp(88.0, 150.0);
-    final imageWidth = (screenW * 0.30).clamp(90.0, 130.0);
-
-    return Container(
-      height: cardHeight,
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-            color: Theme.of(context).brightness == Brightness.dark 
-              ? Colors.grey.shade800 
-              : Colors.grey.shade200
-          ),
-      ),
-      child: Row(
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // IMAGE
-          SizedBox(
-            width: imageWidth,
-            height: cardHeight,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.asset(
-                  "assets/images/1.png",
-                  fit: BoxFit.cover,
-                ),
-              ),
+          Container(
+            width: 100.w,
+            height: 100.w,
+            decoration: BoxDecoration(
+              color: cardColor,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(IconlyLight.search, color: Colors.grey.shade700, size: 45.sp),
+          ),
+          SizedBox(height: 24.h),
+          Text(
+            "No properties found",
+            style: GoogleFonts.inter(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
-
-          // DETAILS
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Name
-                  Text(
-                    name,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-
-                  const SizedBox(height: 4),
-
-                  // Location
-                  Text(
-                    location,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // Rating
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 16),
-                      const SizedBox(width: 6),
-                      Text(
-                        rating,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                          color: Theme.of(context).textTheme.bodyLarge?.color,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+          SizedBox(height: 10.h),
+          Text(
+            "Try keyword or different filters",
+            style: TextStyle(color: Colors.grey, fontSize: 15.sp),
           ),
         ],
       ),
@@ -287,3 +261,143 @@ class ResultCard extends StatelessWidget {
   }
 }
 
+class PropertyCard extends StatelessWidget {
+  final PropertyListItem property;
+  PropertyCard({required this.property, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Get.toNamed(AppRoutes.propertyDetail, arguments: property.id),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image Stack
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+                  child: CustomImage(
+                    imageUrl: property.mainImageUrl ?? "",
+                    height: 180.h,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  top: 12.h,
+                  right: 12.w,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                    child: Text(
+                      property.propertyType,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 12.h,
+                  left: 12.w,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: secondary,
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                    child: Text(
+                      "₹${formatPrice(property.price)}",
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            // Details Section
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    property.title,
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 8.h),
+                  Row(
+                    children: [
+                      Icon(IconlyLight.location, size: 14.sp, color: Colors.grey),
+                      SizedBox(width: 6.w),
+                      Expanded(
+                        child: Text(
+                          property.address,
+                          style: TextStyle(color: Colors.grey, fontSize: 13.sp),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12.h),
+                  Row(
+                    children: [
+                      if (property.bedrooms != null) ...[
+                        _buildInfoIcon(IconlyBold.show, "${property.bedrooms} Beds"),
+                        SizedBox(width: 16.w),
+                      ],
+                      _buildInfoIcon(IconlyBold.category, "${property.area} Sq.Ft"),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoIcon(IconData icon, String label) {
+    return Row(
+      children: [
+        Icon(icon, size: 16.sp, color: secondary),
+        SizedBox(width: 6.w),
+        Text(
+          label,
+          style: TextStyle(color: Colors.grey.shade400, fontSize: 12.sp),
+        ),
+      ],
+    );
+  }
+}

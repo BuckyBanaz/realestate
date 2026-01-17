@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconly/iconly.dart';
 import 'package:realestate/constant/app_colors.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 
 class PromotionalBanners extends StatefulWidget {
   final double responsiveWidth;
@@ -253,10 +254,12 @@ class PromoCardWhite extends StatelessWidget {
                 height: double.infinity,
                 color: Colors.grey.shade50,
                 child: imageUrl != null
-                    ? Image.network(
-                        imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Center(
+                    ? CustomImage(
+                        imageUrl: imageUrl!,
+                        width: 140.w,
+                        height: double.infinity,
+                        borderRadius: 16.r,
+                        errorWidget: (_, __, ___) => Center(
                           child: Icon(
                             IconlyLight.home,
                             size: 36.w,

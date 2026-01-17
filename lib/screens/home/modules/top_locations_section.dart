@@ -6,43 +6,49 @@ import 'package:realestate/constant/app_colors.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
+import '../../../../data/controllers/home_controller.dart';
+
+import 'package:realestate/screens/widgets/helpers.dart';
 
 class TopLocationsSection extends StatelessWidget {
   const TopLocationsSection({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 140.h,
-      child: ListView.separated(
-        // padding: EdgeInsets.symmetric(horizontal: 4.w),
-        scrollDirection: Axis.horizontal,
-        itemCount: topLocations.length,
-        clipBehavior: Clip.none,
-        separatorBuilder: (_, __) => SizedBox(width: 14.w),
-        itemBuilder: (context, index) {
-          final location = topLocations[index];
-          return LocationCard(
-            imageUrl: location["image"]!,
-            title: location["title"]!,
-            listings: "25+",
-            onTap: () {
-              Get.toNamed(
-                AppRoutes.topLocations,
-                arguments: {
-                  'locationName': location["title"]!.replaceAll('\n', ' '),
-                  'rank': "+${index + 1}",
-                  'heroImage': location["image"]!,
-                  'subtitle':
-                      "Our recommended real estates in ${location["title"]!.split(',').first}",
-                },
-              );
-            },
-          )
-              .animate()
-              .fadeIn(delay: (100 * index).ms)
-              .slideX(begin: 0.2, end: 0, curve: Curves.easeOutQuad);
-        },
+    final HomeController controller = Get.find<HomeController>();
+
+    return Obx(
+      () => SizedBox(
+        height: 140.h,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: controller.topLocations.length,
+          clipBehavior: Clip.none,
+          separatorBuilder: (_, __) => SizedBox(width: 14.w),
+          itemBuilder: (context, index) {
+            final location = controller.topLocations[index];
+            return LocationCard(
+              imageUrl: location.propertyImage ?? "https://via.placeholder.com/300x140",
+              title: location.title,
+              listings: "Explore",
+              onTap: () {
+                Get.toNamed(
+                  AppRoutes.locationDetail,
+                  arguments: {
+                    'locationName': location.title,
+                    'rank': "+${index + 1}",
+                    'heroImage': location.propertyImage,
+                    'subtitle': location.address,
+                    'addressId': location.id,
+                  },
+                );
+              },
+            )
+            .animate()
+            .fadeIn(delay: (100 * index).ms)
+            .slideX(begin: 0.2, end: 0, curve: Curves.easeOutQuad);
+          },
+        ),
       ),
     );
   }
@@ -87,23 +93,14 @@ class LocationCard extends StatelessWidget {
             // Image Section
             Hero(
               tag: imageUrl + title,
-              child: Container(
+              child: CustomImage(
+                imageUrl: imageUrl,
                 width: 110.w,
                 height: 116.h,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: Colors.white.withOpacity(0.05)),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20.r),
-                  child: Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: Colors.grey.shade900,
-                      child: Icon(IconlyLight.image, color: Colors.grey.shade700),
-                    ),
-                  ),
+                borderRadius: 20.r,
+                errorWidget: (context, url, _) => Container(
+                  color: Colors.grey.shade900,
+                  child: Icon(IconlyLight.image, color: Colors.grey.shade700),
                 ),
               ),
             ),
@@ -201,27 +198,4 @@ class LocationCard extends StatelessWidget {
   }
 }
 
-// ---------------- sample data ----------------
-final List<Map<String, String>> topLocations = [
-  {
-    "title": "Sector 15, Hisar",
-    "image":
-        "https://images.unsplash.com/photo-1599423300746-b62533397364?w=600",
-  },
-  {
-    "title": "Hisar Cantt",
-    "image":
-        "https://images.unsplash.com/photo-1600585153490-76fb20a32601?w=600",
-  },
-  {
-    "title": "Rajguru Nagar, Hisar",
-    "image":
-        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600",
-  },
-  {
-    "title": "Model Town, Hisar",
-    "image":
-        "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=600",
-  },
-];
 

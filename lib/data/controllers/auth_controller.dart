@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/domain/repo/auth_repository.dart';
 import 'package:realestate/screens/home/home_screen.dart'; // Assume Home Screen exists
+import 'package:realestate/screens/widgets/helpers.dart';
 
 class AuthController extends GetxController {
   final AuthRepository _authRepo = AuthRepository();
@@ -13,19 +13,13 @@ class AuthController extends GetxController {
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
+  final TextEditingController forgotPasswordEmailController = TextEditingController();
 
   var isLoading = false.obs;
 
   Future<void> login() async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-      Fluttertoast.showToast(
-        msg: "Please enter email and password",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0
-      );
+      showCustomToast("Please enter email and password", isError: true);
       return;
     }
 
@@ -40,39 +34,18 @@ class AuthController extends GetxController {
     isLoading.value = false;
 
     if (result['success']) {
-      Fluttertoast.showToast(
-        msg: result['message'] ?? "Login Successful",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 16.0
-      );
+      showCustomToast(result['message'] ?? "Login Successful");
           
       // Navigate to Home or Dashboard
        Get.offAllNamed(AppRoutes.home); 
     } else {
-      Fluttertoast.showToast(
-        msg: result['message'] ?? "Login Failed",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0
-      );
+      showCustomToast(result['message'] ?? "Login Failed", isError: true);
     }
   }
 
   Future<void> register() async {
     if (nameController.text.isEmpty || phoneController.text.isEmpty || emailController.text.isEmpty || passwordController.text.isEmpty) {
-      Fluttertoast.showToast(
-        msg: "Please fill all fields",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0
-      );
+      showCustomToast("Please fill all fields", isError: true);
       return;
     }
 
@@ -88,14 +61,7 @@ class AuthController extends GetxController {
     isLoading.value = false;
 
     if (result['success']) {
-      Fluttertoast.showToast(
-        msg: result['message'] ?? "Registration Successful",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 16.0
-      );
+      showCustomToast("Registration Successful. Now enter email and password to login");
       
       // Navigate to Login Screen
       // We will clear fields optionally
@@ -106,23 +72,36 @@ class AuthController extends GetxController {
       
       Get.offAllNamed(AppRoutes.login);
     } else {
-      Fluttertoast.showToast(
-        msg: result['message'] ?? "Registration Failed",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0
-      );
+      showCustomToast(result['message'] ?? "Registration Failed", isError: true);
     }
   }
   
+  Future<void> forgotPassword() async {
+    final email = forgotPasswordEmailController.text.trim();
+    if (email.isEmpty) {
+      showCustomToast("Please enter your email", isError: true);
+      return;
+    }
+
+    isLoading.value = true;
+    final result = await _authRepo.forgotPassword(email);
+    isLoading.value = false;
+
+    if (result['success']) {
+      showCustomToast(result['message'] ?? "OTP sent to your email");
+      Get.toNamed(AppRoutes.otp, arguments: {
+        'contact': email,
+        'isEmail': true,
+        'isForgotPassword': true,
+      });
+    } else {
+      showCustomToast(result['message'] ?? "Failed to send OTP", isError: true);
+    }
+  }
+
   @override
   void onClose() {
-    emailController.dispose();
-    passwordController.dispose();
-    nameController.dispose();
-    phoneController.dispose();
+    forgotPasswordEmailController.dispose();
     super.onClose();
   }
 }

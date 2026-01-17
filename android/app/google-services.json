@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "402708018802",
+    "project_id": "bladmin-26b27",
+    "storage_bucket": "bladmin-26b27.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:402708018802:android:ed60e72a032008dadef4eb",
+        "android_client_info": {
+          "package_name": "com.bla.realestate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3wj6QqLRzsu8cKaBqBc5bDsCKJS70_jg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:402708018802:android:89374e1af5443973def4eb",
+        "android_client_info": {
+          "package_name": "com.example.employe_realestate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3wj6QqLRzsu8cKaBqBc5bDsCKJS70_jg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

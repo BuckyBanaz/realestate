@@ -43,13 +43,13 @@ class _SplashScreenState extends State<SplashScreen>
     // navigate after 3 seconds
     Timer(const Duration(seconds: 3), () {
       if (!mounted) return;
-       Get.offAllNamed(AppRoutes.home);
-      // final token = LocalStorage().getToken();
-      // if (token != null && token.isNotEmpty) {
-      //    Get.offAllNamed(AppRoutes.home);
-      // } else {
-      //    Get.offAllNamed(AppRoutes.login);
-      // }
+      //  Get.offAllNamed(AppRoutes.login);
+      final token = LocalStorage().getToken();
+      if (token != null && token.isNotEmpty) {
+         Get.offAllNamed(AppRoutes.home);
+      } else {
+         Get.offAllNamed(AppRoutes.login);
+      }
     });
   }
 

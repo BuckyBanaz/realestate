@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:realestate/Routes/appRoutes.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 
 /// Simple data holder for a category — only title used for now.
 class CategoryItem {
@@ -134,7 +135,15 @@ class PropertyCategoryCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            SvgPicture.asset(path, width: 40.w, height: 40.w, fit: BoxFit.contain),
+            if (iconUrl != null && iconUrl!.isNotEmpty)
+              CustomImage(
+                imageUrl: iconUrl!,
+                width: 40.w,
+                height: 40.w,
+                borderRadius: 8.r,
+              )
+            else
+              SvgPicture.asset(path, width: 40.w, height: 40.w, fit: BoxFit.contain),
             SizedBox(width: 12.w),
             Expanded(
               child: Column(

@@ -4,6 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:realestate/data/models/profile_models.dart';
+import 'package:realestate/data/models/transaction_model.dart';
+import 'package:realestate/Routes/appRoutes.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 
 import '../../constant/app_colors.dart';
 
@@ -11,8 +14,6 @@ class RecentTransactionListScreen extends StatelessWidget {
   final List<TransactionModel> transactions;
   const RecentTransactionListScreen({required this.transactions, super.key});
 
-  String _fmtDate(DateTime d) =>
-      '${d.day.toString().padLeft(2, '0')}-${d.month.toString().padLeft(2, '0')}-${d.year}';
 
   @override
   Widget build(BuildContext context) {
@@ -80,9 +81,9 @@ class RecentTransactionListScreen extends StatelessWidget {
                 separatorBuilder: (_, __) => SizedBox(height: 8.h),
                 itemBuilder: (ctx, i) {
                   final t = transactions[i];
+                  final isReceived = t.amount.startsWith('+');
                   return InkWell(
-                    onTap: () =>
-                        Get.to(() => TransactionDetailScreen(transaction: t)),
+                    onTap: () => Get.toNamed(AppRoutes.transactionDetail, arguments: t),
                     child: Container(
                       padding: EdgeInsets.symmetric(
                         vertical: 12.h,
@@ -94,24 +95,36 @@ class RecentTransactionListScreen extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          SizedBox(width: 90.w, child: Text(_fmtDate(t.date))),
+                          SizedBox(width: 90.w, child: Text(t.date)),
                           Expanded(
                             child: Text(
-                              t.property,
+                              t.propertyName,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           SizedBox(
                             width: 90.w,
                             child: Text(
-                              '₹${t.amount}',
+                              t.amount,
                               textAlign: TextAlign.right,
-                              style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600, 
+                                color: isReceived ? Colors.green : Theme.of(context).textTheme.bodyLarge?.color
+                              ),
                             ),
                           ),
                           SizedBox(
                             width: 70.w,
-                            child: Center(child: Text(t.type)),
+                            child: Center(
+                              child: Text(
+                                t.status,
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: t.status.toLowerCase() == 'completed' ? Colors.green : Colors.orange,
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -120,106 +133,6 @@ class RecentTransactionListScreen extends StatelessWidget {
                 },
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ------------------ Transaction Detail Screen ------------------
-class TransactionDetailScreen extends StatelessWidget {
-  final TransactionModel transaction;
-  const TransactionDetailScreen({required this.transaction, super.key});
-
-  String _fmtDate(DateTime d) =>
-      '${d.day.toString().padLeft(2, '0')}-${d.month.toString().padLeft(2, '0')}-${d.year}';
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () => Get.back(),
-          icon: Icon(IconlyLight.arrow_left_2, color: Theme.of(context).iconTheme.color),
-        ),
-
-          title: Text('Transaction ${transaction.id}', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          elevation: 0,
-          ),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              transaction.property,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp, color: Theme.of(context).textTheme.bodyLarge?.color),
-            ),
-            SizedBox(height: 8.h),
-            Row(
-              children: [
-                Icon(Icons.location_on, size: 16.w),
-                SizedBox(width: 6.w),
-                Text(transaction.location),
-              ],
-            ),
-            SizedBox(height: 12.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Amount', style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color)),
-                Text('₹${transaction.amount}', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
-              ],
-            ),
-            SizedBox(height: 8.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Date', style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color)),
-                Text(_fmtDate(transaction.date), style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
-              ],
-            ),
-            SizedBox(height: 8.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Type', style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color)),
-                Text(transaction.type, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
-              ],
-            ),
-            SizedBox(height: 8.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Status', style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color)),
-                Text(transaction.status, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
-              ],
-            ),
-            SizedBox(height: 8.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Reference',
-                  style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
-                ),
-                Text(transaction.reference, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
-              ],
-            ),
-            SizedBox(height: 16.h),
-            if (transaction.image.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12.r),
-                child: Image.network(
-                  transaction.image,
-                  height: 160.h,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
           ],
         ),
       ),

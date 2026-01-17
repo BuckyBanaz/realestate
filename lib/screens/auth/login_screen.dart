@@ -359,7 +359,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Yeh function add kar de
   void _showForgotPasswordDialog() {
-    if (Platform.isAndroid) {
+    if (Platform.isIOS) {
       // iOS - Cupertino Alert Dialog
       showCupertinoDialog(
         context: context,
@@ -379,6 +379,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text("Enter your email address and we'll send you a link to reset your password."),
                   SizedBox(height: 16),
                   CupertinoTextField(
+                    controller: _authController.forgotPasswordEmailController,
                     placeholder: "you@example.com",
                     padding: EdgeInsets.all(14),
                     decoration: BoxDecoration(
@@ -399,17 +400,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Text("Send", style: TextStyle(color: primary, fontWeight: FontWeight.bold)),
                 onPressed: () {
                   Navigator.pop(context);
-                  // Get.rawSnackbar(
-                  //   title: "Success",
-                  //   message: "Password reset link sent to your email!",
-                  //   backgroundColor: primary,
-                  //   borderRadius: 12,
-                  //   margin: EdgeInsets.all(16),
-                  //   snackPosition: SnackPosition.BOTTOM,
-                  //   icon: Icon(Icons.check_circle_outline, color: Colors.white, size: 28),
-                  //   duration: Duration(seconds: 3),
-                  // );
-                  },
+                  _authController.forgotPassword();
+                },
 
               ),
             ],
@@ -429,6 +421,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Text("We'll send a password reset link to your email.", style: TextStyle(fontSize: 14.sp, color: Theme.of(context).textTheme.bodyLarge?.color)),
               SizedBox(height: 16),
               TextField(
+                controller: _authController.forgotPasswordEmailController,
                 decoration: InputDecoration(
                   hintText: "you@example.com",
                   filled: true,
@@ -451,16 +444,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
-                // Get.rawSnackbar(
-                //   title: "Success",
-                //   message: "Password reset link sent to your email!",
-                //   backgroundColor: primary,
-                //   borderRadius: 12,
-                //   margin: EdgeInsets.all(16),
-                //   snackPosition: SnackPosition.BOTTOM,
-                //   icon: Icon(Icons.check_circle_outline, color: Colors.white, size: 28),
-                //   duration: Duration(seconds: 3),
-                // );
+                _authController.forgotPassword();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: primary,

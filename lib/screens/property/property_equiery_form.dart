@@ -5,13 +5,19 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:realestate/constant/app_colors.dart';
+import 'package:realestate/domain/app/local_storage.dart';
+import 'package:realestate/domain/repo/property_repository.dart';
+import 'package:realestate/Routes/appRoutes.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 
 class EnquiryFormScreen extends StatefulWidget {
+  final int propertyId;
   final String propertyName;
   final String propertyLocation;
 
   const EnquiryFormScreen({
     Key? key,
+    required this.propertyId,
     required this.propertyName,
     required this.propertyLocation,
   }) : super(key: key);
@@ -28,6 +34,22 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
   final _messageController = TextEditingController();
 
   bool _isLoading = false;
+  final PropertyRepository _repository = PropertyRepository();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  void _loadUserData() {
+    final user = LocalStorage().getUser();
+    if (user != null) {
+      _nameController.text = user['name'] ?? '';
+      _emailController.text = user['email'] ?? '';
+      _phoneController.text = user['phone'] ?? '';
+    }
+  }
 
   @override
   void dispose() {
@@ -42,18 +64,24 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
+    
+    final result = await _repository.saveEnquiry(
+      propertyId: widget.propertyId,
+      name: _nameController.text.trim(),
+      email: _emailController.text.trim(),
+      phone: _phoneController.text.trim(),
+      message: _messageController.text.trim(),
+    );
+    
     setState(() => _isLoading = false);
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text("Enquiry sent successfully!"),
-          backgroundColor: primary,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      Get.back();
+      if (result['success'] == true) {
+        showCustomToast(result['message'] ?? 'Enquiry submitted successfully!');
+        Get.offAllNamed(AppRoutes.home);
+      } else {
+        showCustomToast(result['message'] ?? 'Failed to submit enquiry', isError: true);
+      }
     }
   }
 

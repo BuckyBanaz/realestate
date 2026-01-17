@@ -12,8 +12,9 @@ import '../widgets/helpers.dart';
 class OTPScreen extends StatefulWidget {
   final String contact;
   final bool isEmail;
+  final bool isForgotPassword;
 
-  const OTPScreen({Key? key, required this.contact, this.isEmail = false}) : super(key: key);
+  const OTPScreen({Key? key, required this.contact, this.isEmail = false, this.isForgotPassword = false}) : super(key: key);
 
   @override
   State<OTPScreen> createState() => _OTPScreenState();
@@ -28,7 +29,6 @@ class _OTPScreenState extends State<OTPScreen> {
     super.initState();
     _pinController = TextEditingController();
     _authC = Get.put(OtpController());
-    // start timer at 30s
     _authC.startTimer(seconds: 30);
   }
 
@@ -41,7 +41,11 @@ class _OTPScreenState extends State<OTPScreen> {
   }
 
   void _onOtpCompleted(String pin) {
-    _authC.verifyOtp(otp: pin, contact: widget.contact);
+    bool isForgot = false;
+    if (Get.arguments is Map && Get.arguments['isForgotPassword'] == true) {
+      isForgot = true;
+    }
+    _authC.verifyOtp(otp: pin, contact: widget.contact, isForgotPassword: isForgot);
   }
 
   @override
@@ -117,9 +121,8 @@ class _OTPScreenState extends State<OTPScreen> {
               stagger(
                 4, Center(
                   child: Pinput(
-
                     controller: _pinController,
-                    length: 4,
+                    length: 6,
                     defaultPinTheme: defaultPinTheme,
                     focusedPinTheme: defaultPinTheme.copyWith(
                       decoration: defaultPinTheme.decoration!.copyWith(
@@ -141,9 +144,62 @@ class _OTPScreenState extends State<OTPScreen> {
 
               SizedBox(height: 20.h),
 
-              // Timer + resend
+              // Password fields for Reset Password flow
+              Obx(() {
+                bool isForgot = false;
+                if (Get.arguments is Map && Get.arguments['isForgotPassword'] == true) {
+                   isForgot = true;
+                }
+                
+                if (isForgot) {
+                   return Column(
+                     children: [
+                        stagger(
+                          5, _buildPasswordField(
+                            controller: _authC.newPasswordController,
+                            hintText: "New Password",
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        stagger(
+                          6, _buildPasswordField(
+                            controller: _authC.confirmPasswordController,
+                            hintText: "Confirm New Password",
+                          ),
+                        ),
+                        SizedBox(height: 24.h),
+                        stagger(
+                          7, SizedBox(
+                            width: double.infinity,
+                            height: 52.h,
+                            child: ElevatedButton(
+                              onPressed: _authC.isVerifying.value ? null : () {
+                                if (_pinController.text.length != 6) {
+                                  showCustomToast("Please enter 6 digit OTP", isError: true);
+                                  return;
+                                }
+                                _authC.resetPassword(email: widget.contact, otp: _pinController.text);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primary,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                              ),
+                              child: _authC.isVerifying.value 
+                                ? CircularProgressIndicator(color: Colors.white)
+                                : Text("Reset Password", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ),
+                     ],
+                   );
+                }
+                return const SizedBox.shrink();
+              }),
+
+              SizedBox(height: 20.h),
+
               stagger(
-                5, Center(
+                9, Center(
                   child: Obx(() {
                     final seconds = _authC.secondsRemaining.value;
                     final canResend = seconds == 0 && !_authC.isResending.value;
@@ -217,6 +273,24 @@ class _OTPScreenState extends State<OTPScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPasswordField({required TextEditingController controller, required String hintText}) {
+    return TextFormField(
+      controller: controller,
+      obscureText: true,
+      decoration: InputDecoration(
+        hintText: hintText,
+        filled: true,
+        fillColor: Theme.of(context).cardColor,
+        contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      style: TextStyle(fontSize: 14.sp, color: Theme.of(context).textTheme.bodyLarge?.color),
     );
   }
 }

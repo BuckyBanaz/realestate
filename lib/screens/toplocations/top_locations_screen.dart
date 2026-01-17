@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/constant/app_colors.dart';
+import 'package:realestate/data/controllers/home_controller.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 
 class TopLocationsScreen extends StatelessWidget {
   const TopLocationsScreen({Key? key}) : super(key: key);
@@ -99,33 +101,47 @@ class TopLocationsScreen extends StatelessWidget {
           ),
 
           // ==================== GRID OF LOCATIONS ====================
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16.w,
-                mainAxisSpacing: 16.h,
-                childAspectRatio: 0.85,
+          Obx(() {
+            final controller = Get.find<HomeController>();
+            if (controller.isLoading.value) {
+              return const SliverToBoxAdapter(
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (controller.topLocations.isEmpty) {
+              return const SliverToBoxAdapter(
+                child: Center(child: Text("No locations found")),
+              );
+            }
+            return SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              sliver: SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16.w,
+                  mainAxisSpacing: 16.h,
+                  childAspectRatio: 0.85,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final loc = controller.topLocations[index];
+                    return _LocationCard(
+                      rank: (index + 1).toString().padLeft(2, '0'),
+                      title: loc.title,
+                      imageUrl: loc.propertyImage ?? "",
+                      listingCount: loc.address,
+                      addressId: loc.id,
+                    )
+                        .animate()
+                        .fadeIn(delay: (200 + (index * 100)).ms)
+                        .slideY(begin: 0.1, end: 0)
+                        .scale(begin: const Offset(0.9, 0.9));
+                  },
+                  childCount: controller.topLocations.length,
+                ),
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final loc = locations[index];
-                  return _LocationCard(
-                    rank: loc["rank"]!,
-                    title: loc["title"]!,
-                    imageUrl: loc["image"]!,
-                    listingCount: "${15 + (index * 3)} Properties",
-                  )
-                      .animate()
-                      .fadeIn(delay: (200 + (index * 100)).ms)
-                      .slideY(begin: 0.1, end: 0)
-                      .scale(begin: const Offset(0.9, 0.9));
-                },
-                childCount: locations.length,
-              ),
-            ),
-          ),
+            );
+          }),
           
           SliverToBoxAdapter(child: SizedBox(height: 40.h)),
         ],
@@ -136,12 +152,14 @@ class TopLocationsScreen extends StatelessWidget {
 
 class _LocationCard extends StatelessWidget {
   final String rank, title, imageUrl, listingCount;
+  final int addressId;
 
   const _LocationCard({
     required this.rank,
     required this.title,
     required this.imageUrl,
     required this.listingCount,
+    required this.addressId,
   });
 
   @override
@@ -154,7 +172,8 @@ class _LocationCard extends StatelessWidget {
             'locationName': title,
             'rank': rank,
             'heroImage': imageUrl,
-            'subtitle': "Our recommended real estates in $title",
+            'subtitle': listingCount,
+            'addressId': addressId,
           },
         );
       },
@@ -176,12 +195,12 @@ class _LocationCard extends StatelessWidget {
           child: Stack(
             children: [
               // Image
-              Image.network(
-                imageUrl.startsWith('http') ? imageUrl : "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600",
+              CustomImage(
+                imageUrl: imageUrl.startsWith('http') ? imageUrl : "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600",
                 width: double.infinity,
                 height: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade900),
+                borderRadius: 24.r,
+                errorWidget: (_, __, ___) => Container(color: Colors.grey.shade900),
               ),
 
               // Premium Gradient Overlay
@@ -268,35 +287,3 @@ class _LocationCard extends StatelessWidget {
   }
 }
 
-final List<Map<String, String>> locations = [
-  {
-    "rank": "01",
-    "title": "Sector 15, Hisar",
-    "image": "https://images.unsplash.com/photo-1599423300746-b62533397364?w=600",
-  },
-  {
-    "rank": "02",
-    "title": "Hisar Cantt",
-    "image": "https://images.unsplash.com/photo-1600585153490-76fb20a32601?w=600",
-  },
-  {
-    "rank": "03",
-    "title": "Rajguru Nagar, Hisar",
-    "image": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600",
-  },
-  {
-    "rank": "04",
-    "title": "Model Town, Hisar",
-    "image": "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=600",
-  },
-  {
-    "rank": "05",
-    "title": "Camp Chowk, Hisar",
-    "image": "https://images.unsplash.com/photo-1582234372722-50d7ccc30ebd?w=600",
-  },
-  {
-    "rank": "06",
-    "title": "Urban Estate II, Hisar",
-    "image": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600",
-  },
-];

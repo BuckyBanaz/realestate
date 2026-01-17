@@ -222,7 +222,7 @@ class NewsShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 150.h, // Assuming similar height to typical news cards
+      height: 300.h, 
       child: ListView.separated(
          padding: EdgeInsets.zero,
         scrollDirection: Axis.horizontal,
@@ -232,31 +232,59 @@ class NewsShimmer extends StatelessWidget {
         itemBuilder: (context, index) {
           return BaseShimmer(
             child: Container(
-              width: 280.w,
-              padding: EdgeInsets.all(12.w),
+              width: 260.w,
               decoration: BoxDecoration(
                 color: const Color(0xFF1E1E1E),
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(16.r),
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   ShimmerContainer(width: 100.w, height: double.infinity, radius: 16.r),
-                   SizedBox(width: 12.w),
-                   Expanded(
+                   ShimmerContainer(width: double.infinity, height: 140.h, radius: 16.r),
+                   Padding(
+                     padding: EdgeInsets.all(14.w),
                      child: Column(
                        crossAxisAlignment: CrossAxisAlignment.start,
-                       mainAxisAlignment: MainAxisAlignment.center,
                        children: [
-                         ShimmerContainer(width: 80.w, height: 12.h, radius: 4),
+                         ShimmerContainer(width: 180.w, height: 15.h, radius: 4),
                          SizedBox(height: 8.h),
-                         ShimmerContainer(width: double.infinity, height: 14.h, radius: 4),
+                         ShimmerContainer(width: double.infinity, height: 11.h, radius: 4),
                          SizedBox(height: 4.h),
-                         ShimmerContainer(width: 120.w, height: 14.h, radius: 4),
+                         ShimmerContainer(width: 150.w, height: 11.h, radius: 4),
+                         SizedBox(height: 20.h),
+                         ShimmerContainer(width: 80.w, height: 14.h, radius: 4),
                        ],
                      ),
                    )
                 ],
               ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ---------------- Categories Shimmer ----------------
+class CategoriesShimmer extends StatelessWidget {
+  const CategoriesShimmer({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 38.h,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 5,
+        separatorBuilder: (_, __) => SizedBox(width: 8.w),
+        itemBuilder: (context, index) {
+          return BaseShimmer(
+            child: ShimmerContainer(
+              width: 80.w + (index * 10),
+              height: 38.h,
+              radius: 10.r,
             ),
           );
         },

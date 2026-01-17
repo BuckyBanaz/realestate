@@ -1,134 +1,160 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:realestate/domain/repo/auth_repository.dart';
+import 'package:realestate/domain/app/local_storage.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 import 'package:realestate/data/models/profile_models.dart';
+import 'package:realestate/data/models/transaction_model.dart';
+import 'package:realestate/data/models/account_data_model.dart';
+import 'package:realestate/domain/repo/property_repository.dart';
+import 'package:realestate/Routes/appRoutes.dart';
 
 class ProfileController extends GetxController {
-  var selectedTab = 0.obs; // 0=Transaction, 1=my_property, 2=payments
+  final AuthRepository _authRepo = AuthRepository();
+  final PropertyRepository _propertyRepo = PropertyRepository();
+  
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
-  // Purchased / owned properties
-  final List<TransactionModel> transactions = [
-    TransactionModel(
-      id: 'TXN001',
-      property: 'Plot No. 21 Shree Shyam Kunj Phase 5',
-      location: 'Raipur Road, Hisar',
-      date: DateTime(2025, 11, 24),
-      amount: 230000,
-      type: 'Received',
-      status: 'Completed',
-      reference: 'REF-20251124-001',
-      image:
-          'https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg',
-    ),
-    TransactionModel(
-      id: 'TXN002',
-      property: 'Plot No. 78 Galaxy Residency',
-      location: 'Sector 12, Hisar',
-      date: DateTime(2025, 11, 18),
-      amount: 520000,
-      type: 'Received',
-      status: 'Completed',
-      reference: 'REF-20251118-002',
-      image:
-          'https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg',
-    ),
-    TransactionModel(
-      id: 'TXN003',
-      property: 'Block A - Park View Apartment',
-      location: 'MG Road, Hisar',
-      date: DateTime(2025, 10, 29),
-      amount: 310000,
-      type: 'Paid',
-      status: 'Pending',
-      reference: 'REF-20251029-003',
-      image:
-          'https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg',
-    ),
-    // more dummy transactions for the View All screen
-    TransactionModel(
-      id: 'TXN004',
-      property: 'Plot No. 9 Sunny Acres',
-      location: 'Ring Road, Hisar',
-      date: DateTime(2025, 9, 5),
-      amount: 125000,
-      type: 'Received',
-      status: 'Completed',
-      reference: 'REF-20250905-004',
-      image:
-          'https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg',
-    ),
-    TransactionModel(
-      id: 'TXN005',
-      property: 'Shop No. 12 Market Plaza',
-      location: 'Old Bazar, Hisar',
-      date: DateTime(2025, 8, 23),
-      amount: 45000,
-      type: 'Paid',
-      status: 'Completed',
-      reference: 'REF-20250823-005',
-      image:
-          'https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg',
-    ),
-  ];
-  // Upcoming payments (scheduled / due)
-  final List<Payment> upcomingPayments = [
-    Payment(
-      "Plot No. 21 Shree Shyam Kunj Phase 5",
-      "Raipur Road, Hisar",
-      "Dec 05, 2025",
-      230000,
-      false,
-    ),
-    Payment(
-      "hree Shyam Kunj Phase 5 Plot",
-      "Raipur Road, Hisar",
-      "Dec 20, 2025",
-      520000,
-      false,
-    ),
-  ];
+  var isLoading = false.obs;
+  var isTransactionsLoading = false.obs;
+  var isAccountDataLoading = false.obs;
+  var selectedImagePath = ''.obs;
+  var currentUser = {}.obs;
 
-  // Past payments
-  final List<Payment> pastPayments = [
-    Payment(
-      "Plot No. 21 Shree Shyam Kunj Phase 5",
-      "Raipur Road, Hisar",
-      "Nov 01, 2025",
-      89000,
-      true,
-    ),
-    Payment(
-      "Security Deposit - Shree Shyam Kunj Plot",
-      "Raipur Road, Hisar",
-      "Oct 10, 2025",
-      3290,
-      true,
-    ),
-  ];
+  // UI state for Profile Screen
+  var selectedTab = 0.obs;
+  
+  // My Properties Data
+  final RxList<OwnedProperty> my_property = <OwnedProperty>[].obs;
 
-  // Transactions (sale/rent actions) with location & date & image
-  final List<Property> my_property = [
-    Property(
-      "Plot No. 21 Shree Shyam Kunj Phase 5",
-      "Raipur Road, Hisar",
-      "Sale",
-      "January 10, 2025",
-      true,
-      "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
-    ),
-    Property(
-      "Plot No. 21 Shree Shyam Kunj Phase 5",
-      "Raipur Road, Hisar",
-      "Rent",
-      "January 05, 2025",
-      true,
-      "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
-    ),
-    Property(
-      "Plot No. 21 Shree Shyam Kunj Phase 5",
-      "Raipur Road, Hisar",
-      "Booking",
-      "September 15, 2025",
-      true,
-      "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
-    ),
-  ];
+  final RxList<TransactionModel> transactions = <TransactionModel>[].obs;
+
+  // Payments Data
+  final RxList<PaymentItem> upcomingPayments = <PaymentItem>[].obs;
+  final RxList<PaymentItem> pastPayments = <PaymentItem>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadUserData();
+    fetchProfileTransactions();
+    fetchAccountData();
+  }
+
+  Future<void> fetchAccountData() async {
+    isAccountDataLoading.value = true;
+    try {
+      final data = await _propertyRepo.fetchAccountData();
+      if (data != null) {
+        // Update customer info while preserving other fields (like address or image)
+        final Map<String, dynamic> updatedUser = Map<String, dynamic>.from(currentUser);
+        updatedUser['id'] = data.customer.id;
+        updatedUser['name'] = data.customer.name;
+        updatedUser['email'] = data.customer.email;
+        updatedUser['phone'] = data.customer.phone;
+        
+        await LocalStorage().saveUser(updatedUser);
+        currentUser.value = updatedUser;
+
+        nameController.text = data.customer.name;
+        emailController.text = data.customer.email;
+        phoneController.text = data.customer.phone;
+        
+        // Update properties
+        my_property.assignAll(data.properties);
+
+        // Update payments
+        final List<PaymentItem> allPayments = [];
+        for (var p in data.properties) {
+          for (var f in p.finance) {
+            allPayments.addAll(f.payments);
+          }
+        }
+        
+        upcomingPayments.assignAll(allPayments.where((e) => e.status.toLowerCase() == 'pending').toList());
+        pastPayments.assignAll(allPayments.where((e) => e.status.toLowerCase() == 'paid').toList());
+      }
+    } catch (e) {
+      debugPrint("Error fetching account data: $e");
+    } finally {
+      isAccountDataLoading.value = false;
+    }
+  }
+
+  Future<void> fetchProfileTransactions() async {
+    isTransactionsLoading.value = true;
+    try {
+      final List<TransactionModel> data = await _propertyRepo.fetchTransactions();
+      transactions.assignAll(data);
+    } catch (e) {
+      debugPrint("Error fetching transactions in profile: $e");
+    } finally {
+      isTransactionsLoading.value = false;
+    }
+  }
+
+  void loadUserData() {
+    final user = LocalStorage().getUser();
+    if (user != null) {
+      currentUser.value = user;
+      nameController.text = user['name'] ?? '';
+      emailController.text = user['email'] ?? '';
+      phoneController.text = user['phone'] ?? '';
+      addressController.text = user['address'] ?? '';
+    }
+  }
+
+  Future<void> pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    try {
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        selectedImagePath.value = image.path;
+      }
+    } catch (e) {
+      showCustomToast("Error picking image", isError: true);
+    }
+  }
+
+  Future<void> updateProfile() async {
+    if (nameController.text.isEmpty || emailController.text.isEmpty || phoneController.text.isEmpty) {
+      showCustomToast("Name, email and phone are required", isError: true);
+      return;
+    }
+
+    isLoading.value = true;
+    
+    final result = await _authRepo.updateProfile(
+      name: nameController.text.trim(),
+      email: emailController.text.trim(),
+      phone: phoneController.text.trim(),
+      address: addressController.text.trim(),
+      password: passwordController.text.trim(),
+      imagePath: selectedImagePath.value.isNotEmpty ? selectedImagePath.value : null,
+    );
+
+    isLoading.value = false;
+
+    if (result['success']) {
+      final updatedUser = result['data'];
+      await LocalStorage().saveUser(updatedUser);
+      currentUser.value = updatedUser;
+      showCustomToast(result['message'] ?? "Profile updated successfully");
+      passwordController.clear();
+      selectedImagePath.value = '';
+    } else {
+      showCustomToast(result['message'] ?? "Profile update failed", isError: true);
+    }
+  }
+
+  Future<void> logout() async {
+    await LocalStorage().clear();
+    Get.offAllNamed(AppRoutes.login);
+  }
 }

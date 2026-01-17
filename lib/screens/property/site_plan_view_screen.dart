@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:realestate/constant/app_colors.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 
 class SitePlanViewScreen extends StatelessWidget {
   final String imagePath;
@@ -25,7 +26,7 @@ class SitePlanViewScreen extends StatelessWidget {
               child: Hero(
                 tag: 'sitePlan',
                 child: imagePath.startsWith('http')
-                    ? Image.network(imagePath, fit: BoxFit.contain)
+                    ? CustomImage(imageUrl: imagePath, fit: BoxFit.contain)
                     : Image.asset(
                         imagePath,
                         fit: BoxFit.contain,

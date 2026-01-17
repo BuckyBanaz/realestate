@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:realestate/screens/dashboard/dashboard_screen.dart';
 import 'package:realestate/constant/app_colors.dart';
+import 'package:realestate/domain/repo/auth_repository.dart';
+import 'package:realestate/Routes/appRoutes.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 
 class OtpController extends GetxController {
   /// OTP timer (seconds)
@@ -11,6 +14,10 @@ class OtpController extends GetxController {
   /// Loading states
   final RxBool isResending = false.obs;
   final RxBool isVerifying = false.obs;
+  
+  final AuthRepository _authRepo = AuthRepository();
+  final TextEditingController newPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
   Timer? _timer;
 
@@ -66,24 +73,56 @@ class OtpController extends GetxController {
   }
 
   /// Verify OTP placeholder
-  Future<void> verifyOtp({required String otp, required String contact}) async {
+  Future<void> verifyOtp({required String otp, required String contact, bool isForgotPassword = false}) async {
     if (isVerifying.value) return;
     isVerifying.value = true;
 
     try {
-      // TODO: call your verify API here
-      await Future.delayed(const Duration(seconds: 1)); // simulate network
+      if (isForgotPassword) {
+        // If it's forgot password, we don't verify OTP alone, 
+        // usually we show password fields or send them with the reset call.
+        // For this flow, we'll keep isVerifying true and wait for password submission.
+        isVerifying.value = false; 
+        return;
+      }
 
-      // On success navigate to dashboard (replace with your logic)
+      await Future.delayed(const Duration(seconds: 1)); // simulate network
       Get.offAll(const DashboardScreen());
     } catch (e) {
-      ScaffoldMessenger.of(Get.context!).showSnackBar(
-        const SnackBar(
-          content: Text("Invalid OTP. Please check the code and try again."),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-        ),
+      showCustomToast("Invalid OTP. Please check the code and try again.", isError: true);
+    } finally {
+      isVerifying.value = false;
+    }
+  }
+
+  Future<void> resetPassword({required String email, required String otp}) async {
+    if (newPasswordController.text.isEmpty || confirmPasswordController.text.isEmpty) {
+      showCustomToast("Please enter and confirm your new password", isError: true);
+      return;
+    }
+
+    if (newPasswordController.text != confirmPasswordController.text) {
+      showCustomToast("Passwords do not match", isError: true);
+      return;
+    }
+
+    isVerifying.value = true;
+    try {
+      final result = await _authRepo.resetPassword(
+        email: email,
+        otp: otp,
+        password: newPasswordController.text.trim(),
+        passwordConfirmation: confirmPasswordController.text.trim(),
       );
+
+      if (result['success']) {
+        showCustomToast(result['message'] ?? "Password reset successfully");
+        Get.offAllNamed(AppRoutes.login);
+      } else {
+        showCustomToast(result['message'] ?? "Password reset failed", isError: true);
+      }
+    } catch (e) {
+      showCustomToast("An error occurred during password reset", isError: true);
     } finally {
       isVerifying.value = false;
     }
@@ -91,6 +130,8 @@ class OtpController extends GetxController {
 
   @override
   void onClose() {
+    newPasswordController.dispose();
+    confirmPasswordController.dispose();
     stopTimer();
     super.onClose();
   }

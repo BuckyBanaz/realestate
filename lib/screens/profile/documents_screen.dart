@@ -1,337 +1,518 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../constant/app_colors.dart';
-
-/// Sample Document Model
-class PropertyDocument {
-  final String id;
-  final String title;
-  final String propertyName;
-  final String docType;
-  final String thumbnail;
-  final String uploadedDate;
-  final Map<String, String> metadata; // e.g., owner history, reg date, reg no, issuer, remarks
-
-  PropertyDocument({
-    required this.id,
-    required this.title,
-    required this.propertyName,
-    required this.docType,
-    required this.thumbnail,
-    required this.uploadedDate,
-    required this.metadata,
-  });
-}
+import '../../data/controllers/document_controller.dart';
+import '../../data/models/owner_document_model.dart';
+import '../widgets/helpers.dart';
+import '../widgets/shimmers.dart';
 
 class DocumentsScreen extends StatelessWidget {
   DocumentsScreen({super.key});
 
-  // demo list — replace with real data or controller fetch
-  final List<PropertyDocument> docs = [
-    PropertyDocument(
-      id: "doc1",
-      title: "Title Deed - Plot A12",
-      propertyName: "Sky Dandelions Township",
-      docType: "Title Deed",
-      // using your uploaded local image path as thumbnail
-      thumbnail: "https://b3103330.smushcdn.com/3103330/wp-content/uploads/2016/04/mutation-procedure-transfer-of-title-of-property-in-municpality-limits-pic.jpg?lossy=2&strip=1&webp=1",
-      uploadedDate: "2021-11-28",
-      metadata: {
-        "Registered On": "11/20/2019",
-        "Registration No.": "REG-HT-001234",
-        "Previous Owner": "M/s. Sunrise Builders",
-        "Current Owner": "Anderson",
-        "Issued By": "Hisar Land Registry",
-        "Remarks": "Clear title, no encumbrance",
-      },
-    ),
-    PropertyDocument(
-      id: "doc2",
-      title: "Sale Agreement - Unit 302",
-      propertyName: "Urban Heights Apartment",
-      docType: "Sale Agreement",
-      thumbnail: "https://b3103330.smushcdn.com/3103330/wp-content/uploads/2016/04/mutation-procedure-transfer-of-title-of-property-in-municpality-limits-pic.jpg?lossy=2&strip=1&webp=1",
-      uploadedDate: "2022-05-14",
-      metadata: {
-        "Registered On": "05/10/2022",
-        "Registration No.": "REG-UH-00421",
-        "Previous Owner": "Mr. Ramesh",
-        "Current Owner": "Chetan Sharma",
-        "Issued By": "District Registrar",
-        "Remarks": "Standard sale agreement",
-      },
-    ),
-    // add more as needed
-  ];
-
-  Widget _thumbWidget(String path, {double? width, double? height}) {
-    if (path.startsWith('/mnt/') || path.startsWith('/data/')) {
-      final file = File(path);
-      if (file.existsSync()) {
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(12.r),
-          child: Image.file(file, width: width, height: height, fit: BoxFit.cover),
-        );
-      } else {
-        return Container(
-          width: width,
-          height: height,
-          decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(12.r)),
-          child: Icon(Icons.broken_image, size: 28.w, color: Colors.grey[500]),
-        );
-      }
-    } else {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12.r),
-        child: Image.network(path, width: width, height: height, fit: BoxFit.cover, errorBuilder: (_, __, ___) {
-          return Container(
-            width: width,
-            height: height,
-            decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(12.r)),
-            child: Icon(Icons.broken_image, size: 28.w, color: Colors.grey[500]),
-          );
-        }),
-      );
-    }
-  }
+  final DocumentController controller = Get.put(DocumentController());
 
   @override
   Widget build(BuildContext context) {
-    // Screen scaffold
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: scaffoldColor,
       appBar: AppBar(
-        title: Text("Documents", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
+        title: Text(
+          "Documents",
+          style: GoogleFonts.inter(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         elevation: 0,
-        leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(IconlyLight.arrow_left_2, color: Theme.of(context).iconTheme.color)),
-
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: scaffoldColor,
+        leading: IconButton(
+          onPressed: () => Get.back(),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+        ),
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          children: [
-            // Header / search if needed
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-              decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(12.r)),
-              child: Row(
-                children: [
-                  Icon(Icons.file_present_outlined, color: primary),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    child: Text("Property Documents", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
+      body: RefreshIndicator(
+        onRefresh: controller.onRefresh,
+        color: secondary,
+        backgroundColor: const Color(0xFF1E1E1E),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Status Card
+              Obx(() => Container(
+                padding: EdgeInsets.all(20.w),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [primary, primary.withOpacity(0.8)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  Text("${docs.length}", style: TextStyle(color: Colors.grey[600], fontSize: 13.sp)),
-                ],
-              ),
-            ),
-            SizedBox(height: 12.h),
-
-            // Documents list
-            Expanded(
-              child: ListView.separated(
-                itemCount: docs.length,
-                separatorBuilder: (_, __) => SizedBox(height: 12.h),
-                itemBuilder: (context, index) {
-                  final d = docs[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Get.to(() => DocumentDetailScreen(document: d));
-                    },
-                    child: Container(
+                  borderRadius: BorderRadius.circular(24.r),
+                ),
+                child: Row(
+                  children: [
+                    Container(
                       padding: EdgeInsets.all(12.w),
-                      decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(14.r)),
-                      child: Row(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
+                      child: Icon(IconlyBold.document, color: Colors.white, size: 24.sp),
+                    ),
+                    SizedBox(width: 16.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Hero(tag: d.id, child: _thumbWidget(d.thumbnail, width: 110.w, height: 72.h)),
-                          SizedBox(width: 12.w),
-                          Expanded(
-                            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                              Text(d.title, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color), maxLines: 2, overflow: TextOverflow.ellipsis),
-                              SizedBox(height: 6.h),
-                              Row(children: [
-                                Icon(Icons.location_on, size: 12.w, color: Colors.grey),
-                                SizedBox(width: 6.w),
-                                Expanded(child: Text(d.propertyName, style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]), overflow: TextOverflow.ellipsis)),
-                              ]),
-                              SizedBox(height: 6.h),
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.r), color: Theme.of(context).scaffoldBackgroundColor),
-                                    child: Text(d.docType, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
-                                  ),
-                                  SizedBox(width: 8.w),
-                                  Text(d.uploadedDate, style: TextStyle(color: Colors.grey[600], fontSize: 11.sp)),
-                                ],
-                              )
-                            ]),
-                          )
+                          Text(
+                            "Safe Repository",
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16.sp,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            controller.isLoading.value 
+                              ? "Scanning vault..." 
+                              : "${controller.documentGroups.fold(0, (sum, group) => sum + group.documents.length)} Documents Secured",
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.8),
+                              fontSize: 12.sp,
+                            ),
+                          ),
                         ],
                       ),
                     ),
+                  ],
+                ),
+              ).animate().fadeIn().slideY(begin: -0.1, end: 0)),
+              
+              SizedBox(height: 24.h),
+
+              Text(
+                "VERIFIED DOCUMENTS",
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
+                ),
+              ).paddingOnly(left: 4.w),
+              
+              SizedBox(height: 16.h),
+
+              // List of Documents
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return ListView.separated(
+                      itemCount: 5,
+                      separatorBuilder: (_, __) => SizedBox(height: 16.h),
+                      itemBuilder: (_, __) => const DocumentShimmer(),
+                    );
+                  }
+
+                  if (controller.documentGroups.isEmpty) {
+                    return _buildEmptyState();
+                  }
+
+                  // Flatten groups for internal listing or show by owner
+                  final allDocuments = <Map<String, dynamic>>[];
+                  for (var group in controller.documentGroups) {
+                    for (var doc in group.documents) {
+                      allDocuments.add({
+                        'owner': group,
+                        'doc': doc
+                      });
+                    }
+                  }
+
+                  return ListView.separated(
+                    itemCount: allDocuments.length,
+                    separatorBuilder: (_, __) => SizedBox(height: 16.h),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      final item = allDocuments[index];
+                      final OwnerDocumentGroup owner = item['owner'];
+                      final DocumentItem doc = item['doc'];
+
+                      return _buildDocumentCard(owner, doc, index);
+                    },
                   );
-                },
+                }),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(32.w),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.03),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(IconlyLight.document, size: 64.sp, color: Colors.grey.withOpacity(0.2)),
+          ),
+          SizedBox(height: 24.h),
+          Text(
+            "No documents found",
+            style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 16.sp, fontWeight: FontWeight.w600),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            "Your verified property documents will appear here.",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 13.sp),
+          ),
+        ],
+      ).animate().fadeIn(),
+    );
+  }
+
+  Widget _buildDocumentCard(OwnerDocumentGroup owner, DocumentItem doc, int index) {
+    return GestureDetector(
+      onTap: () => Get.to(() => DocumentDetailScreen(owner: owner, doc: doc)),
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: const Color(0xFF161616),
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Document Icon / Thumbnail
+            Container(
+              width: 56.w,
+              height: 56.w,
+              decoration: BoxDecoration(
+                color: secondary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+              child: Center(
+                child: Icon(
+                  _getDocIcon(doc.documentName),
+                  color: secondary,
+                  size: 24.sp,
+                ),
+              ),
+            ),
+            SizedBox(width: 16.w),
+            
+            // Text Info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    doc.documentName,
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    "Owner: ${owner.name}",
+                    style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontSize: 11.sp,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Action Arrow
+            Icon(IconlyLight.arrow_right_2, color: Colors.white.withOpacity(0.3), size: 18.sp),
+          ],
+        ),
+      ).animate().fadeIn(delay: (100 * index).ms).slideX(begin: 0.1, end: 0),
+    );
+  }
+
+  IconData _getDocIcon(String name) {
+    if (name.toLowerCase().contains('deed') || name.toLowerCase().contains('title')) {
+      return Icons.assignment_turned_in_rounded;
+    } else if (name.toLowerCase().contains('agreement')) {
+      return Icons.handshake_rounded;
+    } else if (name.toLowerCase().contains('tax')) {
+      return Icons.receipt_long_rounded;
+    }
+    return Icons.description_rounded;
   }
 }
 
 // ========== Document Detail Screen ==========
 class DocumentDetailScreen extends StatelessWidget {
-  final PropertyDocument document;
+  final OwnerDocumentGroup owner;
+  final DocumentItem doc;
 
-  const DocumentDetailScreen({super.key, required this.document});
-
-  Widget _imageWidget(String path, {double? width, double? height, BoxFit fit = BoxFit.cover}) {
-    if (path.startsWith('/mnt/') || path.startsWith('/data/')) {
-      final file = File(path);
-      if (file.existsSync()) {
-        return Image.file(file, width: width, height: height, fit: fit);
-      } else {
-        return Container(width: width, height: height, color: Colors.grey.shade200, child: Icon(Icons.broken_image, size: 36.w, color: Colors.grey[500]));
-      }
-    } else {
-      return Image.network(path, width: width, height: height, fit: fit, errorBuilder: (_, __, ___) {
-        return Container(width: width, height: height, color: Colors.grey.shade200, child: Icon(Icons.broken_image, size: 36.w, color: Colors.grey[500]));
-      });
-    }
-  }
-
-  Widget _metaRow(BuildContext context, String label, String value) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(width: 140.w, child: Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 13.sp))),
-          Expanded(child: Text(value, textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp, color: Theme.of(context).textTheme.bodyLarge?.color))),
-        ],
-      ),
-    );
-  }
+  const DocumentDetailScreen({super.key, required this.owner, required this.doc});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: scaffoldColor,
       appBar: AppBar(
-        title: Text("Document Detail", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
+        title: Text("Document Details", 
+          style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white)),
         elevation: 0,
-        leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(IconlyLight.arrow_left_2, color: Theme.of(context).iconTheme.color)),
-
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        leading: IconButton(onPressed: () => Get.back(), icon: const Icon( Icons.arrow_back_ios_new_rounded, color: Colors.white)),
+        backgroundColor: scaffoldColor,
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.w),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          // Top card with image and basic info
-          Container(
-            padding: EdgeInsets.all(12.w),
-            decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(16.r)),
-            child: Row(children: [
-              GestureDetector(
-                onTap: () {
-                  Get.to(() => FullscreenImageScreen(imagePath: document.thumbnail, tag: document.id));
-                },
-                child: Hero(tag: document.id, child: ClipRRect(borderRadius: BorderRadius.circular(12.r), child: _imageWidget(document.thumbnail, width: 140.w, height: 96.h))),
+        padding: EdgeInsets.all(20.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start, 
+          children: [
+            // Preview Card
+            Container(
+              width: double.infinity,
+              height: 200.h,
+              decoration: BoxDecoration(
+                color: const Color(0xFF161616),
+                borderRadius: BorderRadius.circular(24.r),
+                border: Border.all(color: Colors.white.withOpacity(0.06)),
               ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(document.title, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color)),
-                  SizedBox(height: 6.h),
-                  Text(document.propertyName, style: TextStyle(fontSize: 12.sp, color: Colors.grey[600])),
-                  SizedBox(height: 8.h),
-                  Row(children: [
-                    Container(padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h), decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.r), color: Theme.of(context).scaffoldBackgroundColor), child: Text(document.docType, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color))),
-                    SizedBox(width: 8.w),
-                    Text(document.uploadedDate, style: TextStyle(color: Colors.grey[600], fontSize: 11.sp)),
-                  ]),
-                ]),
-              )
-            ]),
-          ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24.r),
+                child: Stack(
+                  children: [
+                    CustomImage(
+                      imageUrl: doc.documentUrl,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 20.h,
+                      right: 20.w,
+                      child: GestureDetector(
+                        onTap: () => Get.to(() => FullscreenImageScreen(imagePath: doc.documentUrl, tag: "doc-${doc.id}")),
+                        child: Container(
+                          padding: EdgeInsets.all(12.w),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: Icon(IconlyLight.scan, color: Colors.white, size: 20.sp),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ).animate().fadeIn().scale(begin: const Offset(0.9, 0.9)),
 
-          SizedBox(height: 18.h),
+            SizedBox(height: 30.h),
 
-          // Document metadata
-          Text("Document Information", style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color)),
-          SizedBox(height: 10.h),
-          Container(
-            padding: EdgeInsets.all(12.w),
-            decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(12.r)),
-            child: Column(children: [
-              _metaRow(context, "Registration No.", document.metadata["Registration No."] ?? "-"),
-              _metaRow(context, "Registered On", document.metadata["Registered On"] ?? "-"),
-              _metaRow(context, "Previous Owner", document.metadata["Previous Owner"] ?? "-"),
-              _metaRow(context, "Current Owner", document.metadata["Current Owner"] ?? "-"),
-              _metaRow(context, "Issued By", document.metadata["Issued By"] ?? "-"),
-              _metaRow(context, "Remarks", document.metadata["Remarks"] ?? "-"),
-            ]),
-          ),
+            // Document Info
+            Text("DOCUMENT INFORMATION", 
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 11.sp, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+            SizedBox(height: 16.h),
+            Container(
+              padding: EdgeInsets.all(20.w),
+              decoration: BoxDecoration(
+                color: const Color(0xFF161616),
+                borderRadius: BorderRadius.circular(24.r),
+                border: Border.all(color: Colors.white.withOpacity(0.06)),
+              ),
+              child: Column(
+                children: [
+                  _infoRow("Document Name", doc.documentName),
+                  _divider(),
+                  _infoRow("Registration ID", "REG-${doc.id}8827"),
+                  _divider(),
+                  _infoRow("Date Uploaded", "16 Jan 2026"),
+                  _divider(),
+                  _infoRow("Status", "Verified", valueColor: Colors.green),
+                ],
+              ),
+            ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1, end: 0),
 
+            SizedBox(height: 24.h),
 
-          SizedBox(height: 16.h),
+            // Owner Info
+            Text("OWNER DETAILS", 
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 11.sp, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+            SizedBox(height: 16.h),
+            Container(
+              padding: EdgeInsets.all(20.w),
+              decoration: BoxDecoration(
+                color: const Color(0xFF161616),
+                borderRadius: BorderRadius.circular(24.r),
+                border: Border.all(color: Colors.white.withOpacity(0.06)),
+              ),
+              child: Column(
+                children: [
+                  _infoRow("Full Name", owner.name),
+                  _divider(),
+                  _infoRow("Email", owner.email),
+                  _divider(),
+                  _infoRow("Phone", owner.phone),
+                  _divider(),
+                  _infoRow("Address", owner.address),
+                ],
+              ),
+            ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0),
 
-          // Full-size preview / view document
-          SizedBox(
-            width: double.infinity,
-            child: TextButton(
-              onPressed: () {
-                Get.to(() => FullscreenImageScreen(imagePath: document.thumbnail, tag: "${document.id}-preview"));
-              },
-              child: Text("Open Document Preview", style: TextStyle(color: primary, fontSize: 14.sp)),
-            ),
-          )
-        ]),
+            SizedBox(height: 32.h),
+
+            // Action Button
+            SizedBox(
+              width: double.infinity,
+              height: 56.h,
+              child: ElevatedButton.icon(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.r)),
+                  elevation: 0,
+                ),
+                icon: const Icon(IconlyLight.download, color: Colors.white),
+                label: Text("Download Document", 
+                  style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15.sp, color: Colors.white)),
+              ),
+            ).animate().fadeIn(delay: 600.ms),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _infoRow(String label, String value, {Color? valueColor}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(width: 120.w, child: Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 13.sp))),
+        Expanded(
+          child: Text(
+            value, 
+            textAlign: TextAlign.right, 
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w600, 
+              fontSize: 13.sp, 
+              color: valueColor ?? Colors.white
+            )
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _divider() {
+    return Container(
+      height: 1,
+      margin: EdgeInsets.symmetric(vertical: 16.h),
+      color: Colors.white.withOpacity(0.05),
     );
   }
 }
 
-/// Reusing FullscreenImageScreen from earlier
 class FullscreenImageScreen extends StatelessWidget {
   final String imagePath;
   final String tag;
 
   const FullscreenImageScreen({super.key, required this.imagePath, required this.tag});
 
-  Widget _imageWidget(String path) {
-    if (path.startsWith('/mnt/') || path.startsWith('/data/')) {
-      final file = File(path);
-      if (file.existsSync()) {
-        return Image.file(file, fit: BoxFit.contain);
-      } else {
-        return Center(child: Icon(Icons.broken_image, size: 64));
-      }
-    } else {
-      return Image.network(path, fit: BoxFit.contain, errorBuilder: (_, __, ___) => Center(child: Icon(Icons.broken_image, size: 64)));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: GestureDetector(
-        onTap: () => Get.back(),
-        child: Center(
-          child: Hero(
-            tag: tag,
-            child: _imageWidget(imagePath),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close, color: Colors.white)),
+      ),
+      body: Center(
+        child: Hero(
+          tag: tag,
+          child: InteractiveViewer(
+            child: CustomImage(
+              imageUrl: imagePath,
+              width: double.infinity,
+              fit: BoxFit.contain,
+            ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// Simple Shimmer for Document items
+class DocumentShimmer extends StatelessWidget {
+  const DocumentShimmer({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 80.h,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: const Color(0xFF161616),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 50.w,
+            height: 50.w,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(width: 150.w, height: 12.h, color: Colors.white.withOpacity(0.05)),
+                SizedBox(height: 8.h),
+                Container(width: 100.w, height: 10.h, color: Colors.white.withOpacity(0.05)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

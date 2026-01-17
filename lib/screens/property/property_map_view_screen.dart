@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:iconly/iconly.dart';
 import 'package:realestate/constant/app_colors.dart';
 
@@ -223,7 +224,7 @@ class _AgentPin extends StatelessWidget {
       ),
       child: const CircleAvatar(
         radius: 22,
-        backgroundImage: NetworkImage("https://randomuser.me/api/portraits/men/45.jpg"),
+        backgroundImage: CachedNetworkImageProvider("https://randomuser.me/api/portraits/men/45.jpg"),
       ),
     );
   }

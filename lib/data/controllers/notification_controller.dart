@@ -1,63 +1,86 @@
 import 'package:get/get.dart';
 import 'package:realestate/data/models/notification_models.dart';
+import 'package:realestate/domain/api/api_client.dart';
 
 class NotificationController extends GetxController {
-  var selectedTab = 0.obs; // 0=All, 1=Review, 2=Sold, 3=House
+  final ApiClient _apiClient = ApiClient();
+  
+  var isLoading = false.obs;
+  var unreadCount = 0.obs;
+  var allNotifications = <NotificationItem>[].obs;
 
-  // Use RxList for GetX reactivity
-  var allNotifications = <NotificationItem>[
-    // Today
-    NotificationItem(
-      id: 1,
-      avatar: "https://i.pravatar.cc/150?img=1",
-      name: "Chetan Sharma",
-      message: "Payment due of ₹2,500. Please pay to avoid penalty.",
-      timeAgo: "10 mins ago",
-      type: NotifType.payment,
-      isToday: true,
-    ),
-    NotificationItem(
-      id: 2,
-      avatar: "https://i.pravatar.cc/150?img=2",
-      name: "Chetan Sharma",
-      message: "Payment due of ₹4,750 for maintenance. Due in 3 days.",
-      timeAgo: "40 mins ago",
-      propertyImage:
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
-      type: NotifType.payment,
-      isToday: true,
-    ),
-    NotificationItem(
-      id: 3,
-      avatar: "https://i.pravatar.cc/150?img=3",
-      name: "Chetan Sharma",
-      message: "Payment due of ₹12,000 for monthly rent. Pay now.",
-      timeAgo: "4 hours ago",
-      propertyImage:
-      "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800",
-      type: NotifType.payment,
-      isToday: true,
-    ),
-    // Older
-    NotificationItem(
-      id: 4,
-      avatar: "https://i.pravatar.cc/150?img=5",
-      name: "Chetan Sharma",
-      message: "Payment due of ₹850 for parking. Please clear the dues.",
-      timeAgo: "2 Days ago",
-      propertyImage:
-      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800",
-      type: NotifType.payment,
-      isToday: false,
-    ),
-    NotificationItem(
-      id: 5,
-      avatar: "https://i.pravatar.cc/150?img=7",
-      name: "Chetan Sharma",
-      message: "Payment due of ₹3,200. Last reminder sent.",
-      timeAgo: "3 Days ago",
-      type: NotifType.payment,
-      isToday: false,
-    ),
-  ].obs;
+  @override
+  void onInit() {
+    super.onInit();
+    fetchNotifications();
+  }
+
+  Future<void> fetchNotifications() async {
+    try {
+      isLoading.value = true;
+      final response = await _apiClient.dio.get('customer/notifications');
+      
+      if (response.statusCode == 200) {
+        final notifResponse = NotificationResponse.fromJson(response.data);
+        allNotifications.value = notifResponse.data;
+        unreadCount.value = notifResponse.unreadCount;
+      }
+    } catch (e) {
+      print('Notification Error: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> markAsRead(int notificationId) async {
+    try {
+      await _apiClient.dio.post('customer/notifications/$notificationId/read');
+      // Update local state
+      final index = allNotifications.indexWhere((n) => n.id == notificationId);
+      if (index != -1) {
+        final updatedNotif = NotificationItem(
+          id: allNotifications[index].id,
+          title: allNotifications[index].title,
+          body: allNotifications[index].body,
+          type: allNotifications[index].type,
+          isRead: true,
+          createdAt: allNotifications[index].createdAt,
+        );
+        allNotifications[index] = updatedNotif;
+        if (unreadCount.value > 0) unreadCount.value--;
+      }
+    } catch (e) {
+      print('Mark as read error: $e');
+    }
+  }
+
+  void deleteNotification(int notificationId) {
+    allNotifications.removeWhere((n) => n.id == notificationId);
+  }
+
+  List<NotificationItem> get todayNotifications => 
+      allNotifications.where((n) => _isToday(n.createdAt)).toList();
+
+  List<NotificationItem> get olderNotifications => 
+      allNotifications.where((n) => !_isToday(n.createdAt)).toList();
+
+  bool _isToday(String dateStr) {
+    try {
+      final now = DateTime.now();
+      // Check if the date string contains "today" or matches today's date
+      if (dateStr.toLowerCase().contains('today')) return true;
+      
+      // Parse the date from format like "16 Jan 2026, 04:56 AM"
+      // For simplicity, check if it's within last 24 hours
+      return dateStr.contains('${now.day} ${_getMonthName(now.month)} ${now.year}');
+    } catch (e) {
+      return false;
+    }
+  }
+
+  String _getMonthName(int month) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[month - 1];
+  }
 }

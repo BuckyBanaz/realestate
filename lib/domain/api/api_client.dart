@@ -15,8 +15,8 @@ class ApiClient {
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -39,7 +39,10 @@ class ApiClient {
           // Add Token if available
           final token = LocalStorage().getToken();
           if (token != null) {
-            options.headers['Authorization'] = 'Bearer $token';
+            options.headers['Authorization'] = 'Bearer ${token.trim()}';
+            debugPrint('$yellow Token found and added (masked): ${token.substring(0, 10)}...$reset');
+          } else {
+            debugPrint('$red No token found in LocalStorage$reset');
           }
           
           debugPrint('$blue--> [${options.method}] $cyan${options.uri}$reset');

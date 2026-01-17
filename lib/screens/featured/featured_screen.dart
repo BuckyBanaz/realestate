@@ -12,6 +12,7 @@ import '../home/modules/search_text_field.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:realestate/Routes/appRoutes.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 
 class FeaturedScreen extends StatelessWidget {
   const FeaturedScreen({Key? key}) : super(key: key);
@@ -247,13 +248,12 @@ class FeaturedScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius.r),
-        child: Image.network(
-          url,
-          fit: BoxFit.cover,
-          errorBuilder: (c, e, s) => Container(color: Colors.grey.shade900),
-        ),
+      child: CustomImage(
+        imageUrl: url,
+        width: w,
+        height: h,
+        borderRadius: radius.r,
+        errorWidget: (context, url, error) => Container(color: Colors.grey.shade900),
       ),
     );
   }

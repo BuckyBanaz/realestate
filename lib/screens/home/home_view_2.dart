@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:realestate/constant/app_colors.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
 import 'package:realestate/screens/home/modules/search_text_field.dart';
 import 'modules/news_section.dart';
@@ -27,19 +28,9 @@ class HomeView2 extends StatefulWidget {
 }
 
 class _HomeView2State extends State<HomeView2> {
-  int _selectedCategoryIndex = 0;
   final HomeController controller = Get.put(
     HomeController(),
   ); // Init Controller
-
-  final List<String> categories = [
-    "FLATS / HOUSING",
-    "TOWNSHIPS",
-    "FARM HOUSES",
-    "SOCIETIES",
-    "PLOTS",
-    "AGRI LAND",
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +114,7 @@ class _HomeView2State extends State<HomeView2> {
 
                           // Stats Row
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               _buildStatItem(
                                 IconlyBold.home,
@@ -135,109 +127,117 @@ class _HomeView2State extends State<HomeView2> {
                                 "100.00+",
                                 "Premium Customers",
                               ),
-                              const Spacer(),
-                              // Rating Chip
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 12.w,
-                                  vertical: 8.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF1E1E1E),
-                                  borderRadius: BorderRadius.circular(20.r),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.1),
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.star,
-                                      color: Colors.orange,
-                                      size: 16,
-                                    ),
-                                    SizedBox(width: 6.w),
-                                    Text(
-                                      "5.8 (100)",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              // const Spacer(),
+                              // // Rating Chip
+                              // Container(
+                              //   padding: EdgeInsets.symmetric(
+                              //     horizontal: 12.w,
+                              //     vertical: 8.h,
+                              //   ),
+                              //   decoration: BoxDecoration(
+                              //     color: const Color(0xFF1E1E1E),
+                              //     borderRadius: BorderRadius.circular(20.r),
+                              //     border: Border.all(
+                              //       color: Colors.white.withOpacity(0.1),
+                              //     ),
+                              //   ),
+                              //   child: Row(
+                              //     children: [
+                              //       const Icon(
+                              //         Icons.star,
+                              //         color: Colors.orange,
+                              //         size: 16,
+                              //       ),
+                              //       SizedBox(width: 6.w),
+                              //       Text(
+                              //         "5.8 (100)",
+                              //         style: TextStyle(
+                              //           color: Colors.white,
+                              //           fontWeight: FontWeight.bold,
+                              //         ),
+                              //       ),
+                              //     ],
+                              //   ),
+                              // ),
                             ],
                           ),
 
                           SizedBox(height: 30.h),
 
-                          // 3. Categories
-                          SizedBox(
-                            height: 38.h,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: categories.length,
-                              separatorBuilder: (_, __) => SizedBox(width: 8.w),
-                              itemBuilder: (context, index) {
-                                final isSelected =
-                                    _selectedCategoryIndex == index;
-                                return GestureDetector(
-                                  onTap: () => setState(
-                                    () => _selectedCategoryIndex = index,
-                                  ),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 300),
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 16.w,
-                                    ),
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? primary.withOpacity(0.1)
-                                          : Colors.transparent,
-                                      borderRadius: BorderRadius.circular(10.r),
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? primary
-                                            : Colors.white.withOpacity(0.1),
-                                        width: 1,
+                          // 3. Categories (Dynamic from API)
+                          Obx(() {
+                            if (controller.isLoading.value && controller.categoriesWithProperties.isEmpty) {
+                              return const CategoriesShimmer();
+                            }
+                            if (controller.categoriesWithProperties.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            return SizedBox(
+                              height: 38.h,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: controller.categoriesWithProperties.length,
+                                separatorBuilder: (_, __) => SizedBox(width: 8.w),
+                                itemBuilder: (context, index) {
+                                  return Obx(() {
+                                    final isSelected = controller.selectedCategoryIndex.value == index;
+                                    final category = controller.categoriesWithProperties[index];
+                                    return GestureDetector(
+                                      onTap: () => controller.selectedCategoryIndex.value = index,
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 300),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 16.w,
+                                        ),
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? primary.withOpacity(0.1)
+                                              : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(10.r),
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? primary
+                                                : Colors.white.withOpacity(0.1),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          category.name,
+                                          style: TextStyle(
+                                            color: isSelected
+                                                ? primary
+                                                : Colors.grey.shade500,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12.sp,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                    child: Text(
-                                      categories[index],
-                                      style: TextStyle(
-                                        color: isSelected
-                                            ? primary
-                                            : Colors.grey.shade500,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12.sp,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
+                                    );
+                                  });
+                                },
+                              ),
+                            );
+                          }),
 
                           SizedBox(height: 30.h),
 
                           // 4. Featured Properties Horizontal List
                           Obx(() => controller.isLoading.value ? const FeaturedShimmer() : _buildFeaturedPropertiesList()),
 
-                          SizedBox(height: 30.h),
+                          // SizedBox(height: 30.h),
 
-                          SizedBox(height: 8.h),
-                          SectionTitle(
-                            title: "Featured Properties",
-                            actionText: "View all",
-                            onActionTap: () {
-                              Get.toNamed(AppRoutes.featured);
-                            },
-                          ),
-                          SizedBox(height: 10.h),
-                          // Small listings at bottom
-                          const FeaturedPropertiesList(),
+                          // SizedBox(height: 8.h),
+                          // SectionTitle(
+                          //   title: "Featured Properties",
+                          //   actionText: "View all",
+                          //   onActionTap: () {
+                          //     Get.toNamed(AppRoutes.featured);
+                          //   },
+                          // ),
+                          // SizedBox(height: 10.h),
+                          // // Small listings at bottom
+                          // const FeaturedPropertiesList(),
 
                           SizedBox(height: 30.h),
                           SectionTitle(
@@ -255,7 +255,7 @@ class _HomeView2State extends State<HomeView2> {
                           // Recommended Section
                           SectionTitle(
                             title: "Recommended for you",
-                            actionText: "View all",
+                            // actionText: "View all",
                             onActionTap: () => Get.toNamed(AppRoutes.featured),
                           ),
                           SizedBox(height: 16.h),
@@ -267,7 +267,7 @@ class _HomeView2State extends State<HomeView2> {
                             title: "News For You",
                             subtitle: "Read whats happening in real estate",
                             actionText: "See all",
-                            onActionTap: () => Get.toNamed(AppRoutes.newsList),
+                            onActionTap: () => Get.toNamed(AppRoutes.newsList, arguments: controller.newsList),
                           ),
                           SizedBox(height: 16.h),
                           Obx(() => controller.isLoading.value ? const NewsShimmer() : const NewsSection()),
@@ -365,7 +365,7 @@ class _HomeView2State extends State<HomeView2> {
           _navItem(IconlyLight.heart, false),
           const CircleAvatar(
             radius: 14,
-            backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=12"),
+            backgroundImage: CachedNetworkImageProvider("https://i.pravatar.cc/150?img=12"),
           ),
           // _navItem(IconlyLight.profile, false),
         ],
@@ -396,40 +396,67 @@ class _HomeView2State extends State<HomeView2> {
   // Featured Properties Horizontal List
   Widget _buildFeaturedPropertiesList() {
     return Obx(
-      () => SizedBox(
-        height: 320.h,
-        child: ListView.separated(
-          clipBehavior: Clip.none,
-          scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.zero,
-          itemCount: controller.featuredProperties.length,
-          separatorBuilder: (_, __) => SizedBox(width: 16.w),
-          itemBuilder: (context, index) {
-            final property = controller.featuredProperties[index];
-            return _buildPropertyCard(
-                  title: property["title"]!,
-                  location: property["location"]!,
-                  bedrooms: property["bedrooms"]!,
-                  bathrooms: property["bathrooms"]!,
-                  price: property["price"]!,
-                  imageUrl: property["image"]!,
-                )
-                .animate(
-                  target: controller.isRefreshing.value ? 0 : 1,
-                ) // Reset animation on refresh
-                .fadeIn(delay: (100 * index).ms)
-                .slideX(begin: 0.2, end: 0, curve: Curves.easeOutQuad);
-          },
-        ),
-      ),
+      () {
+        if (controller.categoriesWithProperties.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        // Safeguard for index range
+        if (controller.selectedCategoryIndex.value >= controller.categoriesWithProperties.length) {
+          controller.selectedCategoryIndex.value = 0;
+        }
+
+        final category = controller.categoriesWithProperties[controller.selectedCategoryIndex.value];
+        final properties = category.properties;
+
+        if (properties.isEmpty) {
+          return SizedBox(
+            height: 320.h,
+            child: Center(
+              child: Text(
+                "No Properties in ${category.name}",
+                style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+              ),
+            ),
+          );
+        }
+
+        return SizedBox(
+          height: 320.h,
+          child: ListView.separated(
+            clipBehavior: Clip.none,
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.zero,
+            itemCount: properties.length,
+            separatorBuilder: (_, __) => SizedBox(width: 16.w),
+            itemBuilder: (context, index) {
+              final property = properties[index];
+              return GestureDetector(
+                onTap: () => Get.toNamed(AppRoutes.propertyDetail, arguments: property.id),
+                child: _buildPropertyCard(
+                      title: property.title,
+                      location: property.address,
+                      area: property.area,
+                      price: "₹${formatPrice(property.price)}",
+                      imageUrl: property.propertyImage ?? "https://via.placeholder.com/300X320",
+                    ),
+              )
+                  .animate(
+                    target: controller.isRefreshing.value ? 0 : 1,
+                  ) // Reset animation on refresh
+                  .fadeIn(delay: (100 * index).ms)
+                  .slideX(begin: 0.2, end: 0, curve: Curves.easeOutQuad);
+            },
+          ),
+        );
+      },
     );
   }
 
   Widget _buildPropertyCard({
     required String title,
     required String location,
-    required String bedrooms,
-    required String bathrooms,
+    required String area,
     required String price,
     required String imageUrl,
   }) {
@@ -438,10 +465,6 @@ class _HomeView2State extends State<HomeView2> {
       height: 320.h,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(36.r),
-        image: DecorationImage(
-          image: NetworkImage(imageUrl),
-          fit: BoxFit.cover,
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.3),
@@ -452,6 +475,14 @@ class _HomeView2State extends State<HomeView2> {
       ),
       child: Stack(
         children: [
+          // Background Image
+          CustomImage(
+            imageUrl: imageUrl, 
+            width: double.infinity, 
+            height: double.infinity,
+            borderRadius: 36.r,
+          ),
+
           // Gradient Overlay
           Container(
             decoration: BoxDecoration(
@@ -469,23 +500,31 @@ class _HomeView2State extends State<HomeView2> {
           Positioned(
             top: 20.h,
             left: 20.w,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: Colors.white.withOpacity(0.2)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(IconlyLight.location, color: Colors.white, size: 14.sp),
-                  SizedBox(width: 6.w),
-                  Text(
-                    location,
-                    style: TextStyle(color: Colors.white, fontSize: 12.sp),
-                  ),
-                ],
+            right: 20.w,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.35),
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(color: Colors.white.withOpacity(0.15)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(IconlyLight.location, color: Colors.white, size: 14.sp),
+                    SizedBox(width: 6.w),
+                    Flexible(
+                      child: Text(
+                        location,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: Colors.white, fontSize: 11.sp, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -515,77 +554,50 @@ class _HomeView2State extends State<HomeView2> {
                 ),
                 SizedBox(height: 12.h),
 
-                // Attributes and Price Row
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Bedroom
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 6.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.2),
+                    // Area/Size
+                    Flexible(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10.w,
+                          vertical: 6.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              IconlyLight.discovery,
+                              size: 14.sp,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 4.w),
+                            Flexible(
+                              child: Text(
+                                area,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.bed_outlined,
-                            size: 14.sp,
-                            color: Colors.white,
-                          ),
-                          SizedBox(width: 4.w),
-                          Text(
-                            "$bedrooms Bed",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
+
                     SizedBox(width: 8.w),
-
-                    // Bathroom
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 6.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.2),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.bathtub_outlined,
-                            size: 14.sp,
-                            color: Colors.white,
-                          ),
-                          SizedBox(width: 4.w),
-                          Text(
-                            "$bathrooms Bath",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const Spacer(),
 
                     // Price
                     Container(
@@ -611,7 +623,7 @@ class _HomeView2State extends State<HomeView2> {
                 SizedBox(height: 16.h),
 
                 GestureDetector(
-                  onTap: () => Get.toNamed(AppRoutes.propertyDetail),
+                  // onTap: () => Get.toNamed(AppRoutes.propertyDetail),
                   child: Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 20.w,
@@ -620,13 +632,6 @@ class _HomeView2State extends State<HomeView2> {
                     decoration: BoxDecoration(
                       color: secondary,
                       borderRadius: BorderRadius.circular(30.r),
-                      // boxShadow: [
-                      //   BoxShadow(
-                      //     color: secondary.withOpacity(0.4),
-                      //     blurRadius: 10,
-                      //     offset: const Offset(0, 4),
-                      //   ),
-                      // ],
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min, // Wrap content width

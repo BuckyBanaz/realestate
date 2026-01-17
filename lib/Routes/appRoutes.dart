@@ -9,6 +9,7 @@ import 'package:realestate/screens/featured/featured_screen.dart';
 import 'package:realestate/screens/property/property_deatils_screen.dart';
 import 'package:realestate/screens/search/search_screen.dart';
 import 'package:realestate/screens/notification/notification_screen.dart';
+import 'package:realestate/screens/transaction/transaction_details_screen.dart';
 
 import 'package:realestate/screens/property/property_map_view_screen.dart';
 import 'package:realestate/screens/property/property_equiery_form.dart';
@@ -37,33 +38,52 @@ class AppRoutes {
   static const sitePlan = '/sitePlan';
   static const newsList = '/newsList';
   static const newsDetail = '/newsDetail';
+  static const transactionDetail = '/transactionDetail';
 
   static get routes => [
     GetPage(name: splash, page: () => SplashScreen()),
     GetPage(name: login, page: () => LoginScreen(), transition: Transition.rightToLeft),
     GetPage(name: signup, page: () => RegisterScreen(), transition: Transition.rightToLeft),
     GetPage(name: home, page: () => DashboardScreen(), transition: Transition.rightToLeft),
-    GetPage(name: otp, page: () => OTPScreen(contact: "chetan@gmail.com"), transition: Transition.rightToLeft),
+    GetPage(
+      name: otp,
+      page: () {
+        final args = Get.arguments as Map<String, dynamic>? ?? {};
+        return OTPScreen(
+          contact: args['contact'] ?? "",
+          isEmail: args['isEmail'] ?? false,
+          isForgotPassword: args['isForgotPassword'] ?? false,
+        );
+      },
+      transition: Transition.rightToLeft,
+    ),
     GetPage(name: topLocations, page: () => TopLocationsScreen(), transition: Transition.rightToLeft),
     GetPage(name: locationDetail, page: () {
         final args = Get.arguments as Map<String, dynamic>;
         return LocationDetailScreen(
           locationName: args['locationName'],
           rank: args['rank'],
-          heroImage: args['heroImage'],
-          subtitle: args['subtitle'],
+          heroImage: args['heroImage'] ?? "",
+          subtitle: args['subtitle'] ?? "",
+          addressId: args['addressId'],
         );
       },
       transition: Transition.rightToLeft,
     ),
     GetPage(name: featured, page: () => FeaturedScreen(), transition: Transition.rightToLeft),
-    GetPage(name: propertyDetail, page: () => PropertyDetailScreen(), transition: Transition.rightToLeft),
+    GetPage(name: propertyDetail, page: () {
+        final propertyId = Get.arguments as int;
+        return PropertyDetailScreen(propertyId: propertyId);
+      },
+      transition: Transition.rightToLeft,
+    ),
     GetPage(name: search, page: () => SearchScreen(), transition: Transition.rightToLeft),
     GetPage(name: notification, page: () => NotificationScreen(), transition: Transition.rightToLeft),
     GetPage(name: propertyMap, page: () => PropertyMapViewScreen(), transition: Transition.rightToLeft),
     GetPage(name: enquiry, page: () {
         final args = Get.arguments as Map<String, dynamic>? ?? {};
         return EnquiryFormScreen(
+          propertyId: args['propertyId'] ?? 0,
           propertyName: args['propertyName'] ?? "Property Enquiry",
           propertyLocation: args['propertyLocation'] ?? "Unknown Location",
         );
@@ -79,5 +99,6 @@ class AppRoutes {
     ),
     GetPage(name: newsList, page: () => const NewsListScreen(), transition: Transition.rightToLeft),
     GetPage(name: newsDetail, page: () => const NewsDetailScreen(), transition: Transition.rightToLeft),
+    GetPage(name: transactionDetail, page: () => const TransactionDetailsScreen(), transition: Transition.rightToLeft),
   ];
 }

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/screens/property/property_deatils_screen.dart';
 import '../../constant/app_colors.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
 
 const String sitePlanImagePath =
     'https://media.istockphoto.com/id/1458263734/photo/land-plot-management-real-estate-concept-with-a-vacant-land-parcel-available-for-building.jpg?s=2048x2048&w=is&k=20&c=9put_u4dxBRj9VOEPG_ES52tcKYh-FyK6z6HPv0B0L4=';
@@ -33,18 +34,12 @@ class SitePlanHeader extends StatelessWidget {
               ClipRRect(
                 borderRadius:
                 BorderRadius.circular(24.r),
-                child: Image.network(
-                  sitePlanImagePath,
+                child: CustomImage(
+                  imageUrl: sitePlanImagePath,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorWidget: (_, __, ___) => Container(
                     color: Colors.grey.shade100,
                   ),
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      color: Colors.grey.shade200,
-                    );
-                  },
                 ),
               ),
 
@@ -323,16 +318,13 @@ class _PlotCard extends StatelessWidget {
           child: Row(
             children: [
               // Left image
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10.r),
-                child: Image.network(
-                  imageUrl,
-                  width: imageW,
-                  height: imageH,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      Container(width: imageW, height: imageH, color: Colors.grey.shade200),
-                ),
+              CustomImage(
+                imageUrl: imageUrl,
+                width: imageW,
+                height: imageH,
+                borderRadius: 10.r,
+                errorWidget: (_, __, ___) =>
+                    Container(width: imageW, height: imageH, color: Colors.grey.shade200),
               ),
 
               SizedBox(width: 12.w),

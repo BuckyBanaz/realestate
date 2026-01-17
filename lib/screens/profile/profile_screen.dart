@@ -7,11 +7,16 @@ import 'package:realestate/screens/profile/documents_screen.dart';
 import 'package:realestate/screens/profile/property_transaction_detail_screen.dart';
 import 'package:realestate/screens/profile/transaction_detail_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:realestate/data/models/transaction_model.dart';
+import 'package:realestate/Routes/appRoutes.dart';
+import 'package:realestate/screens/widgets/shimmers.dart';
 import '../../constant/app_colors.dart';
 import 'edit_profile_screen.dart';
 
 import 'package:realestate/data/controllers/profile_controller.dart';
-import 'package:realestate/data/models/profile_models.dart';
+import 'package:realestate/data/models/account_data_model.dart';
+import 'package:realestate/screens/widgets/helpers.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 // ====================== PROFILE SCREEN (RESPONSIVE) ======================
 
@@ -42,6 +47,10 @@ class ProfileScreen extends StatelessWidget {
           IconButton(
             icon: Icon(IconlyLight.setting, color: Theme.of(context).iconTheme.color),
             onPressed: () => Get.to(PermissionsScreen()),
+          ),
+          IconButton(
+            icon: const Icon(IconlyLight.logout, color: Colors.redAccent),
+            onPressed: () => _showLogoutConfirmation(context, ctrl),
           ),
         ],
       ),
@@ -79,20 +88,25 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     final double avatarSize = 120.w.clamp(72.0, 120.0);
+    final ctrl = Get.find<ProfileController>();
 
-    return Column(
+    return Obx(() => Column(
       children: [
         Stack(
           alignment: Alignment.bottomRight,
           children: [
             CircleAvatar(
               radius: avatarSize / 2.5,
-              child: Icon(IconlyLight.profile, size: 30),
               backgroundColor: Colors.grey.shade300,
-              // backgroundImage: NetworkImage("https://i.pravatar.cc/300?u=mathew"),
+              backgroundImage: ctrl.currentUser['profile_image'] != null
+                  ? NetworkImage(ctrl.currentUser['profile_image'])
+                  : null,
+              child: ctrl.currentUser['profile_image'] == null
+                  ? Icon(IconlyBold.profile, size: avatarSize / 3, color: Colors.white)
+                  : null,
             ),
             GestureDetector(
-              onTap: () => Get.to(EditProfileScreen()),
+              onTap: () => Get.to(const EditProfileScreen()),
               child: Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
@@ -102,7 +116,7 @@ class ProfileScreen extends StatelessWidget {
                     BoxShadow(
                       color: Colors.black.withOpacity(0.08),
                       blurRadius: 8,
-                      offset: Offset(0, 4),
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -113,16 +127,16 @@ class ProfileScreen extends StatelessWidget {
         ),
         SizedBox(height: 12.h),
         Text(
-          "Chetan Sharma",
+          ctrl.currentUser['name'] ?? "User Name",
           style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 6.h),
         Text(
-          "8906327912",
+          ctrl.currentUser['phone'] ?? "Phone Number",
           style: TextStyle(color: Colors.grey[600], fontSize: 13.sp),
         ),
       ],
-    );
+    ));
   }
 
   Widget _buildTabs(ProfileController c) {
@@ -179,46 +193,58 @@ class ProfileScreen extends StatelessWidget {
 
   // ---------------- Transactions view ----------------
   Widget _buildMyProperties(ProfileController c) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4.w),
-          child: Text(
-            "${c.my_property.length} Purchased Properties",
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-          ),
-        ),
-        SizedBox(height: 12.h),
-        ListView.builder(
+    return Obx(() {
+      if (c.isAccountDataLoading.value) {
+        return ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          itemCount: c.my_property.length,
-          itemBuilder: (ctx, i) {
-            final t = c.my_property[i];
-            return Padding(
-              padding: EdgeInsets.only(bottom: 12.h, left: 4.w, right: 4.w),
-              child: _PropertyTile(
-                image: t.image,
-                title: t.title,
-                location: t.location,
-                tag: t.tag,
-                date: t.date,
-                isCompleted: t.completed,
-              ),
-            );
-          },
-        ),
-      ],
-    );
+          itemCount: 3,
+          separatorBuilder: (_, __) => SizedBox(height: 12.h),
+          itemBuilder: (_, __) => ShimmerContainer(width: double.infinity, height: 100.h, radius: 12.r),
+        );
+      }
+
+      if (c.my_property.isEmpty) {
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.all(40.h),
+            child: Text("No properties owned yet.", style: TextStyle(color: Colors.grey, fontSize: 14.sp)),
+          ),
+        );
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.w),
+            child: Text(
+              "${c.my_property.length} Purchased Properties",
+              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+            ),
+          ),
+          SizedBox(height: 12.h),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            itemCount: c.my_property.length,
+            itemBuilder: (ctx, i) {
+              final prop = c.my_property[i];
+              return Padding(
+                padding: EdgeInsets.only(bottom: 12.h, left: 4.w, right: 4.w),
+                child: _PropertyTile(propertyData: prop),
+              );
+            },
+          ),
+        ],
+      );
+    });
   }
 
   // ---------------- My Properties view ----------------
   // ---------------- Transaction Summary (excel-like rows) ----------------
   Widget _buildTransactionsSummary(BuildContext context, ProfileController c) {
-    // show first 3 recent transactions and a "View All" button
-    final recent = c.transactions.take(3).toList();
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 4.w),
@@ -304,20 +330,46 @@ class ProfileScreen extends StatelessWidget {
 
           SizedBox(height: 8.h),
 
-          ListView.separated(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemBuilder: (ctx, i) {
-              final t = recent[i];
-              return GestureDetector(
-                onTap: () =>
-                    Get.to(() => TransactionDetailScreen(transaction: t)),
-                child: TransactionRow(transaction: t),
+          SizedBox(height: 8.h),
+
+          SizedBox(height: 8.h),
+
+          Obx(() {
+            if (c.isTransactionsLoading.value) {
+              return ListView.separated(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (ctx, i) => ShimmerContainer(width: double.infinity, height: 60.h, radius: 8.r),
+                separatorBuilder: (_, __) => SizedBox(height: 6.h),
+                itemCount: 3,
               );
-            },
-            separatorBuilder: (_, __) => SizedBox(height: 6.h),
-            itemCount: recent.length,
-          ),
+            }
+            
+            final recent = c.transactions.take(3).toList();
+            
+            if (recent.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20.w),
+                  child: Text("No transactions found", style: TextStyle(color: Colors.grey, fontSize: 13.sp)),
+                ),
+              );
+            }
+
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemBuilder: (ctx, i) {
+                final t = recent[i];
+                return GestureDetector(
+                  onTap: () => Get.toNamed(AppRoutes.transactionDetail, arguments: t),
+                  child: TransactionRow(transaction: t),
+                );
+              },
+              separatorBuilder: (_, __) => SizedBox(height: 6.h),
+              itemCount: recent.length,
+            );
+          }),
         ],
       ),
     );
@@ -325,82 +377,184 @@ class ProfileScreen extends StatelessWidget {
 
   // ---------------- Payments view (past + upcoming) ----------------
   Widget _buildPaymentsSection(ProfileController c) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header
-        // Padding(
-        //   padding: EdgeInsets.symmetric(horizontal: 4.w),
-        //   child: Text(
-        //     "Payments",
-        //     style: TextStyle(
-        //       fontSize: 16.sp,
-        //       fontWeight: FontWeight.w600,
-        //     ),
-        //   ),
-        // ),
-        SizedBox(height: 12.h),
+    return Obx(() {
+      if (c.isAccountDataLoading.value) {
+        return Column(
+          children: List.generate(3, (index) => Padding(
+            padding: EdgeInsets.only(bottom: 10.h),
+            child: ShimmerContainer(width: double.infinity, height: 80.h, radius: 12.r),
+          )),
+        );
+      }
 
-        // Upcoming Payments
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4.w),
-          child: Text(
-            "Upcoming Payments",
-            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 12.h),
+          if (c.upcomingPayments.isNotEmpty) ...[
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.w),
+              child: Text(
+                "Upcoming Payments",
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+              ),
+            ),
+            SizedBox(height: 8.h),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: 4.w),
+              itemCount: c.upcomingPayments.length,
+              itemBuilder: (ctx, i) {
+                final p = c.upcomingPayments[i];
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 10.h),
+                  child: PaymentCard(payment: p),
+                );
+              },
+            ),
+            SizedBox(height: 16.h),
+          ],
+          if (c.pastPayments.isNotEmpty) ...[
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.w),
+              child: Text(
+                "Past Payments",
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+              ),
+            ),
+            SizedBox(height: 8.h),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: 4.w),
+              itemCount: c.pastPayments.length,
+              itemBuilder: (ctx, i) {
+                final p = c.pastPayments[i];
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 10.h),
+                  child: PaymentCard(payment: p),
+                );
+              },
+            ),
+          ],
+          if (c.upcomingPayments.isEmpty && c.pastPayments.isEmpty)
+             Center(child: Text("No payments records found.", style: TextStyle(color: Colors.grey, fontSize: 13.sp))),
+        ],
+      );
+    });
+  }
+
+  void _showLogoutConfirmation(BuildContext context, ProfileController ctrl) {
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: EdgeInsets.all(24.w),
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(28.r),
+            border: Border.all(color: Colors.white.withOpacity(0.06)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(16.w),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(IconlyLight.logout, color: Colors.redAccent, size: 32.sp),
+              ),
+              SizedBox(height: 20.h),
+              Text(
+                "Logout Confirmation",
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                "Are you sure you want to logout? You will need to login again to access your account.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.grey.shade400,
+                  fontSize: 13.sp,
+                ),
+              ),
+              SizedBox(height: 30.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Get.back(),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(color: Colors.white.withOpacity(0.05)),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Cancel",
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14.sp,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 16.w),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => ctrl.logout(),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        decoration: BoxDecoration(
+                          color: Colors.redAccent,
+                          borderRadius: BorderRadius.circular(16.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.redAccent.withOpacity(0.2),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Logout",
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14.sp,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-        SizedBox(height: 8.h),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 4.w),
-          itemCount: c.upcomingPayments.length,
-          itemBuilder: (ctx, i) {
-            final p = c.upcomingPayments[i];
-            return Padding(
-              padding: EdgeInsets.only(bottom: 10.h),
-              child: PaymentCard(
-                title: p.title,
-                location: p.location,
-                date: p.date,
-                amount: p.amount,
-                paid: p.paid,
-              ),
-            );
-          },
-        ),
-
-        SizedBox(height: 16.h),
-
-        // Past Payments
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4.w),
-          child: Text(
-            "Past Payments",
-            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
-          ),
-        ),
-        SizedBox(height: 8.h),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 4.w),
-          itemCount: c.pastPayments.length,
-          itemBuilder: (ctx, i) {
-            final p = c.pastPayments[i];
-            return Padding(
-              padding: EdgeInsets.only(bottom: 10.h),
-              child: PaymentCard(
-                title: p.title,
-                location: p.location,
-                date: p.date,
-                amount: p.amount,
-                paid: p.paid,
-              ),
-            );
-          },
-        ),
-      ],
+      ),
+      barrierColor: Colors.black.withOpacity(0.7),
     );
   }
 }
@@ -411,12 +565,9 @@ class TransactionRow extends StatelessWidget {
   final TransactionModel transaction;
   const TransactionRow({required this.transaction, super.key});
 
-  String _fmtDate(DateTime d) {
-    return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-  }
-
   @override
   Widget build(BuildContext context) {
+    final isReceived = transaction.amount.startsWith('+');
     return Container(
       padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
       decoration: BoxDecoration(
@@ -428,13 +579,13 @@ class TransactionRow extends StatelessWidget {
           SizedBox(
             width: 90.w,
             child: Text(
-              _fmtDate(transaction.date),
+              transaction.date,
               style: TextStyle(fontSize: 12.sp),
             ),
           ),
           Expanded(
             child: Text(
-              transaction.property,
+              transaction.propertyName,
               style: TextStyle(fontSize: 12.sp),
               overflow: TextOverflow.ellipsis,
             ),
@@ -442,19 +593,24 @@ class TransactionRow extends StatelessWidget {
           SizedBox(
             width: 90.w,
             child: Text(
-              '₹${transaction.amount}',
+              transaction.amount,
               textAlign: TextAlign.right,
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.sp),
+              style: TextStyle(
+                fontWeight: FontWeight.w600, 
+                fontSize: 12.sp,
+                color: isReceived ? Colors.green : Colors.white,
+              ),
             ),
           ),
           SizedBox(
             width: 70.w,
             child: Center(
               child: Text(
-                transaction.type,
+                transaction.status,
                 style: TextStyle(
-                  fontSize: 12.sp,
-                  color: transaction.type == 'Received'
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.bold,
+                  color: transaction.status.toLowerCase() == 'completed'
                       ? Colors.green
                       : Colors.orange,
                 ),
@@ -469,49 +625,44 @@ class TransactionRow extends StatelessWidget {
 
 // ====================== Transaction Tile ======================
 class _PropertyTile extends StatelessWidget {
-  final String image;
-  final String title;
-  final String location;
-  final String tag;
-  final String date;
-  final bool isCompleted;
+  final OwnedProperty propertyData;
 
   const _PropertyTile({
     Key? key,
-    required this.image,
-    required this.title,
-    required this.location,
-    required this.tag,
-    required this.date,
-    this.isCompleted = false,
+    required this.propertyData,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final p = propertyData.property;
+    final ctrl = Get.find<ProfileController>();
+    final finance = propertyData.finance.isNotEmpty ? propertyData.finance.first : null;
+
     return GestureDetector(
       onTap: () {
         Get.to(
           () => PropertyTransactionDetailScreen(
-            image: image,
-            title: "Plot No. 21 Shree Shyam Kunj Phase 5",
-            location: "Raipur Road, Hisar",
-            tag: "Purchase",
-            date: "11/28/2021",
+            image: p.image,
+            title: p.title,
+            location: p.address,
+            tag: "Owned",
+            date: p.saleDate,
             details: {
-              "checkIn": "11/28/2021",
-              "checkOut": "01/28/2022",
-              "owner": "Chetan Sharma",
-              "paymentEmail": "user@mail.com",
+              "checkIn": p.saleDate,
+              "checkOut": "-",
+              "owner": ctrl.currentUser['name'] ?? "Owner",
+              "paymentEmail": ctrl.currentUser['email'] ?? "Email",
             },
             paymentDetail: {
-              "period": "2 months",
-              "monthly": 220,
-              "discount": 88,
-              "total": 31250,
+              "period": "-",
+              "monthly": "-",
+              "discount": "0",
+              "total": finance?.totalAmount ?? "0",
+              "paid": finance?.paidAmount ?? "0",
+              "balance": finance?.balance ?? "0",
             },
             propertyType: PropertyType.township,
-            // pass mapImage as the local path too if you want it to show as map preview:
-            mapImage: image,
+            mapImage: p.image,
             view360Url: null,
           ),
         );
@@ -531,25 +682,17 @@ class _PropertyTile extends StatelessWidget {
                 width: 100.w,
                 height: 80.h,
                 color: Colors.grey.shade200,
-                child: image.isNotEmpty
-                    ? Image.network(
-                        image,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Icon(
+                child: p.image.isNotEmpty
+                    ? CustomImage(
+                        imageUrl: p.image,
+                        width: 100.w,
+                        height: 80.h,
+                        borderRadius: 8.r,
+                        errorWidget: (_, __, ___) => Icon(
                           Icons.home_outlined,
                           size: 30.w,
                           color: Colors.grey[600],
                         ),
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: SizedBox(
-                              width: 20.w,
-                              height: 20.w,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          );
-                        },
                       )
                     : Icon(
                         Icons.home_outlined,
@@ -564,7 +707,7 @@ class _PropertyTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    p.title,
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
@@ -577,7 +720,7 @@ class _PropertyTile extends StatelessWidget {
                       SizedBox(width: 6.w),
                       Expanded(
                         child: Text(
-                          location,
+                          p.address,
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 12.sp,
@@ -591,13 +734,13 @@ class _PropertyTile extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        isCompleted ? Icons.check_circle : Icons.access_time,
+                        Icons.check_circle,
                         size: 14.w,
-                        color: isCompleted ? primary : Colors.grey,
+                        color: primary,
                       ),
                       SizedBox(width: 8.w),
                       Text(
-                        "$tag • $date",
+                        "Owned • ${p.saleDate.split('T').first}",
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 12.sp,
@@ -617,23 +760,16 @@ class _PropertyTile extends StatelessWidget {
 
 // ====================== Payment Card ======================
 class PaymentCard extends StatelessWidget {
-  final String title;
-  final String location;
-  final String date;
-  final num amount;
-  final bool paid;
+  final PaymentItem payment;
 
   const PaymentCard({
     Key? key,
-    required this.title,
-    required this.location,
-    required this.date,
-    required this.amount,
-    this.paid = false,
+    required this.payment,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final isPaid = payment.status.toLowerCase() == 'paid';
     return Container(
       padding: EdgeInsets.all(10.w),
       decoration: BoxDecoration(
@@ -646,14 +782,14 @@ class PaymentCard extends StatelessWidget {
             width: 64.w,
             height: 52.h,
             decoration: BoxDecoration(
-              color: paid 
+              color: isPaid 
                   ? Colors.green.withOpacity(0.15) 
                   : Colors.orange.withOpacity(0.15),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Icon(
-              paid ? Icons.check : Icons.schedule,
-              color: paid ? primary : Colors.orange,
+              isPaid ? Icons.check : Icons.schedule,
+              color: isPaid ? primary : Colors.orange,
               size: 28.w,
             ),
           ),
@@ -663,7 +799,7 @@ class PaymentCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  "EMI #${payment.emiNumber} - ${payment.paymentType.toUpperCase()}",
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 13.sp,
@@ -671,7 +807,7 @@ class PaymentCard extends StatelessWidget {
                 ),
                 SizedBox(height: 6.h),
                 Text(
-                  location,
+                  "Status: ${payment.status}",
                   style: TextStyle(color:  Theme.of(context).brightness == Brightness.dark ? Colors.grey[400] : Colors.grey[600], fontSize: 12.sp),
                 ),
               ],
@@ -681,12 +817,12 @@ class PaymentCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                "₹$amount",
+                "₹${payment.amount}",
                 style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.sp),
               ),
               SizedBox(height: 6.h),
               Text(
-                date,
+                payment.paidDate,
                 style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[400] : Colors.grey[600], fontSize: 12.sp),
               ),
             ],
