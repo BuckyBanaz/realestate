@@ -17,14 +17,19 @@ import 'package:realestate/domain/app/local_storage.dart';
 
 class PropertyDetailScreen extends StatefulWidget {
   final int propertyId;
-  const PropertyDetailScreen({Key? key, required this.propertyId}) : super(key: key);
+  const PropertyDetailScreen({Key? key, required this.propertyId})
+    : super(key: key);
 
   @override
   State<PropertyDetailScreen> createState() => _PropertyDetailScreenState();
 }
 
 class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
-  final PropertyDetailController controller = Get.put(PropertyDetailController());
+  final PropertyDetailController controller = Get.put(
+    PropertyDetailController(),
+  );
+  String _selectedAreaUnit = '';
+  String _lastAreaRaw = '';
 
   @override
   void initState() {
@@ -42,431 +47,537 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
         }
         final property = controller.propertyDetails.value?.property;
         if (property == null) {
-          return const Center(child: Text("Property not found", style: TextStyle(color: Colors.white)));
+          return const Center(
+            child: Text(
+              "Property not found",
+              style: TextStyle(color: Colors.white),
+            ),
+          );
         }
         return CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          // ==================== PREMIUM COLLAPSIBLE HEADER ====================
-          SliverAppBar(
-            expandedHeight: 420.h,
-            pinned: true,
-            stretch: true,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            leadingWidth: 70,
-            leading: Padding(
-              padding: EdgeInsets.only(left: 20.w, top: 12.h),
-              child: _buildCircleButton(
-                Icons.arrow_back_ios_new_rounded,
-                () => Get.back(),
-              ),
-            ),
-            actions: [
-              Padding(
-                padding: EdgeInsets.only(right: 20.w, top: 12.h),
-                child: Container(
-                  width: 48.w,
-                  height: 48.h,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.3),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: Icon(
-                      property.isFavorite ? IconlyBold.heart : IconlyLight.heart,
-                      color: property.isFavorite ? Colors.red : Colors.white,
-                      size: 24.sp,
-                    ),
-                    onPressed: () async {
-                    try {
-                      final repository = PropertyRepository();
-                      final result = await repository.toggleFavorite(property.id);
-                      
-                      if (result['success'] == true) {
-                        // Update local state by recreating the entire model
-                        final updatedProperty = PropertyDetailData(
-                          id: property.id,
-                          title: property.title,
-                          slug: property.slug,
-                          address: property.address,
-                          price: property.price,
-                          area: property.area,
-                          status: property.status,
-                          views: property.views,
-                          category: property.category,
-                          subCategory: property.subCategory,
-                          attributes: property.attributes,
-                          amenities: property.amenities,
-                          mainImage: property.mainImage,
-                          propertyImages: property.propertyImages,
-                          threeSixtyView: property.threeSixtyView,
-                          sitePlanImages: property.sitePlanImages,
-                          isFavorite: result['is_favourite'] ?? !property.isFavorite,
-                        );
-                        
-                        controller.propertyDetails.value = PropertyDetailsModel(
-                          status: controller.propertyDetails.value!.status,
-                          viewType: controller.propertyDetails.value!.viewType,
-                          property: updatedProperty,
-                          similar: controller.propertyDetails.value!.similar,
-                          plotData: controller.propertyDetails.value!.plotData,
-                          amenities: controller.propertyDetails.value!.amenities,
-                        );
-                        
-                        showCustomToast(
-                          result['message'] ?? 'Favorite updated',
-                          isError: false,
-                        );
-                      } else {
-                        // Check if unauthorized (401)
-                        if (result['unauthorized'] == true) {
-                          showCustomToast(
-                            result['message'] ?? 'Session expired. Please login again.',
-                            isError: true,
-                          );
-                          
-                          // Logout and redirect to login
-                          await Future.delayed(const Duration(seconds: 2));
-                          final storage = LocalStorage();
-                          await storage.clear();
-                          Get.offAllNamed(AppRoutes.login);
-                        } else {
-                          showCustomToast(
-                            result['message'] ?? 'Failed to update favorite',
-                            isError: true,
-                          );
-                        }
-                      }
-                    } catch (e) {
-                      showCustomToast(
-                        'An error occurred',
-                        isError: true,
-                      );
-                    }
-                  },
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // ==================== PREMIUM COLLAPSIBLE HEADER ====================
+            SliverAppBar(
+              expandedHeight: 420.h,
+              pinned: true,
+              stretch: true,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              leadingWidth: 70,
+              leading: Padding(
+                padding: EdgeInsets.only(left: 20.w, top: 12.h),
+                child: _buildCircleButton(
+                  Icons.arrow_back_ios_new_rounded,
+                  () => Get.back(),
                 ),
               ),
-            ),
-          ],
-            flexibleSpace: FlexibleSpaceBar(
-              stretchModes: const [
-                StretchMode.zoomBackground,
-                StretchMode.blurBackground,
-              ],
-              background: _buildHeaderGallery(),
-            ),
-          ),
-
-          // ==================== CONTENT SECTION ====================
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 24.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title Section
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              property.title,
-                              style: GoogleFonts.inter(
-                                fontSize: 24.sp,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                letterSpacing: -0.5,
-                              ),
-                            ).animate().fadeIn(duration: 600.ms).slideX(begin: -0.1, end: 0),
-                            SizedBox(height: 8.h),
-                            Row(
-                              children: [
-                                Icon(IconlyLight.location, size: 16.sp, color: primary),
-                                SizedBox(width: 6.w),
-                                Expanded(
-                                  child: Text(
-                                    property.address,
-                                    style: TextStyle(
-                                      color: Colors.grey.shade500,
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ).animate().fadeIn(delay: 100.ms).slideX(begin: -0.1, end: 0),
-                            SizedBox(height: 12.h),
-                            Text(
-                              "₹${formatPrice(property.price)}",
-                              style: GoogleFonts.inter(
-                                fontSize: 22.sp,
-                                fontWeight: FontWeight.bold,
-                                color: secondary,
-                              ),
-                            ).animate().fadeIn(delay: 150.ms).slideX(begin: -0.1, end: 0),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 16.w),
-                      Column(
-                        children: [
-                          _buildCircleButton(Icons.share_outlined, () {}),
-                          SizedBox(height: 12.h),
-                          _buildCircleButton(IconlyLight.download, () {}),
-                        ],
-                      ).animate().fadeIn(delay: 200.ms).scale(),
-                    ],
-                  ),
-
-                  SizedBox(height: 20.h),
-
-                  // Details Card
-                  _buildDetailsCard(context).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1, end: 0),
-
-                  // 360° Virtual Tour
-                  if (controller.propertyDetails.value?.property.threeSixtyView.isNotEmpty ?? false) ...[
-                    SizedBox(height: 24.h),
-                    Text(
-                      "360° Virtual Tour",
-                      style: GoogleFonts.inter(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ).animate().fadeIn(delay: 350.ms),
-                    SizedBox(height: 16.h),
-                    SizedBox(
-                      height: 150.h,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: controller.propertyDetails.value!.property.threeSixtyView.length,
-                        separatorBuilder: (_, __) => SizedBox(width: 16.w),
-                        itemBuilder: (context, index) {
-                          final view = controller.propertyDetails.value!.property.threeSixtyView[index];
-                          return Container(
-                            width: 260.w,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24.r),
-                              border: Border.all(color: Colors.white.withOpacity(0.1)),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(24.r),
-                                  child: CustomImage(
-                                    imageUrl: view.image,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(24.r),
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.black.withOpacity(0.5),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Center(
-                                  child: Container(
-                                    padding: EdgeInsets.all(12.w),
-                                    decoration: BoxDecoration(
-                                      color: primary.withOpacity(0.8),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(Icons.threesixty, color: Colors.white, size: 28.sp),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+              actions: [
+                Padding(
+                  padding: EdgeInsets.only(right: 20.w, top: 12.h),
+                  child: Container(
+                    width: 48.w,
+                    height: 48.h,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.3),
+                      shape: BoxShape.circle,
                     ),
-                  ],
-
-                  SizedBox(height: 24.h),
-
-                  // Plot Selection
-                  if (controller.propertyDetails.value?.plotData.isNotEmpty ?? false) ...[
-                    Text(
-                      "Choose Plots",
-                      style: GoogleFonts.inter(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                    child: IconButton(
+                      icon: Icon(
+                        property.isFavorite
+                            ? IconlyBold.heart
+                            : IconlyLight.heart,
+                        color: property.isFavorite ? Colors.red : Colors.white,
+                        size: 24.sp,
                       ),
-                    ).animate().fadeIn(delay: 400.ms),
-                    SizedBox(height: 12.h),
-                    PlotSelectionWidget(
-                      plotData: controller.propertyDetails.value?.plotData ?? [],
-                      onPlotSelected: (plotNo, size) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Selected: $plotNo • $size"),
-                            backgroundColor: primary,
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      },
-                    ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1, end: 0),
-                    SizedBox(height: 24.h),
-                  ],
+                      onPressed: () async {
+                        try {
+                          final repository = PropertyRepository();
+                          final result = await repository.toggleFavorite(
+                            property.id,
+                          );
 
-                  // Site Plan - Only show if images exist
-                  if (controller.propertyDetails.value?.property.sitePlanImages.isNotEmpty ?? false) ...[
-                    Text(
-                      "Site Plan",
-                      style: GoogleFonts.inter(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ).animate().fadeIn(delay: 600.ms),
-                    SizedBox(height: 12.h),
-                    GestureDetector(
-                      onTap: () {
-                        final firstImage = controller.propertyDetails.value!.property.sitePlanImages.first.image;
-                        Get.toNamed(AppRoutes.sitePlan, arguments: firstImage);
+                          if (result['success'] == true) {
+                            // Update local state by recreating the entire model
+                            final updatedProperty = PropertyDetailData(
+                              id: property.id,
+                              title: property.title,
+                              slug: property.slug,
+                              address: property.address,
+                              price: property.price,
+                              area: property.area,
+                              status: property.status,
+                              views: property.views,
+                              category: property.category,
+                              subCategory: property.subCategory,
+                              attributes: property.attributes,
+                              amenities: property.amenities,
+                              mainImage: property.mainImage,
+                              propertyImages: property.propertyImages,
+                              threeSixtyView: property.threeSixtyView,
+                              sitePlanImages: property.sitePlanImages,
+                              isFavorite:
+                                  result['is_favourite'] ??
+                                  !property.isFavorite,
+                            );
+
+                            controller
+                                .propertyDetails
+                                .value = PropertyDetailsModel(
+                              status: controller.propertyDetails.value!.status,
+                              viewType:
+                                  controller.propertyDetails.value!.viewType,
+                              property: updatedProperty,
+                              similar:
+                                  controller.propertyDetails.value!.similar,
+                              plotData:
+                                  controller.propertyDetails.value!.plotData,
+                              amenities:
+                                  controller.propertyDetails.value!.amenities,
+                            );
+
+                            showCustomToast(
+                              result['message'] ?? 'Favorite updated',
+                              isError: false,
+                            );
+                          } else {
+                            // Check if unauthorized (401)
+                            if (result['unauthorized'] == true) {
+                              showCustomToast(
+                                result['message'] ??
+                                    'Session expired. Please login again.',
+                                isError: true,
+                              );
+
+                              // Logout and redirect to login
+                              await Future.delayed(const Duration(seconds: 2));
+                              final storage = LocalStorage();
+                              await storage.clear();
+                              Get.offAllNamed(AppRoutes.login);
+                            } else {
+                              showCustomToast(
+                                result['message'] ??
+                                    'Failed to update favorite',
+                                isError: true,
+                              );
+                            }
+                          }
+                        } catch (e) {
+                          showCustomToast('An error occurred', isError: true);
+                        }
                       },
-                      child: Hero(
-                        tag: 'sitePlan',
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24.r),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.white.withOpacity(0.1)),
-                            ),
-                            child: CustomImage(
-                              imageUrl: controller.propertyDetails.value!.property.sitePlanImages.first.image,
-                              width: double.infinity,
-                              height: 200.h,
-                            ),
+                    ),
+                  ),
+                ),
+              ],
+              flexibleSpace: FlexibleSpaceBar(
+                stretchModes: const [
+                  StretchMode.zoomBackground,
+                  StretchMode.blurBackground,
+                ],
+                background: _buildHeaderGallery(),
+              ),
+            ),
+
+            // ==================== CONTENT SECTION ====================
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 24.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title Section
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                    property.title,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 24.sp,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  )
+                                  .animate()
+                                  .fadeIn(duration: 600.ms)
+                                  .slideX(begin: -0.1, end: 0),
+                              SizedBox(height: 8.h),
+                              Row(
+                                    children: [
+                                      Icon(
+                                        IconlyLight.location,
+                                        size: 16.sp,
+                                        color: primary,
+                                      ),
+                                      SizedBox(width: 6.w),
+                                      Expanded(
+                                        child: Text(
+                                          property.address,
+                                          style: TextStyle(
+                                            color: Colors.grey.shade500,
+                                            fontSize: 13.sp,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                  .animate()
+                                  .fadeIn(delay: 100.ms)
+                                  .slideX(begin: -0.1, end: 0),
+                              SizedBox(height: 12.h),
+                              Text(
+                                    "₹${formatPrice(property.price)}",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 22.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: secondary,
+                                    ),
+                                  )
+                                  .animate()
+                                  .fadeIn(delay: 150.ms)
+                                  .slideX(begin: -0.1, end: 0),
+                            ],
                           ),
                         ),
-                      ),
-                    ).animate().fadeIn(delay: 700.ms).scale(),
-                    SizedBox(height: 24.h),
-                  ],
+                        // SizedBox(width: 16.w),
+                        // Column(
+                        //   children: [
+                        //     _buildCircleButton(Icons.share_outlined, () {}),
+                        //     SizedBox(height: 12.h),
+                        //     _buildCircleButton(IconlyLight.download, () {}),
+                        //   ],
+                        // ).animate().fadeIn(delay: 200.ms).scale(),
+                      ],
+                    ),
 
-                  // Amenities - Only show if exist
-                  if (controller.propertyDetails.value?.amenities.isNotEmpty ?? false) ...[
-                    _buildAmenitiesCard(),
-                  ],
+                    SizedBox(height: 20.h),
 
-                  SizedBox(height: 24.h),
-                  
-                  // Similar Properties
-                  if (controller.propertyDetails.value!.similar.isNotEmpty) ...[
-                    Text(
-                      "Similar Properties",
-                      style: GoogleFonts.inter(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ).animate().fadeIn(delay: 750.ms),
-                    SizedBox(height: 16.h),
-                    SizedBox(
-                      height: 180.h,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: controller.propertyDetails.value!.similar.length,
-                        separatorBuilder: (_, __) => SizedBox(width: 16.w),
-                        itemBuilder: (context, index) {
-                          final sim = controller.propertyDetails.value!.similar[index];
-                          return GestureDetector(
-                            onTap: () {
-                              // Reload with new property ID
-                              controller.fetchPropertyDetails(sim.id).then((_) {
-                                // Scroll to top if needed, or just let it reload
-                              });
-                            },
-                            child: Container(
-                              width: 160.w,
+                    // Details Card
+                    _buildDetailsCard(context)
+                        .animate()
+                        .fadeIn(delay: 300.ms)
+                        .slideY(begin: 0.1, end: 0),
+
+                    // 360° Virtual Tour
+                    if (controller
+                            .propertyDetails
+                            .value
+                            ?.property
+                            .threeSixtyView
+                            .isNotEmpty ??
+                        false) ...[
+                      SizedBox(height: 24.h),
+                      Text(
+                        "360° Virtual Tour",
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ).animate().fadeIn(delay: 350.ms),
+                      SizedBox(height: 16.h),
+                      SizedBox(
+                        height: 150.h,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: controller
+                              .propertyDetails
+                              .value!
+                              .property
+                              .threeSixtyView
+                              .length,
+                          separatorBuilder: (_, __) => SizedBox(width: 16.w),
+                          itemBuilder: (context, index) {
+                            final view = controller
+                                .propertyDetails
+                                .value!
+                                .property
+                                .threeSixtyView[index];
+                            return Container(
+                              width: 260.w,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1E1E1E),
-                                borderRadius: BorderRadius.circular(20.r),
-                                border: Border.all(color: Colors.white.withOpacity(0.05)),
+                                borderRadius: BorderRadius.circular(24.r),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.1),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black26,
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Stack(
                                 children: [
                                   ClipRRect(
-                                    borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+                                    borderRadius: BorderRadius.circular(24.r),
                                     child: CustomImage(
-                                      imageUrl: sim.image,
-                                      height: 100.h,
+                                      imageUrl: view.image,
                                       width: double.infinity,
+                                      height: double.infinity,
                                     ),
                                   ),
-                                  Padding(
-                                    padding: EdgeInsets.all(10.w),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          sim.title,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.inter(
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        SizedBox(height: 4.h),
-                                        Text(
-                                          sim.address,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 10.sp,
-                                            color: Colors.grey.shade500,
-                                          ),
-                                        ),
-                                      ],
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(24.r),
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Colors.transparent,
+                                          Colors.black.withOpacity(0.5),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Center(
+                                    child: Container(
+                                      padding: EdgeInsets.all(12.w),
+                                      decoration: BoxDecoration(
+                                        color: primary.withOpacity(0.8),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.threesixty,
+                                        color: Colors.white,
+                                        size: 28.sp,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+
+                    SizedBox(height: 24.h),
+
+                    // Plot Selection
+                    if (controller.propertyDetails.value?.plotData.isNotEmpty ??
+                        false) ...[
+                      Text(
+                        "Choose Plots",
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ).animate().fadeIn(delay: 400.ms),
+                      SizedBox(height: 12.h),
+                      PlotSelectionWidget(
+                            plotData:
+                                controller.propertyDetails.value?.plotData ??
+                                [],
+                            onPlotSelected: (plotNo, size) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Selected: $plotNo • $size"),
+                                  backgroundColor: primary,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            },
+                          )
+                          .animate()
+                          .fadeIn(delay: 500.ms)
+                          .slideY(begin: 0.1, end: 0),
+                      SizedBox(height: 24.h),
+                    ],
+
+                    // Site Plan - Only show if images exist
+                    if (controller
+                            .propertyDetails
+                            .value
+                            ?.property
+                            .sitePlanImages
+                            .isNotEmpty ??
+                        false) ...[
+                      Text(
+                        "Site Plan",
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ).animate().fadeIn(delay: 600.ms),
+                      SizedBox(height: 12.h),
+                      GestureDetector(
+                        onTap: () {
+                          final firstImage = controller
+                              .propertyDetails
+                              .value!
+                              .property
+                              .sitePlanImages
+                              .first
+                              .image;
+                          Get.toNamed(
+                            AppRoutes.sitePlan,
+                            arguments: firstImage,
                           );
                         },
-                      ),
-                    ),
-                  ],
+                        child: Hero(
+                          tag: 'sitePlan',
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(24.r),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.1),
+                                ),
+                              ),
+                              child: CustomImage(
+                                imageUrl: controller
+                                    .propertyDetails
+                                    .value!
+                                    .property
+                                    .sitePlanImages
+                                    .first
+                                    .image,
+                                width: double.infinity,
+                                height: 200.h,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ).animate().fadeIn(delay: 700.ms).scale(),
+                      SizedBox(height: 24.h),
+                    ],
 
-                  SizedBox(height: 100.h),
-                ],
+                    // Amenities - Only show if exist
+                    if (controller
+                            .propertyDetails
+                            .value
+                            ?.amenities
+                            .isNotEmpty ??
+                        false) ...[
+                      _buildAmenitiesCard(),
+                    ],
+
+                    SizedBox(height: 24.h),
+
+                    // Similar Properties
+                    if (controller
+                        .propertyDetails
+                        .value!
+                        .similar
+                        .isNotEmpty) ...[
+                      Text(
+                        "Similar Properties",
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ).animate().fadeIn(delay: 750.ms),
+                      SizedBox(height: 16.h),
+                      SizedBox(
+                        height: 180.h,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount:
+                              controller.propertyDetails.value!.similar.length,
+                          separatorBuilder: (_, __) => SizedBox(width: 16.w),
+                          itemBuilder: (context, index) {
+                            final sim = controller
+                                .propertyDetails
+                                .value!
+                                .similar[index];
+                            return GestureDetector(
+                              onTap: () {
+                                // Reload with new property ID
+                                controller.fetchPropertyDetails(sim.id).then((
+                                  _,
+                                ) {
+                                  // Scroll to top if needed, or just let it reload
+                                });
+                              },
+                              child: Container(
+                                width: 160.w,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1E1E1E),
+                                  borderRadius: BorderRadius.circular(20.r),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.05),
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(20.r),
+                                      ),
+                                      child: CustomImage(
+                                        imageUrl: sim.image,
+                                        height: 100.h,
+                                        width: double.infinity,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.all(10.w),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            sim.title,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12.sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4.h),
+                                          Text(
+                                            sim.address,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 10.sp,
+                                              color: Colors.grey.shade500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+
+                    SizedBox(height: 100.h),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
-      );
-    }),
-    bottomNavigationBar: _buildBottomBar(),
+          ],
+        );
+      }),
+      bottomNavigationBar: _buildBottomBar(),
     );
   }
 
-  Widget _buildCircleButton(IconData icon, VoidCallback onTap, {bool isFavorite = false}) {
+  Widget _buildCircleButton(
+    IconData icon,
+    VoidCallback onTap, {
+    bool isFavorite = false,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
@@ -479,7 +590,10 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.3),
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.15),
+                width: 1,
+              ),
             ),
             child: Icon(
               icon,
@@ -551,22 +665,37 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
   Widget _buildGalleryThumb(String path, double w, double h, Duration delay) {
     return Container(
-      width: w,
-      height: h,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
-        boxShadow: [
-          BoxShadow(color: Colors.black45, blurRadius: 20, offset: const Offset(0, 10)),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24.r),
-        child: path.startsWith('http')
-            ? CustomImage(imageUrl: path)
-            : Image.asset(path, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade900)),
-      ),
-    ).animate().fadeIn(delay: delay).scale(begin: const Offset(0.8, 0.8), curve: Curves.easeOutBack);
+          width: w,
+          height: h,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24.r),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black45,
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24.r),
+            child: path.startsWith('http')
+                ? CustomImage(imageUrl: path)
+                : Image.asset(
+                    path,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        Container(color: Colors.grey.shade900),
+                  ),
+          ),
+        )
+        .animate()
+        .fadeIn(delay: delay)
+        .scale(begin: const Offset(0.8, 0.8), curve: Curves.easeOutBack);
   }
 
   Widget _buildDetailsCard(BuildContext context) {
@@ -646,31 +775,349 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                     crossAxisSpacing: 16.w,
                     mainAxisSpacing: 16.h,
                   ),
-                  itemCount: (controller.propertyDetails.value?.property.attributes ?? [])
-                      .where((attr) => 
-                        attr.value != null && 
-                        attr.value!.toLowerCase() != "null" && 
-                        attr.value!.toLowerCase() != "n/a" && 
-                        attr.value!.trim().isNotEmpty
-                      ).length,
+                  itemCount:
+                      (controller.propertyDetails.value?.property.attributes ??
+                              [])
+                          .where(
+                            (attr) =>
+                                attr.value != null &&
+                                attr.value!.toLowerCase() != "null" &&
+                                attr.value!.toLowerCase() != "n/a" &&
+                                attr.value!.trim().isNotEmpty,
+                          )
+                          .length,
                   itemBuilder: (context, index) {
-                    final validAttrs = (controller.propertyDetails.value?.property.attributes ?? [])
-                        .where((attr) => 
-                          attr.value != null && 
-                          attr.value!.toLowerCase() != "null" && 
-                          attr.value!.toLowerCase() != "n/a" && 
-                          attr.value!.trim().isNotEmpty
-                        ).toList();
+                    final validAttrs =
+                        (controller
+                                    .propertyDetails
+                                    .value
+                                    ?.property
+                                    .attributes ??
+                                [])
+                            .where(
+                              (attr) =>
+                                  attr.value != null &&
+                                  attr.value!.toLowerCase() != "null" &&
+                                  attr.value!.toLowerCase() != "n/a" &&
+                                  attr.value!.trim().isNotEmpty,
+                            )
+                            .toList();
                     final attr = validAttrs[index];
                     return _buildQuickSpec(
-                      _getAttributeIcon(attr.attribute), 
-                      attr.value!, 
-                      attr.attribute
+                      _getAttributeIcon(attr.attribute),
+                      attr.value!,
+                      attr.attribute,
                     );
                   },
                 ),
                 SizedBox(height: 16.h),
-                _buildLongSpec(IconlyLight.discovery, "${controller.propertyDetails.value?.property.area ?? "N/A"}", "Total Plot Area"),
+                _buildConvertibleAreaRow(
+                  controller.propertyDetails.value?.property.area ?? "N/A",
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  double _convertArea(double value, String from, String to) {
+    const toSqFt = {
+      'Sq Ft': 1.0,
+      'Sq Yd': 9.0,
+      'Sq M': 10.7639,
+      'Acre': 43560.0,
+      'Grounds': 2400.0,
+      'Aankadam': 72.0,
+      'Rood': 10890.0,
+      'Chatak': 45.0,
+      'Perch': 272.25,
+      'Guntha': 1089.0,
+      'Ares': 1076.39,
+      'Biswa (Pucca)': 1361.25,
+      'Biswa (Kaccha)': 900.0,
+    };
+    final fromFactor = toSqFt[from] ?? 1.0;
+    final toFactor = toSqFt[to] ?? 1.0;
+    return (value * fromFactor) / toFactor;
+  }
+
+  String _guessUnit(String raw) {
+    final l = raw.toLowerCase();
+    if (l.contains('yard') || l.contains('sq-yd') || l.contains('sq.yd')) {
+      return 'Sq Yd';
+    }
+    if (l.contains('sq m') || l.contains('sqm')) return 'Sq M';
+    if (l.contains('acre')) return 'Acre';
+    if (l.contains('ground')) return 'Grounds';
+    if (l.contains('aankadam') || l.contains('ankadam')) return 'Aankadam';
+    if (l.contains('rood')) return 'Rood';
+    if (l.contains('chatak')) return 'Chatak';
+    if (l.contains('perch')) return 'Perch';
+    if (l.contains('guntha')) return 'Guntha';
+    if (l.contains('are')) return 'Ares';
+    if (l.contains('biswa') && l.contains('kaccha')) return 'Biswa (Kaccha)';
+    if (l.contains('biswa')) return 'Biswa (Pucca)';
+    if (l.contains('ft') || l.contains('sqft') || l.contains('sq.ft')) {
+      return 'Sq Ft';
+    }
+    return 'Sq Ft';
+  }
+
+  String _extractNumber(String raw) {
+    final match = RegExp(r'([\d]+(\.[\d]+)?)').firstMatch(raw);
+    return match?.group(1) ?? '';
+  }
+
+  String _unitLabel(String unit) {
+    switch (unit) {
+      case 'Sq Ft':
+        return 'sq.ft.';
+      case 'Sq Yd':
+        return 'sq.yd.';
+      case 'Sq M':
+        return 'sq.m.';
+      case 'Acre':
+        return 'acre';
+      case 'Grounds':
+        return 'grounds';
+      case 'Aankadam':
+        return 'aankadam';
+      case 'Rood':
+        return 'rood';
+      case 'Chatak':
+        return 'chataks';
+      case 'Perch':
+        return 'perch';
+      case 'Guntha':
+        return 'guntha';
+      case 'Ares':
+        return 'ares';
+      case 'Biswa (Pucca)':
+        return 'biswa (pucca)';
+      case 'Biswa (Kaccha)':
+        return 'biswa (kaccha)';
+      default:
+        return unit.toLowerCase();
+    }
+  }
+
+  String _formatNumber(double value) {
+    if (value % 1 == 0) return value.toStringAsFixed(0);
+    return value.toStringAsFixed(2);
+  }
+
+  void _openUnitPicker(BuildContext context, String currentUnit) {
+    const units = [
+      'Sq Ft',
+      'Sq Yd',
+      'Sq M',
+      'Grounds',
+      'Aankadam',
+      'Rood',
+      'Chatak',
+      'Perch',
+      'Guntha',
+      'Ares',
+      'Biswa (Pucca)',
+      'Biswa (Kaccha)',
+      'Acre',
+    ];
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) {
+        final maxHeight = MediaQuery.of(context).size.height * 0.7;
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxHeight),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40.w,
+                      height: 4.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    "Select Area Unit",
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+                  Flexible(
+                    child: ListView.separated(
+                      itemCount: units.length,
+                      separatorBuilder: (_, __) => Divider(
+                        height: 1,
+                        color: Colors.white.withOpacity(0.08),
+                      ),
+                      itemBuilder: (context, index) {
+                        final unit = units[index];
+                        final selected = unit == currentUnit;
+                        return ListTile(
+                          onTap: () {
+                            setState(() => _selectedAreaUnit = unit);
+                            Navigator.pop(context);
+                          },
+                          contentPadding: EdgeInsets.zero,
+                          leading: selected
+                              ? const Icon(Icons.check, color: Colors.white)
+                              : const SizedBox(width: 24),
+                          title: Text(
+                            _unitLabel(unit),
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: Colors.white,
+                              fontWeight: selected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildConvertibleAreaRow(String rawValue) {
+    final baseUnit = _guessUnit(rawValue);
+    final baseValueStr = _extractNumber(rawValue);
+    final baseValue = double.tryParse(baseValueStr);
+
+    if (_lastAreaRaw != rawValue) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() {
+          _lastAreaRaw = rawValue;
+          _selectedAreaUnit = baseUnit;
+        });
+      });
+    }
+
+    final selectedUnit = _selectedAreaUnit.isEmpty
+        ? baseUnit
+        : _selectedAreaUnit;
+    final displayValue = baseValue == null
+        ? rawValue
+        : _formatNumber(_convertArea(baseValue, baseUnit, selectedUnit));
+
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: primary.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: primary.withOpacity(0.1)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(
+              color: primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(14.r),
+            ),
+            child: Icon(IconlyLight.discovery, size: 20.sp, color: primary),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "TOTAL PLOT AREA",
+                  style: TextStyle(
+                    fontSize: 9.sp,
+                    color: Colors.grey.shade500,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Row(
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        style: GoogleFonts.inter(
+                          fontSize: 15.sp,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                        ),
+                        children: [
+                          TextSpan(text: displayValue),
+                          const TextSpan(text: " "),
+                          TextSpan(
+                            text: _unitLabel(selectedUnit),
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    GestureDetector(
+                      onTap: () => _openUnitPicker(context, selectedUnit),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10.w,
+                          vertical: 6.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.12),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _unitLabel(selectedUnit),
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: Colors.white.withOpacity(0.9),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(width: 4.w),
+                            Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              size: 16.sp,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -735,8 +1182,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 8.sp, 
-                    color: Colors.grey.shade600, 
+                    fontSize: 8.sp,
+                    color: Colors.grey.shade600,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
                   ),
@@ -747,58 +1194,9 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
-                    fontSize: 12.sp, 
-                    color: Colors.white, 
+                    fontSize: 12.sp,
+                    color: Colors.white,
                     fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLongSpec(IconData icon, String value, String label) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: primary.withOpacity(0.04),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: primary.withOpacity(0.1)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(10.w),
-            decoration: BoxDecoration(
-              color: primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(14.r),
-            ),
-            child: Icon(icon, size: 20.sp, color: primary),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 9.sp, 
-                    color: Colors.grey.shade500, 
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  value,
-                  style: GoogleFonts.inter(
-                    fontSize: 15.sp, 
-                    color: Colors.white, 
-                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ],
@@ -823,7 +1221,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(14.r),
             child: CustomImage(
-              imageUrl: "https://media.wired.com/photos/59269cd37034dc5f91bec0f1/191:100/w_1280,c_limit/GoogleMapTA.jpg",
+              imageUrl:
+                  "https://media.wired.com/photos/59269cd37034dc5f91bec0f1/191:100/w_1280,c_limit/GoogleMapTA.jpg",
               width: 80.w,
               height: 55.h,
               fit: BoxFit.cover,
@@ -837,17 +1236,17 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                 Text(
                   "Property Location",
                   style: GoogleFonts.inter(
-                    fontSize: 14.sp, 
-                    fontWeight: FontWeight.w700, 
-                    color: Colors.white
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
                   ),
                 ),
                 SizedBox(height: 2.h),
                 Text(
                   "Get directions to site",
                   style: TextStyle(
-                    fontSize: 11.sp, 
-                    color: Colors.grey.shade500
+                    fontSize: 11.sp,
+                    color: Colors.grey.shade500,
                   ),
                 ),
               ],
@@ -908,32 +1307,42 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     return Obx(() {
       final p = controller.propertyDetails.value?.property;
       if (p == null) return const SizedBox.shrink();
-      
+
       return Container(
         padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
         decoration: BoxDecoration(
           color: const Color(0xFF1E1E1E),
-          border: Border(top: BorderSide(color: Colors.white.withOpacity(0.08))),
+          border: Border(
+            top: BorderSide(color: Colors.white.withOpacity(0.08)),
+          ),
         ),
         child: SizedBox(
           height: 56.h,
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () => Get.toNamed(AppRoutes.enquiry, arguments: {
-              'propertyId': p.id,
-              'propertyName': p.title,
-              'propertyLocation': p.address,
-            }),
+            onPressed: () => Get.toNamed(
+              AppRoutes.enquiry,
+              arguments: {
+                'propertyId': p.id,
+                'propertyName': p.title,
+                'propertyLocation': p.address,
+              },
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: secondary,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18.r),
+              ),
               elevation: 8,
               shadowColor: secondary.withOpacity(0.4),
             ),
             child: Text(
               "Submit Enquiry",
-              style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.bold),
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -943,15 +1352,13 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
   Widget _buildAmenitiesCard() {
     final amenities = controller.propertyDetails.value?.amenities ?? [];
-    
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: const Color(0xFF161616),
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.06),
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -987,16 +1394,13 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
               ),
             ],
           ),
-          
+
           SizedBox(height: 8.h),
-          
-          Container(
-            height: 0.5,
-            color: Colors.white.withOpacity(0.08),
-          ),
-          
+
+          Container(height: 0.5, color: Colors.white.withOpacity(0.08)),
+
           SizedBox(height: 8.h),
-          
+
           // Ultra Compact List
           Column(
             children: amenities.asMap().entries.map((entry) {
@@ -1006,13 +1410,14 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                 children: [
                   if (index > 0) SizedBox(height: 6.h),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 6.h,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.02),
                       borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.04),
-                      ),
+                      border: Border.all(color: Colors.white.withOpacity(0.04)),
                     ),
                     child: Row(
                       children: [

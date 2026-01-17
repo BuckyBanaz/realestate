@@ -7,6 +7,7 @@ import '../home/home_view_2.dart';
 import '../favorite/favorite_screen.dart';
 import '../profile/profile_screen.dart';
 import '../transaction/transaction_screen.dart';
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
 
@@ -17,29 +18,43 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
-    HomeView2(showNavBar: false),
-    TransactionListScreen(),
-    FavoriteScreen(),
-    ProfileScreen(),
+  final List<Widget Function()> _pageBuilders = [
+    () => HomeView2(showNavBar: false),
+    () => TransactionListScreen(),
+    () => FavoriteScreen(),
+    () => ProfileScreen(),
   ];
+  final Map<int, Widget> _builtPages = {};
+
+  @override
+  void initState() {
+    super.initState();
+    // Build only the initial tab to avoid extra API calls.
+    _builtPages[_selectedIndex] = _pageBuilders[_selectedIndex]();
+  }
 
   void _onTap(int index) {
     if (_selectedIndex == index) return;
+    if (!_builtPages.containsKey(index)) {
+      _builtPages[index] = _pageBuilders[index]();
+    }
     setState(() => _selectedIndex = index);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: scaffoldColor, 
+      backgroundColor: scaffoldColor,
       extendBody: true, // Important for content to show behind nav bar
       body: Stack(
         children: [
           // 1. Content
           IndexedStack(
             index: _selectedIndex,
-            children: _pages,
+            children: List.generate(
+              _pageBuilders.length,
+              (i) => _builtPages[i] ?? const SizedBox.shrink(),
+            ),
           ),
 
           // 2. Floating Glass Navbar
@@ -58,7 +73,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(30.r),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 30.0, sigmaY: 30.0), // Increased blur for liquid feel
+        filter: ImageFilter.blur(
+          sigmaX: 30.0,
+          sigmaY: 30.0,
+        ), // Increased blur for liquid feel
         child: Container(
           height: 70.h,
           padding: EdgeInsets.symmetric(horizontal: 10.w),
@@ -103,7 +121,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _navItem(IconData icon, IconData activeIcon, String label, int index) {
     final bool isSelected = _selectedIndex == index;
-    
+
     return GestureDetector(
       onTap: () => _onTap(index),
       behavior: HitTestBehavior.opaque,
@@ -111,7 +129,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-        decoration: isSelected 
+        decoration: isSelected
             ? BoxDecoration(
                 color: Colors.white.withOpacity(0.1), // Soft highlight
                 borderRadius: BorderRadius.circular(20.r),
@@ -123,13 +141,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-             Icon(
+            Icon(
               isSelected ? activeIcon : icon,
               size: 24.sp,
               color: isSelected ? secondary : Colors.grey.shade400,
             ),
             if (isSelected) ...[
-               SizedBox(height: 4.h),
+              SizedBox(height: 4.h),
               // Optional: Label or Dot
               Container(
                 width: 4.w,
@@ -138,17 +156,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   color: secondary,
                   shape: BoxShape.circle,
                 ),
-              )
+              ),
             ] else ...[
-               SizedBox(height: 4.h),
-               Text(
-                 label,
-                 style: TextStyle(
-                   fontSize: 10.sp,
-                   color: Colors.grey.shade500,
-                 ),
-               )
-            ]
+              SizedBox(height: 4.h),
+              Text(
+                label,
+                style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade500),
+              ),
+            ],
           ],
         ),
       ),

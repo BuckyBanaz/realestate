@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LocalStorage {
   static const String _tokenKey = 'auth_token';
   static const String _userKey = 'user_data';
+  static const String _fcmTokenKey = 'fcm_token';
 
   // Singleton
   static final LocalStorage _instance = LocalStorage._internal();
@@ -38,5 +39,13 @@ class LocalStorage {
 
   Future<void> clear() async {
     await _prefs?.clear();
+  }
+
+  Future<void> saveFcmToken(String token) async {
+    await _prefs?.setString(_fcmTokenKey, token);
+  }
+
+  String? getFcmToken() {
+    return _prefs?.getString(_fcmTokenKey);
   }
 }

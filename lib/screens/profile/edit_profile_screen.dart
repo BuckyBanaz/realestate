@@ -40,20 +40,35 @@ class EditProfileScreen extends StatelessWidget {
                 child: Stack(
                   children: [
                     Obx(() {
-                      ImageProvider? imageProvider;
+                      final size = 120.r;
                       if (controller.selectedImagePath.isNotEmpty) {
-                        imageProvider = FileImage(File(controller.selectedImagePath.value));
-                      } else if (controller.currentUser['profile_image'] != null) {
-                        imageProvider = NetworkImage(controller.currentUser['profile_image']);
+                        return ClipOval(
+                          child: Image.file(
+                            File(controller.selectedImagePath.value),
+                            width: size,
+                            height: size,
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      }
+
+                      final imageUrl = controller.currentUser['profile_image']?.toString() ?? "";
+                      if (imageUrl.isNotEmpty) {
+                        return ClipOval(
+                          child: CustomImage(
+                            imageUrl: imageUrl,
+                            width: size,
+                            height: size,
+                            fit: BoxFit.cover,
+                            fallbackAsset: 'assets/images/download.jpg',
+                          ),
+                        );
                       }
 
                       return CircleAvatar(
                         radius: 60.r,
                         backgroundColor: Theme.of(context).cardColor,
-                        backgroundImage: imageProvider,
-                        child: imageProvider == null
-                            ? Icon(IconlyBold.profile, size: 40.sp, color: Colors.grey)
-                            : null,
+                        child: Icon(IconlyBold.profile, size: 40.sp, color: Colors.grey),
                       );
                     }),
                     Positioned(

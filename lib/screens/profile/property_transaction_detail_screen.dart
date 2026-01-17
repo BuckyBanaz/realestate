@@ -4,10 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
-import 'package:realestate/screens/profile/documents_screen.dart';
-import 'package:realestate/data/models/owner_document_model.dart';
 import '../../constant/app_colors.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
 
@@ -130,26 +127,26 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: Theme.of(context).iconTheme.color,
         actions: [
-          IconButton(
-            onPressed: () => Get.to(
-              DocumentDetailScreen(
-                owner: OwnerDocumentGroup(
-                  ownerId: 74,
-                  name: "Himanshu Kumawat",
-                  email: "sssssdddd@gmail.com",
-                  phone: "1234567890",
-                  address: "kazipura",
-                  documents: [],
-                ),
-                doc: DocumentItem(
-                  id: 8,
-                  documentName: "Sale Agreement - Unit 302",
-                  documentUrl: "http://108.181.185.27/bladmin/public/uploads/documents/1768568662_WhatsApp Image 2026-01-16 at 10.37.20 AM.jpeg",
-                ),
-              ),
-            ),
-            icon: Icon(IconlyLight.document),
-          ),
+          // IconButton(
+          //   onPressed: () => Get.to(
+          //     DocumentDetailScreen(
+          //       owner: OwnerDocumentGroup(
+          //         ownerId: 74,
+          //         name: "Himanshu Kumawat",
+          //         email: "sssssdddd@gmail.com",
+          //         phone: "1234567890",
+          //         address: "kazipura",
+          //         documents: [],
+          //       ),
+          //       doc: DocumentItem(
+          //         id: 8,
+          //         documentName: "Sale Agreement - Unit 302",
+          //         documentUrl: "http://108.181.185.27/bladmin/public/uploads/documents/1768568662_WhatsApp Image 2026-01-16 at 10.37.20 AM.jpeg",
+          //       ),
+          //     ),
+          //   ),
+          //   icon: Icon(IconlyLight.document),
+          // ),
         ],
         leading: IconButton(
           onPressed: () => Get.back(),
@@ -198,7 +195,9 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w700,
-                              color: Theme.of(context).textTheme.bodyLarge?.color,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color,
                             ),
                           ),
                           SizedBox(height: 6.h),
@@ -249,7 +248,9 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
                                     // open 360 view (placeholder)
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text("360 View: Open 360 viewer: $view360Url"),
+                                        content: Text(
+                                          "360 View: Open 360 viewer: $view360Url",
+                                        ),
                                         behavior: SnackBarBehavior.floating,
                                       ),
                                     );
@@ -280,11 +281,15 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
             // ------------------ TRANSACTION DETAILS ------------------
             Text(
               "Transaction Detail",
-              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
             ),
             SizedBox(height: 10.h),
-            _detailTile(context, "Check in", details["checkIn"] ?? "-"),
-            _detailTile(context, "Check out", details["checkOut"] ?? "-"),
+            // _detailTile(context, "Check in", details["checkIn"] ?? "-"),
+            // _detailTile(context, "Check out", details["checkOut"] ?? "-"),
             _detailTile(context, "Owner name", details["owner"] ?? "-"),
             _detailTile(context, "Transaction type", tag),
             _detailTile(context, "Transaction Date", date),
@@ -294,7 +299,11 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
             // ---------------- PROPERTY ATTRIBUTES (dynamic) ----------------
             Text(
               "Property Details",
-              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
             ),
             SizedBox(height: 10.h),
 
@@ -393,7 +402,11 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
             // ---------------- PAYMENT DETAILS ----------------
             Text(
               "Payment Detail",
-              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
             ),
             SizedBox(height: 12.h),
             Container(
@@ -404,7 +417,11 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _detailTile(context, "Period time", paymentDetail["period"] ?? "-"),
+                  _detailTile(
+                    context,
+                    "Period time",
+                    paymentDetail["period"] ?? "-",
+                  ),
                   _detailTile(
                     context,
                     "Total Amount",
@@ -456,13 +473,13 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
               ),
             ),
 
-            SizedBox(height: 20.h),
+            // SizedBox(height: 20.h),
 
-            // ---------------- PAYMENT METHOD ----------------
-            Text(
-              "Payment Method",
-              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
-            ),
+            // // ---------------- PAYMENT METHOD ----------------
+            // Text(
+            //   "Payment Method",
+            //   style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color),
+            // ),
             // SizedBox(height: 10.h),
             // Container(
             //   padding: EdgeInsets.all(12.w),
@@ -531,7 +548,11 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
           Flexible(
             child: Text(
               value,
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp, color: Theme.of(context).textTheme.bodyLarge?.color),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13.sp,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
             ),
           ),
         ],
@@ -560,9 +581,7 @@ class FullscreenImageScreen extends StatelessWidget {
         return Center(child: Icon(Icons.broken_image, size: 64));
       }
     } else {
-      return CustomImage(
-        imageUrl: path,
-      );
+      return CustomImage(imageUrl: path);
     }
   }
 

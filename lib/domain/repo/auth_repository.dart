@@ -6,25 +6,30 @@ class AuthRepository {
   final ApiClient _apiClient = ApiClient();
 
   // Login Method
-  Future<Map<String, dynamic>> login(String email, String password, {String? deviceToken}) async {
+  Future<Map<String, dynamic>> login(
+    String email,
+    String password, {
+    String? deviceToken,
+  }) async {
     try {
+      final fcmToken = deviceToken ?? LocalStorage().getFcmToken();
       final response = await _apiClient.dio.post(
         'login',
         data: {
           'email': email,
           'password': password,
-          'device_token': "deviceToken",
+          'device_token': fcmToken ?? "",
         },
       );
 
       if (response.statusCode == 200 && response.data['status'] == true) {
         final data = response.data['data'];
         final token = data['token'];
-        
+
         // Save Token & User Data
         await LocalStorage().saveToken(token);
         await LocalStorage().saveUser(data);
-        
+
         return {
           'success': true,
           'message': response.data['message'],
@@ -37,10 +42,7 @@ class AuthRepository {
         };
       }
     } catch (e) {
-      return {
-        'success': false,
-        'message': _handleError(e),
-      };
+      return {'success': false, 'message': _handleError(e)};
     }
   }
 
@@ -62,11 +64,9 @@ class AuthRepository {
         },
       );
 
-      if ((response.statusCode == 200 || response.statusCode == 201) && response.data['status'] == true) {
-        return {
-          'success': true,
-          'message': response.data['message'],
-        };
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data['status'] == true) {
+        return {'success': true, 'message': response.data['message']};
       } else {
         return {
           'success': false,
@@ -74,10 +74,7 @@ class AuthRepository {
         };
       }
     } catch (e) {
-      return {
-        'success': false,
-        'message': _handleError(e),
-      };
+      return {'success': false, 'message': _handleError(e)};
     }
   }
 
@@ -118,7 +115,7 @@ class AuthRepository {
         final userData = response.data['data'];
         // Update local user data
         await LocalStorage().saveUser(userData);
-        
+
         return {
           'success': true,
           'message': response.data['message'],
@@ -131,10 +128,7 @@ class AuthRepository {
         };
       }
     } catch (e) {
-      return {
-        'success': false,
-        'message': _handleError(e),
-      };
+      return {'success': false, 'message': _handleError(e)};
     }
   }
 
@@ -150,10 +144,7 @@ class AuthRepository {
         data: {'email': email},
       );
       if (response.statusCode == 200 && response.data['status'] == true) {
-        return {
-          'success': true,
-          'message': response.data['message'],
-        };
+        return {'success': true, 'message': response.data['message']};
       } else {
         return {
           'success': false,
@@ -161,10 +152,7 @@ class AuthRepository {
         };
       }
     } catch (e) {
-      return {
-        'success': false,
-        'message': _handleError(e),
-      };
+      return {'success': false, 'message': _handleError(e)};
     }
   }
 
@@ -186,10 +174,7 @@ class AuthRepository {
         },
       );
       if (response.statusCode == 200 && response.data['status'] == true) {
-        return {
-          'success': true,
-          'message': response.data['message'],
-        };
+        return {'success': true, 'message': response.data['message']};
       } else {
         return {
           'success': false,
@@ -197,10 +182,7 @@ class AuthRepository {
         };
       }
     } catch (e) {
-      return {
-        'success': false,
-        'message': _handleError(e),
-      };
+      return {'success': false, 'message': _handleError(e)};
     }
   }
 

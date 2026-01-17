@@ -7,6 +7,7 @@ import 'package:realestate/constant/app_colors.dart';
 import 'package:realestate/data/models/transaction_model.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
+import 'package:share_plus/share_plus.dart';
 
 class TransactionDetailsScreen extends StatelessWidget {
   const TransactionDetailsScreen({Key? key}) : super(key: key);
@@ -139,7 +140,7 @@ class TransactionDetailsScreen extends StatelessWidget {
                   child: _buildActionButton(
                     "Share Details",
                     IconlyLight.send,
-                    onTap: () {},
+                    onTap: () => _shareDetails(transaction),
                     isOutline: true,
                   ),
                 ),
@@ -176,6 +177,22 @@ class TransactionDetailsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _shareDetails(TransactionModel transaction) {
+    final status = transaction.status.toUpperCase();
+    final amount = "${transaction.amount.startsWith('+') ? '+' : '-'} ₹${formatPrice(transaction.amountValue)}";
+    final message = [
+      "Transaction Receipt",
+      "Status: $status",
+      "Amount: $amount",
+      "Property: ${transaction.propertyName}",
+      "Date: ${transaction.date}",
+      "EMI: EMI #${transaction.emiNumber}",
+      "Payment Type: ${transaction.paymentType.toUpperCase()}",
+    ].join("\n");
+
+    Share.share(message, subject: "Transaction Receipt");
   }
 
   Widget _buildDetailRow(String label, String value, {bool isBold = false}) {

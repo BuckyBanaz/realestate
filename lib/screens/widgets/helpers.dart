@@ -216,6 +216,7 @@ class CustomImage extends StatelessWidget {
   final double? borderRadius;
   final PlaceholderWidgetBuilder? placeholder;
   final LoadingErrorWidgetBuilder? errorWidget;
+  final String? fallbackAsset;
 
   const CustomImage({
     Key? key,
@@ -226,14 +227,39 @@ class CustomImage extends StatelessWidget {
     this.borderRadius,
     this.placeholder,
     this.errorWidget,
+    this.fallbackAsset,
   }) : super(key: key);
+
+  Widget _buildFallback(BuildContext context) {
+    if (fallbackAsset != null && fallbackAsset!.isNotEmpty) {
+      return Image.asset(
+        fallbackAsset!,
+        width: width,
+        height: height,
+        fit: fit,
+      );
+    }
+    return Container(
+      width: width,
+      height: height,
+      color: Colors.grey.shade900,
+      child: const Icon(Icons.image_not_supported_outlined, color: Colors.white24),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final normalizedUrl = imageUrl.trim();
+    if (normalizedUrl.isEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius ?? 0),
+        child: _buildFallback(context),
+      );
+    }
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius ?? 0),
       child: CachedNetworkImage(
-        imageUrl: imageUrl,
+        imageUrl: normalizedUrl,
         width: width,
         height: height,
         fit: fit,
@@ -247,10 +273,7 @@ class CustomImage extends StatelessWidget {
             ),
           ),
         ),
-        errorWidget: errorWidget ?? (context, url, error) => Container(
-          color: Colors.grey.shade900,
-          child: const Icon(Icons.error_outline, color: Colors.white24),
-        ),
+        errorWidget: errorWidget ?? (context, url, error) => _buildFallback(context),
       ),
     );
   }

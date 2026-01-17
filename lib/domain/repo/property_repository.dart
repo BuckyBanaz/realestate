@@ -70,6 +70,7 @@ class PropertyRepository {
       return null;
     }
   }
+
   Future<Map<String, dynamic>> saveEnquiry({
     required int propertyId,
     required String name,
@@ -88,10 +89,12 @@ class PropertyRepository {
           'message': message,
         },
       );
-      if (response.statusCode == 200 && response.data['status'] == true) {
+         if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data['status'] == true) {
         return {
           'success': true,
-          'message': response.data['message'] ?? 'Inquiry submitted successfully',
+          'message':
+              response.data['message'] ?? 'Inquiry submitted successfully',
         };
       } else {
         return {
@@ -108,10 +111,7 @@ class PropertyRepository {
           };
         }
       }
-      return {
-        'success': false,
-        'message': 'Failed to connect to server',
-      };
+      return {'success': false, 'message': 'Failed to connect to server'};
     }
   }
 
@@ -135,7 +135,7 @@ class PropertyRepository {
         'property/favourite-toggle',
         data: {'property_id': propertyId},
       );
-      
+
       if (response.statusCode == 200) {
         return {
           'success': true,
@@ -150,7 +150,7 @@ class PropertyRepository {
       };
     } catch (e) {
       print('Toggle Favorite Error: $e');
-      
+
       // Check for 401 Unauthorized
       if (e is DioException && e.response?.statusCode == 401) {
         return {
@@ -160,7 +160,7 @@ class PropertyRepository {
           'unauthorized': true,
         };
       }
-      
+
       return {
         'success': false,
         'message': 'An error occurred',
@@ -172,7 +172,7 @@ class PropertyRepository {
   Future<FavoritesResponse?> fetchFavorites() async {
     try {
       final response = await _apiClient.dio.get('favourites-list');
-      
+
       if (response.statusCode == 200) {
         return FavoritesResponse.fromJson(response.data);
       }
@@ -198,7 +198,8 @@ class PropertyRepository {
 
       if (minPrice != null) queryParameters['min_price'] = minPrice;
       if (maxPrice != null) queryParameters['max_price'] = maxPrice;
-      if (search != null && search.isNotEmpty) queryParameters['search'] = search;
+      if (search != null && search.isNotEmpty)
+        queryParameters['search'] = search;
 
       final response = await _apiClient.dio.get(
         'properties',

@@ -16,7 +16,6 @@ import 'edit_profile_screen.dart';
 import 'package:realestate/data/controllers/profile_controller.dart';
 import 'package:realestate/data/models/account_data_model.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 // ====================== PROFILE SCREEN (RESPONSIVE) ======================
 
@@ -31,7 +30,7 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-       title: Text(
+        title: Text(
           "Profile",
           style: GoogleFonts.inter(
             fontSize: 20.sp,
@@ -41,11 +40,17 @@ class ProfileScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(IconlyLight.document, color: Theme.of(context).iconTheme.color),
+            icon: Icon(
+              IconlyLight.document,
+              color: Theme.of(context).iconTheme.color,
+            ),
             onPressed: () => Get.to(DocumentsScreen()),
           ),
           IconButton(
-            icon: Icon(IconlyLight.setting, color: Theme.of(context).iconTheme.color),
+            icon: Icon(
+              IconlyLight.setting,
+              color: Theme.of(context).iconTheme.color,
+            ),
             onPressed: () => Get.to(PermissionsScreen()),
           ),
           IconButton(
@@ -55,30 +60,37 @@ class ProfileScreen extends StatelessWidget {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildHeader(context),
-                // SizedBox(height: 16.h),
-                // _buildStatsRow(),
-                SizedBox(height: 18.h),
-                _buildTabs(ctrl),
-                SizedBox(height: 18.h),
-                Obx(() {
-                  if (ctrl.selectedTab.value == 0) {
-                    return _buildMyProperties(ctrl);
-                  } else if (ctrl.selectedTab.value == 1) {
-                    return _buildTransactionsSummary(context, ctrl);
-                  } else {
-                    return _buildPaymentsSection(ctrl);
-                  }
-                }),
-                SizedBox(height: 24.h),
-              ],
+        child: RefreshIndicator(
+          onRefresh: () => _onRefreshTab(ctrl),
+          color: secondary,
+          backgroundColor: Theme.of(context).cardColor,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeader(context),
+                  // SizedBox(height: 16.h),
+                  // _buildStatsRow(),
+                  SizedBox(height: 18.h),
+                  _buildTabs(ctrl),
+                  SizedBox(height: 18.h),
+                  Obx(() {
+                    if (ctrl.selectedTab.value == 0) {
+                      return _buildMyProperties(ctrl);
+                    } else if (ctrl.selectedTab.value == 1) {
+                      return _buildTransactionsSummary(context, ctrl);
+                    } else {
+                      return _buildPaymentsSection(ctrl);
+                    }
+                  }),
+                  SizedBox(height: 24.h),
+                ],
+              ),
             ),
           ),
         ),
@@ -86,57 +98,81 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _onRefreshTab(ProfileController ctrl) async {
+    switch (ctrl.selectedTab.value) {
+      case 0:
+        await ctrl.fetchAccountData();
+        break;
+      case 1:
+        await ctrl.fetchProfileTransactions();
+        break;
+      case 2:
+        await ctrl.fetchAccountData();
+        break;
+    }
+  }
+
   Widget _buildHeader(BuildContext context) {
     final double avatarSize = 120.w.clamp(72.0, 120.0);
     final ctrl = Get.find<ProfileController>();
 
-    return Obx(() => Column(
-      children: [
-        Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            CircleAvatar(
-              radius: avatarSize / 2.5,
-              backgroundColor: Colors.grey.shade300,
-              backgroundImage: ctrl.currentUser['profile_image'] != null
-                  ? NetworkImage(ctrl.currentUser['profile_image'])
-                  : null,
-              child: ctrl.currentUser['profile_image'] == null
-                  ? Icon(IconlyBold.profile, size: avatarSize / 3, color: Colors.white)
-                  : null,
-            ),
-            GestureDetector(
-              onTap: () => Get.to(const EditProfileScreen()),
-              child: Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: primary,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Icon(IconlyLight.edit, size: 14.w, color: Colors.white),
+    return Obx(
+      () => Column(
+        children: [
+          Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              CircleAvatar(
+                radius: avatarSize / 2.5,
+                backgroundColor: Colors.grey.shade300,
+                backgroundImage: ctrl.currentUser['profile_image'] != null
+                    ? NetworkImage(ctrl.currentUser['profile_image'])
+                    : null,
+                child: ctrl.currentUser['profile_image'] == null
+                    ? Icon(
+                        IconlyBold.profile,
+                        size: avatarSize / 3,
+                        color: Colors.white,
+                      )
+                    : null,
               ),
-            ),
-          ],
-        ),
-        SizedBox(height: 12.h),
-        Text(
-          ctrl.currentUser['name'] ?? "User Name",
-          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 6.h),
-        Text(
-          ctrl.currentUser['phone'] ?? "Phone Number",
-          style: TextStyle(color: Colors.grey[600], fontSize: 13.sp),
-        ),
-      ],
-    ));
+              GestureDetector(
+                onTap: () => Get.to(const EditProfileScreen()),
+                child: Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    color: primary,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    IconlyLight.edit,
+                    size: 14.w,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            ctrl.currentUser['name'] ?? "User Name",
+            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            ctrl.currentUser['phone'] ?? "Phone Number",
+            style: TextStyle(color: Colors.grey[600], fontSize: 13.sp),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildTabs(ProfileController c) {
@@ -161,11 +197,16 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         );
-      }
+      },
     );
   }
 
-  Widget _tab(BuildContext context, String text, int index, ProfileController c) {
+  Widget _tab(
+    BuildContext context,
+    String text,
+    int index,
+    ProfileController c,
+  ) {
     final bool active = c.selectedTab.value == index;
     return Expanded(
       child: GestureDetector(
@@ -173,9 +214,7 @@ class ProfileScreen extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 10.h),
           decoration: BoxDecoration(
-            color: active 
-                ? Theme.of(context).cardColor 
-                : Colors.transparent,
+            color: active ? Theme.of(context).cardColor : Colors.transparent,
             borderRadius: BorderRadius.circular(28.r),
           ),
           child: Text(
@@ -200,7 +239,11 @@ class ProfileScreen extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: 3,
           separatorBuilder: (_, __) => SizedBox(height: 12.h),
-          itemBuilder: (_, __) => ShimmerContainer(width: double.infinity, height: 100.h, radius: 12.r),
+          itemBuilder: (_, __) => ShimmerContainer(
+            width: double.infinity,
+            height: 100.h,
+            radius: 12.r,
+          ),
         );
       }
 
@@ -208,7 +251,10 @@ class ProfileScreen extends StatelessWidget {
         return Center(
           child: Padding(
             padding: EdgeInsets.all(40.h),
-            child: Text("No properties owned yet.", style: TextStyle(color: Colors.grey, fontSize: 14.sp)),
+            child: Text(
+              "No properties owned yet.",
+              style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+            ),
           ),
         );
       }
@@ -245,7 +291,6 @@ class ProfileScreen extends StatelessWidget {
   // ---------------- My Properties view ----------------
   // ---------------- Transaction Summary (excel-like rows) ----------------
   Widget _buildTransactionsSummary(BuildContext context, ProfileController c) {
-
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 4.w),
       child: Column(
@@ -264,7 +309,8 @@ class ProfileScreen extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () => Get.to(
-                  () => RecentTransactionListScreen(transactions: c.transactions),
+                  () =>
+                      RecentTransactionListScreen(transactions: c.transactions),
                 ),
                 child: Text('View All'),
               ),
@@ -276,8 +322,8 @@ class ProfileScreen extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark 
-                  ? Colors.grey.shade800 
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey.shade800
                   : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(8.r),
             ),
@@ -339,19 +385,26 @@ class ProfileScreen extends StatelessWidget {
               return ListView.separated(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
-                itemBuilder: (ctx, i) => ShimmerContainer(width: double.infinity, height: 60.h, radius: 8.r),
+                itemBuilder: (ctx, i) => ShimmerContainer(
+                  width: double.infinity,
+                  height: 60.h,
+                  radius: 8.r,
+                ),
                 separatorBuilder: (_, __) => SizedBox(height: 6.h),
                 itemCount: 3,
               );
             }
-            
+
             final recent = c.transactions.take(3).toList();
-            
+
             if (recent.isEmpty) {
               return Center(
                 child: Padding(
                   padding: EdgeInsets.all(20.w),
-                  child: Text("No transactions found", style: TextStyle(color: Colors.grey, fontSize: 13.sp)),
+                  child: Text(
+                    "No transactions found",
+                    style: TextStyle(color: Colors.grey, fontSize: 13.sp),
+                  ),
                 ),
               );
             }
@@ -362,7 +415,8 @@ class ProfileScreen extends StatelessWidget {
               itemBuilder: (ctx, i) {
                 final t = recent[i];
                 return GestureDetector(
-                  onTap: () => Get.toNamed(AppRoutes.transactionDetail, arguments: t),
+                  onTap: () =>
+                      Get.toNamed(AppRoutes.transactionDetail, arguments: t),
                   child: TransactionRow(transaction: t),
                 );
               },
@@ -380,10 +434,17 @@ class ProfileScreen extends StatelessWidget {
     return Obx(() {
       if (c.isAccountDataLoading.value) {
         return Column(
-          children: List.generate(3, (index) => Padding(
-            padding: EdgeInsets.only(bottom: 10.h),
-            child: ShimmerContainer(width: double.infinity, height: 80.h, radius: 12.r),
-          )),
+          children: List.generate(
+            3,
+            (index) => Padding(
+              padding: EdgeInsets.only(bottom: 10.h),
+              child: ShimmerContainer(
+                width: double.infinity,
+                height: 80.h,
+                radius: 12.r,
+              ),
+            ),
+          ),
         );
       }
 
@@ -439,7 +500,12 @@ class ProfileScreen extends StatelessWidget {
             ),
           ],
           if (c.upcomingPayments.isEmpty && c.pastPayments.isEmpty)
-             Center(child: Text("No payments records found.", style: TextStyle(color: Colors.grey, fontSize: 13.sp))),
+            Center(
+              child: Text(
+                "No payments records found.",
+                style: TextStyle(color: Colors.grey, fontSize: 13.sp),
+              ),
+            ),
         ],
       );
     });
@@ -472,7 +538,11 @@ class ProfileScreen extends StatelessWidget {
                   color: Colors.red.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(IconlyLight.logout, color: Colors.redAccent, size: 32.sp),
+                child: Icon(
+                  IconlyLight.logout,
+                  color: Colors.redAccent,
+                  size: 32.sp,
+                ),
               ),
               SizedBox(height: 20.h),
               Text(
@@ -487,10 +557,7 @@ class ProfileScreen extends StatelessWidget {
               Text(
                 "Are you sure you want to logout? You will need to login again to access your account.",
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.grey.shade400,
-                  fontSize: 13.sp,
-                ),
+                style: TextStyle(color: Colors.grey.shade400, fontSize: 13.sp),
               ),
               SizedBox(height: 30.h),
               Row(
@@ -503,7 +570,9 @@ class ProfileScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.05),
                           borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(color: Colors.white.withOpacity(0.05)),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.05),
+                          ),
                         ),
                         child: Center(
                           child: Text(
@@ -578,10 +647,7 @@ class TransactionRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 90.w,
-            child: Text(
-              transaction.date,
-              style: TextStyle(fontSize: 12.sp),
-            ),
+            child: Text(transaction.date, style: TextStyle(fontSize: 12.sp)),
           ),
           Expanded(
             child: Text(
@@ -596,7 +662,7 @@ class TransactionRow extends StatelessWidget {
               transaction.amount,
               textAlign: TextAlign.right,
               style: TextStyle(
-                fontWeight: FontWeight.w600, 
+                fontWeight: FontWeight.w600,
                 fontSize: 12.sp,
                 color: isReceived ? Colors.green : Colors.white,
               ),
@@ -627,16 +693,15 @@ class TransactionRow extends StatelessWidget {
 class _PropertyTile extends StatelessWidget {
   final OwnedProperty propertyData;
 
-  const _PropertyTile({
-    Key? key,
-    required this.propertyData,
-  }) : super(key: key);
+  const _PropertyTile({Key? key, required this.propertyData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final p = propertyData.property;
     final ctrl = Get.find<ProfileController>();
-    final finance = propertyData.finance.isNotEmpty ? propertyData.finance.first : null;
+    final finance = propertyData.finance.isNotEmpty
+        ? propertyData.finance.first
+        : null;
 
     return GestureDetector(
       onTap: () {
@@ -733,11 +798,7 @@ class _PropertyTile extends StatelessWidget {
                   SizedBox(height: 6.h),
                   Row(
                     children: [
-                      Icon(
-                        Icons.check_circle,
-                        size: 14.w,
-                        color: primary,
-                      ),
+                      Icon(Icons.check_circle, size: 14.w, color: primary),
                       SizedBox(width: 8.w),
                       Text(
                         "Owned • ${p.saleDate.split('T').first}",
@@ -762,10 +823,7 @@ class _PropertyTile extends StatelessWidget {
 class PaymentCard extends StatelessWidget {
   final PaymentItem payment;
 
-  const PaymentCard({
-    Key? key,
-    required this.payment,
-  }) : super(key: key);
+  const PaymentCard({Key? key, required this.payment}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -782,8 +840,8 @@ class PaymentCard extends StatelessWidget {
             width: 64.w,
             height: 52.h,
             decoration: BoxDecoration(
-              color: isPaid 
-                  ? Colors.green.withOpacity(0.15) 
+              color: isPaid
+                  ? Colors.green.withOpacity(0.15)
                   : Colors.orange.withOpacity(0.15),
               borderRadius: BorderRadius.circular(8.r),
             ),
@@ -808,7 +866,12 @@ class PaymentCard extends StatelessWidget {
                 SizedBox(height: 6.h),
                 Text(
                   "Status: ${payment.status}",
-                  style: TextStyle(color:  Theme.of(context).brightness == Brightness.dark ? Colors.grey[400] : Colors.grey[600], fontSize: 12.sp),
+                  style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[400]
+                        : Colors.grey[600],
+                    fontSize: 12.sp,
+                  ),
                 ),
               ],
             ),
@@ -823,7 +886,12 @@ class PaymentCard extends StatelessWidget {
               SizedBox(height: 6.h),
               Text(
                 payment.paidDate,
-                style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[400] : Colors.grey[600], fontSize: 12.sp),
+                style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey[400]
+                      : Colors.grey[600],
+                  fontSize: 12.sp,
+                ),
               ),
             ],
           ),

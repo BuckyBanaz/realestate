@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -8,7 +10,6 @@ import '../../constant/app_colors.dart';
 import '../../data/controllers/document_controller.dart';
 import '../../data/models/owner_document_model.dart';
 import '../widgets/helpers.dart';
-import '../widgets/shimmers.dart';
 
 class DocumentsScreen extends StatelessWidget {
   DocumentsScreen({super.key});
@@ -275,6 +276,27 @@ class DocumentDetailScreen extends StatelessWidget {
 
   const DocumentDetailScreen({super.key, required this.owner, required this.doc});
 
+  Future<void> _downloadDocument(BuildContext context) async {
+    final url = doc.documentUrl.trim();
+    if (url.isEmpty) {
+      showCustomToast("Document URL missing", isError: true);
+      return;
+    }
+
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final fileName = Uri.parse(url).pathSegments.isNotEmpty
+          ? Uri.parse(url).pathSegments.last
+          : "document-${doc.id}.jpg";
+      final savePath = "${dir.path}/$fileName";
+
+      await Dio().download(url, savePath);
+      showCustomToast("Downloaded to: $savePath");
+    } catch (e) {
+      showCustomToast("Download failed", isError: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -399,7 +421,7 @@ class DocumentDetailScreen extends StatelessWidget {
               width: double.infinity,
               height: 56.h,
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () => _downloadDocument(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primary,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.r)),

@@ -64,7 +64,7 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-    
+
     final result = await _repository.saveEnquiry(
       propertyId: widget.propertyId,
       name: _nameController.text.trim(),
@@ -72,15 +72,15 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
       phone: _phoneController.text.trim(),
       message: _messageController.text.trim(),
     );
-    
+
     setState(() => _isLoading = false);
 
     if (mounted) {
       if (result['success'] == true) {
-        showCustomToast(result['message'] ?? 'Enquiry submitted successfully!');
+         showCustomToast(result['message'] ?? 'Enquiry submitted successfully!');
         Get.offAllNamed(AppRoutes.home);
       } else {
-        showCustomToast(result['message'] ?? 'Failed to submit enquiry', isError: true);
+        showCustomToast(result['message'] ?? 'Failed to submit enquiry');
       }
     }
   }
@@ -114,7 +114,7 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 12.h),
-              
+
               // Property Info Card
               Container(
                 width: double.infinity,
@@ -154,9 +154,9 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
                   ],
                 ),
               ),
-              
+
               SizedBox(height: 32.h),
-              
+
               Text(
                 "Your Details",
                 style: GoogleFonts.inter(
@@ -181,7 +181,8 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
                 icon: IconlyLight.call,
                 keyboardType: TextInputType.phone,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (v) => v!.length < 10 ? "Enter valid 10-digit number" : null,
+                validator: (v) =>
+                    v!.length < 10 ? "Enter valid 10-digit number" : null,
               ),
               SizedBox(height: 16.h),
 
@@ -190,7 +191,8 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
                 label: "Email Address",
                 icon: IconlyLight.message,
                 keyboardType: TextInputType.emailAddress,
-                validator: (v) => (v!.isNotEmpty && !v.isEmail) ? "Enter valid email" : null,
+                validator: (v) =>
+                    (v!.isNotEmpty && !v.isEmail) ? "Enter valid email" : null,
               ),
               SizedBox(height: 16.h),
 
@@ -201,7 +203,7 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
                 maxLines: 4,
                 hint: "I'm interested in this property...",
               ),
-              
+
               SizedBox(height: 40.h),
 
               SizedBox(
@@ -222,7 +224,10 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 3,
+                          ),
                         )
                       : Text(
                           "Submit Enquiry",
@@ -276,7 +281,10 @@ class _EnquiryFormScreenState extends State<EnquiryFormScreen> {
             prefixIcon: Icon(icon, size: 20.sp, color: Colors.grey.shade600),
             filled: true,
             fillColor: const Color(0xFF1A1A1A),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: maxLines > 1 ? 16.h : 0),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: maxLines > 1 ? 16.h : 0,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
               borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),

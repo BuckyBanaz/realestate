@@ -6,6 +6,7 @@ import 'package:realestate/domain/app/local_storage.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:realestate/domain/app/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +14,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await LocalStorage().init();
+  await NotificationService().init();
 
   // Background configuration sync
   try {

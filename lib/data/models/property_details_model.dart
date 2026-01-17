@@ -185,7 +185,7 @@ class PropertyDetailData {
                 ?.map((e) => SitePlanImage.fromJson(e))
                 .toList() ??
             [],
-        isFavorite: json['is_favourite'] ?? json['is_favorite'] ?? false,
+        isFavorite: json['isFavourite'] ?? json['is_favourite'] ?? json['is_favorite'] ?? false,
       );
       
       // Debug: Check if is_favorite is coming from API

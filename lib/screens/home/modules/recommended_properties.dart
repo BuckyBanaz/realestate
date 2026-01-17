@@ -65,32 +65,32 @@ class RecommendedProperties extends StatelessWidget {
                             borderRadius: 20.r,
                           ),
                           // Rating Badge
-                          Positioned(
-                            top: 8.h,
-                            right: 8.w,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.6),
-                                borderRadius: BorderRadius.circular(12.r),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.star, color: Colors.amber, size: 12.sp),
-                                  SizedBox(width: 4.w),
-                                  Text(
-                                    "4.5",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10.sp,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                          // Positioned(
+                          //   top: 8.h,
+                          //   right: 8.w,
+                          //   child: Container(
+                          //     padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                          //     decoration: BoxDecoration(
+                          //       color: Colors.black.withOpacity(0.6),
+                          //       borderRadius: BorderRadius.circular(12.r),
+                          //     ),
+                          //     child: Row(
+                          //       mainAxisSize: MainAxisSize.min,
+                          //       children: [
+                          //         Icon(Icons.star, color: Colors.amber, size: 12.sp),
+                          //         SizedBox(width: 4.w),
+                          //         Text(
+                          //           "4.5",
+                          //           style: TextStyle(
+                          //             color: Colors.white,
+                          //             fontSize: 10.sp,
+                          //             fontWeight: FontWeight.bold,
+                          //           ),
+                          //         ),
+                          //       ],
+                          //     ),
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),

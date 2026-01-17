@@ -11,11 +11,10 @@ class AppTheme {
     cardColor: const Color(0xFF1A1A1A),
 
     // Use Carlito for text, ensure it's suitable for dark mode
-    textTheme: GoogleFonts.carlitoTextTheme(ThemeData.dark().textTheme).apply(
-      bodyColor: Colors.white,
-      displayColor: Colors.white,
-    ),
-    
+    textTheme: GoogleFonts.carlitoTextTheme(
+      ThemeData.dark().textTheme,
+    ).apply(bodyColor: Colors.white, displayColor: Colors.white),
+
     colorScheme: ColorScheme.dark(
       primary: primary,
       secondary: secondary,
@@ -40,14 +39,21 @@ class AppTheme {
       ),
     ),
 
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: scaffoldColor,
+      modalBackgroundColor: scaffoldColor,
+      surfaceTintColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+    ),
+
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: primary,
         foregroundColor: Colors.black, // Text color on button
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(vertical: 16),
         textStyle: GoogleFonts.inter(
           fontSize: 16,
@@ -89,12 +95,8 @@ class AppTheme {
     //   ),
     //   margin: EdgeInsets.zero,
     // ),
-    
-    iconTheme: IconThemeData(
-      color: primary,
-      size: 24,
-    ),
-    
+    iconTheme: IconThemeData(color: primary, size: 24),
+
     dividerColor: Colors.grey[800],
   );
 }

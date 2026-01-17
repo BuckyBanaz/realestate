@@ -48,7 +48,9 @@ class SearchScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: cardColor,
                         borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(color: Colors.white.withOpacity(0.05)),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.05),
+                        ),
                       ),
                       child: TextField(
                         controller: controller.searchController,
@@ -57,28 +59,31 @@ class SearchScreen extends StatelessWidget {
                         decoration: InputDecoration(
                           hintText: 'Search city, title, address...',
                           hintStyle: TextStyle(color: Colors.grey.shade500),
-                          prefixIcon: const Icon(IconlyLight.search, color: Colors.grey),
+                          prefixIcon: const Icon(
+                            IconlyLight.search,
+                            color: Colors.grey,
+                          ),
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(vertical: 14.h),
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(width: 12.w),
-                  Container(
-                    height: 52.h,
-                    width: 52.h,
-                    decoration: BoxDecoration(
-                      color: secondary,
-                      borderRadius: BorderRadius.circular(16.r),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(IconlyLight.filter, color: Colors.white),
-                      onPressed: () {
-                        // TODO: Open Filter Modal
-                      },
-                    ),
-                  ),
+                  // SizedBox(width: 12.w),
+                  // Container(
+                  //   height: 52.h,
+                  //   width: 52.h,
+                  //   decoration: BoxDecoration(
+                  //     color: secondary,
+                  //     borderRadius: BorderRadius.circular(16.r),
+                  //   ),
+                  //   child: IconButton(
+                  //     icon: const Icon(IconlyLight.filter, color: Colors.white),
+                  //     onPressed: () {
+                  //       // TODO: Open Filter Modal
+                  //     },
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -108,7 +113,8 @@ class SearchScreen extends StatelessWidget {
             // Results Section
             Expanded(
               child: Obx(() {
-                if (controller.isLoading.value && controller.searchResults.isEmpty) {
+                if (controller.isLoading.value &&
+                    controller.searchResults.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
@@ -121,7 +127,10 @@ class SearchScreen extends StatelessWidget {
                   physics: const BouncingScrollPhysics(),
                   slivers: [
                     SliverPadding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 12.h,
+                      ),
                       sliver: SliverToBoxAdapter(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -149,16 +158,13 @@ class SearchScreen extends StatelessWidget {
                     SliverPadding(
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
                       sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final property = controller.searchResults[index];
-                            return Padding(
-                              padding: EdgeInsets.only(bottom: 16.h),
-                              child: PropertyCard(property: property),
-                            );
-                          },
-                          childCount: controller.searchResults.length,
-                        ),
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final property = controller.searchResults[index];
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 16.h),
+                            child: PropertyCard(property: property),
+                          );
+                        }, childCount: controller.searchResults.length),
                       ),
                     ),
                     if (controller.isMoreLoading.value)
@@ -168,14 +174,18 @@ class SearchScreen extends StatelessWidget {
                           child: Center(child: CircularProgressIndicator()),
                         ),
                       ),
-                    if (!controller.hasNextPage && controller.searchResults.isNotEmpty)
+                    if (!controller.hasNextPage &&
+                        controller.searchResults.isNotEmpty)
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: EdgeInsets.all(24.0),
                           child: Center(
                             child: Text(
                               "You've reached the end of results",
-                              style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14.sp,
+                              ),
                             ),
                           ),
                         ),
@@ -190,7 +200,10 @@ class SearchScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryChip(PropertySearchController controller, String category) {
+  Widget _buildCategoryChip(
+    PropertySearchController controller,
+    String category,
+  ) {
     return Obx(() {
       final isActive = controller.selectedCategory.value == category;
       return GestureDetector(
@@ -204,13 +217,15 @@ class SearchScreen extends StatelessWidget {
             border: Border.all(
               color: isActive ? secondary : Colors.white.withOpacity(0.05),
             ),
-            boxShadow: isActive ? [
-              BoxShadow(
-                color: secondary.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              )
-            ] : null,
+            boxShadow: isActive
+                ? [
+                    BoxShadow(
+                      color: secondary.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
           ),
           child: Center(
             child: Text(
@@ -235,11 +250,12 @@ class SearchScreen extends StatelessWidget {
           Container(
             width: 100.w,
             height: 100.w,
-            decoration: BoxDecoration(
-              color: cardColor,
-              shape: BoxShape.circle,
+            decoration: BoxDecoration(color: cardColor, shape: BoxShape.circle),
+            child: Icon(
+              IconlyLight.search,
+              color: Colors.grey.shade700,
+              size: 45.sp,
             ),
-            child: Icon(IconlyLight.search, color: Colors.grey.shade700, size: 45.sp),
           ),
           SizedBox(height: 24.h),
           Text(
@@ -268,7 +284,8 @@ class PropertyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Get.toNamed(AppRoutes.propertyDetail, arguments: property.id),
+      onTap: () =>
+          Get.toNamed(AppRoutes.propertyDetail, arguments: property.id),
       child: Container(
         decoration: BoxDecoration(
           color: cardColor,
@@ -289,19 +306,25 @@ class PropertyCard extends StatelessWidget {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(20.r),
+                  ),
                   child: CustomImage(
-                    imageUrl: property.mainImageUrl ?? "",
+                    imageUrl: property.mainImageUrl ?? property.mainImage ?? "",
                     height: 180.h,
                     width: double.infinity,
                     fit: BoxFit.cover,
+                    fallbackAsset: 'assets/images/download.jpg',
                   ),
                 ),
                 Positioned(
                   top: 12.h,
                   right: 12.w,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 6.h,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(10.r),
@@ -320,7 +343,10 @@ class PropertyCard extends StatelessWidget {
                   bottom: 12.h,
                   left: 12.w,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 6.h,
+                    ),
                     decoration: BoxDecoration(
                       color: secondary,
                       borderRadius: BorderRadius.circular(10.r),
@@ -357,7 +383,11 @@ class PropertyCard extends StatelessWidget {
                   SizedBox(height: 8.h),
                   Row(
                     children: [
-                      Icon(IconlyLight.location, size: 14.sp, color: Colors.grey),
+                      Icon(
+                        IconlyLight.location,
+                        size: 14.sp,
+                        color: Colors.grey,
+                      ),
                       SizedBox(width: 6.w),
                       Expanded(
                         child: Text(
@@ -373,10 +403,16 @@ class PropertyCard extends StatelessWidget {
                   Row(
                     children: [
                       if (property.bedrooms != null) ...[
-                        _buildInfoIcon(IconlyBold.show, "${property.bedrooms} Beds"),
+                        _buildInfoIcon(
+                          IconlyBold.show,
+                          "${property.bedrooms} Beds",
+                        ),
                         SizedBox(width: 16.w),
                       ],
-                      _buildInfoIcon(IconlyBold.category, "${property.area} Sq.Ft"),
+                      _buildInfoIcon(
+                        IconlyBold.category,
+                        "${property.area} Sq.Ft",
+                      ),
                     ],
                   ),
                 ],
