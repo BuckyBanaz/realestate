@@ -46,13 +46,13 @@ class ProfileScreen extends StatelessWidget {
             ),
             onPressed: () => Get.to(DocumentsScreen()),
           ),
-          IconButton(
-            icon: Icon(
-              IconlyLight.setting,
-              color: Theme.of(context).iconTheme.color,
-            ),
-            onPressed: () => Get.to(PermissionsScreen()),
-          ),
+          // IconButton(
+          //   icon: Icon(
+          //     IconlyLight.setting,
+          //     color: Theme.of(context).iconTheme.color,
+          //   ),
+          //   onPressed: () => Get.to(PermissionsScreen()),
+          // ),
           IconButton(
             icon: const Icon(IconlyLight.logout, color: Colors.redAccent),
             onPressed: () => _showLogoutConfirmation(context, ctrl),
@@ -729,6 +729,7 @@ class _PropertyTile extends StatelessWidget {
             propertyType: PropertyType.township,
             mapImage: p.image,
             view360Url: null,
+            propertyId: p.id,
           ),
         );
       },

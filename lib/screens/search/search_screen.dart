@@ -69,46 +69,53 @@ class SearchScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // SizedBox(width: 12.w),
-                  // Container(
-                  //   height: 52.h,
-                  //   width: 52.h,
-                  //   decoration: BoxDecoration(
-                  //     color: secondary,
-                  //     borderRadius: BorderRadius.circular(16.r),
-                  //   ),
-                  //   child: IconButton(
-                  //     icon: const Icon(IconlyLight.filter, color: Colors.white),
-                  //     onPressed: () {
-                  //       // TODO: Open Filter Modal
-                  //     },
-                  //   ),
-                  // ),
+                  SizedBox(width: 12.w),
+                  Obx(() {
+                    final hasFilter =
+                        controller.minPrice.value != null ||
+                        controller.maxPrice.value != null;
+                    return Container(
+                      height: 52.h,
+                      width: 52.h,
+                      decoration: BoxDecoration(
+                        color: hasFilter ? secondary : cardColor,
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.05),
+                        ),
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          IconlyLight.filter,
+                          color: hasFilter ? Colors.white : Colors.grey,
+                        ),
+                        onPressed: () => _openFilterSheet(context, controller),
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
 
             // Category Filters (Horizontal)
-            SizedBox(
-              height: 55.h,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                children: [
-                  _buildCategoryChip(controller, "All"),
-                  SizedBox(width: 10.w),
-                  _buildCategoryChip(controller, "Residential"),
-                  SizedBox(width: 10.w),
-                  _buildCategoryChip(controller, "Commercial"),
-                  SizedBox(width: 10.w),
-                  _buildCategoryChip(controller, "Plot"),
-                  SizedBox(width: 10.w),
-                  _buildCategoryChip(controller, "Agricultural"),
-                  SizedBox(width: 10.w),
-                  _buildCategoryChip(controller, "Farmhouse"),
-                ],
-              ),
-            ),
+            // SizedBox(
+            //   height: 55.h,
+            //   child: Obx(() {
+            //     final categories = _buildCategories(controller.searchResults);
+            //     return ListView.separated(
+            //       scrollDirection: Axis.horizontal,
+            //       padding: EdgeInsets.symmetric(
+            //         horizontal: 16.w,
+            //         vertical: 8.h,
+            //       ),
+            //       itemCount: categories.length,
+            //       separatorBuilder: (_, __) => SizedBox(width: 10.w),
+            //       itemBuilder: (context, index) {
+            //         return _buildCategoryChip(controller, categories[index]);
+            //       },
+            //     );
+            //   }),
+            // ),
 
             // Results Section
             Expanded(
@@ -119,6 +126,17 @@ class SearchScreen extends StatelessWidget {
                 }
 
                 if (controller.searchResults.isEmpty) {
+                  return _buildEmptyState();
+                }
+
+                final filteredResults = controller.searchResults.where((item) {
+                  final selected = controller.selectedCategory.value;
+                  if (selected == "All") return true;
+                  return item.propertyType.toLowerCase() ==
+                      selected.toLowerCase();
+                }).toList();
+
+                if (filteredResults.isEmpty) {
                   return _buildEmptyState();
                 }
 
@@ -144,7 +162,7 @@ class SearchScreen extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              "${controller.searchResults.length} Results",
+                              "${filteredResults.length} Results",
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 color: secondary,
@@ -159,12 +177,12 @@ class SearchScreen extends StatelessWidget {
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate((context, index) {
-                          final property = controller.searchResults[index];
+                          final property = filteredResults[index];
                           return Padding(
                             padding: EdgeInsets.only(bottom: 16.h),
                             child: PropertyCard(property: property),
                           );
-                        }, childCount: controller.searchResults.length),
+                        }, childCount: filteredResults.length),
                       ),
                     ),
                     if (controller.isMoreLoading.value)
@@ -197,6 +215,151 @@ class SearchScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  List<String> _buildCategories(List<PropertyListItem> items) {
+    final result = <String>["All"];
+    final seen = <String>{};
+    for (final item in items) {
+      final type = item.propertyType.trim();
+      if (type.isEmpty) continue;
+      final key = type.toLowerCase();
+      if (seen.add(key)) {
+        result.add(type);
+      }
+    }
+    return result;
+  }
+
+  void _openFilterSheet(
+    BuildContext context,
+    PropertySearchController controller,
+  ) {
+    final minController = TextEditingController(
+      text: controller.minPrice.value?.toString() ?? '',
+    );
+    final maxController = TextEditingController(
+      text: controller.maxPrice.value?.toString() ?? '',
+    );
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E1E1E),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (_) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Text(
+                "Filter by Price",
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16.sp,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: minController,
+                      keyboardType: TextInputType.number,
+                      style: TextStyle(color: Colors.white, fontSize: 14.sp),
+                      decoration: InputDecoration(
+                        hintText: "Min price",
+                        hintStyle: TextStyle(color: Colors.grey.shade500),
+                        filled: true,
+                        fillColor: cardColor,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: TextField(
+                      controller: maxController,
+                      keyboardType: TextInputType.number,
+                      style: TextStyle(color: Colors.white, fontSize: 14.sp),
+                      decoration: InputDecoration(
+                        hintText: "Max price",
+                        hintStyle: TextStyle(color: Colors.grey.shade500),
+                        filled: true,
+                        fillColor: cardColor,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        controller.clearFilters();
+                        Get.back();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: Colors.white24),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                      ),
+                      child: Text(
+                        "Clear",
+                        style: TextStyle(color: Colors.white, fontSize: 13.sp),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final min = double.tryParse(minController.text.trim());
+                        final max = double.tryParse(maxController.text.trim());
+                        controller.applyPriceFilter(min: min, max: max);
+                        Get.back();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: secondary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                      ),
+                      child: Text(
+                        "Apply",
+                        style: TextStyle(color: Colors.white, fontSize: 13.sp),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

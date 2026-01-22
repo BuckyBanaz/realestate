@@ -25,30 +25,7 @@ class NotificationScreen extends StatelessWidget {
           "Notifications",
           style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color),
         ),
-        actions: [
-          Obx(() => controller.unreadCount.value > 0
-              ? Padding(
-                  padding: EdgeInsets.only(right: 16.w),
-                  child: Center(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        color: secondary,
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Text(
-                        '${controller.unreadCount.value} new',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink()),
-        ],
+        actions: const [],
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -192,25 +169,17 @@ class NotificationTile extends StatelessWidget {
           Get.find<NotificationController>().deleteNotification(item.id);
         },
         child: GestureDetector(
-          onTap: () {
-            if (!item.isRead) {
-              Get.find<NotificationController>().markAsRead(item.id);
-            }
-          },
+          onTap: () {},
           child: Container(
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              color: item.isRead 
-                  ? Theme.of(context).cardColor 
-                  : Theme.of(context).cardColor.withOpacity(0.8),
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(20.r),
               border: Border.all(
-                color: item.isRead
-                    ? (Theme.of(context).brightness == Brightness.dark
-                        ? Colors.grey.shade800
-                        : const Color(0xFFE5E7EB))
-                    : secondary.withOpacity(0.3),
-                width: item.isRead ? 1 : 2,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey.shade800
+                    : const Color(0xFFE5E7EB),
+                width: 1,
               ),
               boxShadow: [
                 BoxShadow(
@@ -243,28 +212,13 @@ class NotificationTile extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              item.title,
-                              style: GoogleFonts.inter(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15.sp,
-                                color: Theme.of(context).textTheme.bodyLarge?.color,
-                              ),
-                            ),
-                          ),
-                          if (!item.isRead)
-                            Container(
-                              width: 8.w,
-                              height: 8.w,
-                              decoration: BoxDecoration(
-                                color: secondary,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                        ],
+                      Text(
+                        item.title,
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15.sp,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
                       ),
                       SizedBox(height: 4.h),
                       Text(

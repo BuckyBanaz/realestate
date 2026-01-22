@@ -4,7 +4,7 @@ import 'package:realestate/domain/api/api_client.dart';
 
 class NotificationController extends GetxController {
   final ApiClient _apiClient = ApiClient();
-  
+
   var isLoading = false.obs;
   var unreadCount = 0.obs;
   var allNotifications = <NotificationItem>[].obs;
@@ -19,7 +19,7 @@ class NotificationController extends GetxController {
     try {
       isLoading.value = true;
       final response = await _apiClient.dio.get('customer/notifications');
-      
+
       if (response.statusCode == 200) {
         final notifResponse = NotificationResponse.fromJson(response.data);
         allNotifications.value = notifResponse.data;
@@ -54,14 +54,23 @@ class NotificationController extends GetxController {
     }
   }
 
-  void deleteNotification(int notificationId) {
-    allNotifications.removeWhere((n) => n.id == notificationId);
+  Future<void> deleteNotification(int notificationId) async {
+    try {
+      final response = await _apiClient.dio.delete(
+        'customer/notifications/$notificationId',
+      );
+      if (response.statusCode == 200) {
+        allNotifications.removeWhere((n) => n.id == notificationId);
+      }
+    } catch (e) {
+      print('Delete notification error: $e');
+    }
   }
 
-  List<NotificationItem> get todayNotifications => 
+  List<NotificationItem> get todayNotifications =>
       allNotifications.where((n) => _isToday(n.createdAt)).toList();
 
-  List<NotificationItem> get olderNotifications => 
+  List<NotificationItem> get olderNotifications =>
       allNotifications.where((n) => !_isToday(n.createdAt)).toList();
 
   bool _isToday(String dateStr) {
@@ -69,18 +78,32 @@ class NotificationController extends GetxController {
       final now = DateTime.now();
       // Check if the date string contains "today" or matches today's date
       if (dateStr.toLowerCase().contains('today')) return true;
-      
+
       // Parse the date from format like "16 Jan 2026, 04:56 AM"
       // For simplicity, check if it's within last 24 hours
-      return dateStr.contains('${now.day} ${_getMonthName(now.month)} ${now.year}');
+      return dateStr.contains(
+        '${now.day} ${_getMonthName(now.month)} ${now.year}',
+      );
     } catch (e) {
       return false;
     }
   }
 
   String _getMonthName(int month) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return months[month - 1];
   }
 }

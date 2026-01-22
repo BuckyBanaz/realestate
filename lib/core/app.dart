@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Real Estate',
+          title: 'B&L Real Estate',
           theme: AppTheme.darkTheme,
           home: child,
           initialRoute: AppRoutes.splash,

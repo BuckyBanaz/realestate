@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
+import 'package:intl/intl.dart';
 import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/constant/app_colors.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -16,10 +17,19 @@ class NewsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final HomeController controller = Get.find<HomeController>();
+    String formatDate(String raw) {
+      final cleaned = raw.trim();
+      if (cleaned.isEmpty) return '-';
+      final normalized = cleaned.endsWith('Z') ? cleaned : '${cleaned}Z';
+      final parsed =
+          DateTime.tryParse(normalized) ?? DateTime.tryParse(cleaned);
+      if (parsed == null) return raw;
+      return DateFormat('dd MMM yyyy').format(parsed.toLocal());
+    }
 
     return Obx(
       () => SizedBox(
-        height: 300.h,
+        height: 220.h,
         child: ListView.separated(
           padding: EdgeInsets.zero,
           clipBehavior: Clip.none,
@@ -50,8 +60,9 @@ class NewsSection extends StatelessWidget {
                   children: [
                     // Image Section
                     CustomImage(
-                      imageUrl: item.resourceImage ?? "https://via.placeholder.com/260x140",
-                      height: 140.h,
+                      imageUrl:
+                          item.resourceImage ?? "https://via.placeholder.com/260x140",
+                      height: 110.h,
                       width: double.infinity,
                       borderRadius: 16.r, // Note: simplifying to full radius or I could use a custom clipper
                     ),
@@ -92,7 +103,7 @@ class NewsSection extends StatelessWidget {
                                 Icon(IconlyLight.time_circle, size: 14.sp, color: secondary),
                                 SizedBox(width: 4.w),
                                 Text(
-                                  "News",
+                                  formatDate(item.createdAt),
                                   style: TextStyle(
                                     color: secondary,
                                     fontSize: 11.sp,

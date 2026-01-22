@@ -118,6 +118,7 @@ class PropertyDetailData {
   final List<PropertyThreeSixtyView> threeSixtyView;
   final List<SitePlanImage> sitePlanImages;
   final bool isFavorite;
+  final String? videoUrl;
 
   PropertyDetailData({
     required this.id,
@@ -137,6 +138,7 @@ class PropertyDetailData {
     required this.threeSixtyView,
     required this.sitePlanImages,
     this.isFavorite = false,
+    this.videoUrl,
   });
 
   factory PropertyDetailData.fromJson(Map<String, dynamic> json) {
@@ -185,6 +187,7 @@ class PropertyDetailData {
                 ?.map((e) => SitePlanImage.fromJson(e))
                 .toList() ??
             [],
+        videoUrl: json['video_url']?.toString(),
         isFavorite: json['isFavourite'] ?? json['is_favourite'] ?? json['is_favorite'] ?? false,
       );
       

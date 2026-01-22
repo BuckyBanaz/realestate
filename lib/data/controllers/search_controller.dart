@@ -14,6 +14,8 @@ class PropertySearchController extends GetxController {
   var isMoreLoading = false.obs;
   var searchResults = <PropertyListItem>[].obs;
   var selectedCategory = "All".obs;
+  var minPrice = RxnDouble();
+  var maxPrice = RxnDouble();
   
   // Pagination
   int currentPage = 1;
@@ -49,6 +51,8 @@ class PropertySearchController extends GetxController {
       final response = await _repository.searchProperties(
         page: currentPage,
         search: searchQuery.value,
+        minPrice: minPrice.value,
+        maxPrice: maxPrice.value,
       );
 
       if (response != null && response.status) {
@@ -90,6 +94,17 @@ class PropertySearchController extends GetxController {
 
   void selectCategory(String category) {
     selectedCategory.value = category;
+  }
+
+  void applyPriceFilter({double? min, double? max}) {
+    minPrice.value = min;
+    maxPrice.value = max;
+    fetchSearchResults();
+  }
+
+  void clearFilters() {
+    minPrice.value = null;
+    maxPrice.value = null;
     fetchSearchResults();
   }
 

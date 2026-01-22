@@ -9,6 +9,7 @@ import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/constant/app_colors.dart';
 import 'package:realestate/screens/property/plot_selection_screen.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:realestate/data/controllers/property_detail_controller.dart';
 import 'package:realestate/domain/repo/property_repository.dart';
@@ -120,6 +121,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                               isFavorite:
                                   result['is_favourite'] ??
                                   !property.isFavorite,
+                              videoUrl: property.videoUrl,
                             );
 
                             controller
@@ -265,6 +267,85 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                         .fadeIn(delay: 300.ms)
                         .slideY(begin: 0.1, end: 0),
 
+                    // Video Tour
+                    if ((controller
+                                .propertyDetails
+                                .value
+                                ?.property
+                                .videoUrl
+                                ?.trim()
+                                .isNotEmpty ??
+                            false) &&
+                        controller.propertyDetails.value?.property.videoUrl !=
+                            null) ...[
+                      SizedBox(height: 24.h),
+                      Text(
+                        "Video Tour",
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ).animate().fadeIn(delay: 340.ms),
+                      SizedBox(height: 12.h),
+                      GestureDetector(
+                        onTap: () => _openVideo(
+                          controller.propertyDetails.value!.property.videoUrl!,
+                        ),
+                        child: Container(
+                          width: double.infinity,
+                          height: 170.h,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24.r),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.08),
+                            ),
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.black.withOpacity(0.4),
+                                Colors.black.withOpacity(0.7),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          child: Stack(
+                            children: [
+                              Center(
+                                child: Icon(
+                                  Icons.play_circle_fill_rounded,
+                                  color: Colors.white,
+                                  size: 52.sp,
+                                ),
+                              ),
+                              Positioned(
+                                left: 16.w,
+                                bottom: 16.h,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.video_library_rounded,
+                                      color: Colors.white70,
+                                      size: 16.sp,
+                                    ),
+                                    SizedBox(width: 6.w),
+                                    Text(
+                                      "Watch on YouTube",
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ).animate().fadeIn(delay: 360.ms).scale(),
+                    ],
+
                     // 360° Virtual Tour
                     if (controller
                             .propertyDetails
@@ -403,7 +484,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                             .isNotEmpty ??
                         false) ...[
                       Text(
-                        "Site Plan",
+                        "Map Images",
                         style: GoogleFonts.inter(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
@@ -411,43 +492,47 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                         ),
                       ).animate().fadeIn(delay: 600.ms),
                       SizedBox(height: 12.h),
-                      GestureDetector(
-                        onTap: () {
-                          final firstImage = controller
+                      SizedBox(
+                        height: 140.h,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: controller
                               .propertyDetails
                               .value!
                               .property
                               .sitePlanImages
-                              .first
-                              .image;
-                          Get.toNamed(
-                            AppRoutes.sitePlan,
-                            arguments: firstImage,
-                          );
-                        },
-                        child: Hero(
-                          tag: 'sitePlan',
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24.r),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.1),
+                              .length,
+                          separatorBuilder: (_, __) => SizedBox(width: 14.w),
+                          itemBuilder: (context, index) {
+                            final image = controller
+                                .propertyDetails
+                                .value!
+                                .property
+                                .sitePlanImages[index]
+                                .image;
+                            return GestureDetector(
+                              onTap: () => Get.toNamed(
+                                AppRoutes.sitePlan,
+                                arguments: image,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(18.r),
+                                child: Container(
+                                  width: 200.w,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.1),
+                                    ),
+                                  ),
+                                  child: CustomImage(
+                                    imageUrl: image,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
                                 ),
                               ),
-                              child: CustomImage(
-                                imageUrl: controller
-                                    .propertyDetails
-                                    .value!
-                                    .property
-                                    .sitePlanImages
-                                    .first
-                                    .image,
-                                width: double.infinity,
-                                height: 200.h,
-                              ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
                       ).animate().fadeIn(delay: 700.ms).scale(),
                       SizedBox(height: 24.h),
@@ -1257,6 +1342,18 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _openVideo(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      showCustomToast("Invalid video URL", isError: true);
+      return;
+    }
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened) {
+      showCustomToast("Unable to open video", isError: true);
+    }
   }
 
   IconData _getAttributeIcon(String label) {

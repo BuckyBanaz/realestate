@@ -5,12 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
+import 'package:intl/intl.dart';
+import 'package:realestate/data/models/property_details_model.dart';
+import 'package:realestate/domain/repo/property_repository.dart';
 import '../../constant/app_colors.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
 
 enum PropertyType { township, plot }
 
-class PropertyTransactionDetailScreen extends StatelessWidget {
+class PropertyTransactionDetailScreen extends StatefulWidget {
   final String image; // network url OR local file path like /mnt/data/....
   final String title;
   final String location;
@@ -18,6 +21,7 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
   final String date;
   final Map<String, dynamic> details;
   final Map<String, dynamic> paymentDetail;
+  final int? propertyId;
 
   // New params for property-specific attributes
   final PropertyType propertyType;
@@ -38,35 +42,69 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
     this.propertyAttributes,
     this.mapImage,
     this.view360Url,
+    this.propertyId,
   });
 
-  // default attributes for township
-  Map<String, String> _defaultTownshipAttributes() {
-    return {
-      "Location": location,
-      "Total Land Area": "120 acres",
-      "Plot / Unit Size": "30×50 ft (typical)",
-      "Road Width (Internal)": "9 - 12 m",
-      "Zoning / Land Use": "Residential / Mixed-use",
-      "Legal Status & Approvals": "Approved",
-      "Connectivity": "2 km to market, 1.5 km to school",
-      "Price / Rate": "₹ 800 / sq.ft",
-      "Facing": "North / East (varies)",
-    };
+  @override
+  State<PropertyTransactionDetailScreen> createState() =>
+      _PropertyTransactionDetailScreenState();
+}
+
+class _PropertyTransactionDetailScreenState
+    extends State<PropertyTransactionDetailScreen> {
+  PropertyDetailData? _remoteProperty;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRemoteDetails();
   }
 
-  // default attributes for plot
-  Map<String, String> _defaultPlotAttributes() {
-    return {
-      "Location": location,
-      "Plot Size / Area": "3000 sq.ft",
-      "Plot Shape": "Rectangle",
-      "Dimensions": "60 × 50 ft",
-      "Facing / Orientation": "North-facing",
-      "Zoning Type": "Residential",
-      "Access Road Width": "10 m",
-      "Surroundings": "Park to the east, School to the north",
-    };
+  Future<void> _fetchRemoteDetails() async {
+    final propertyId = widget.propertyId;
+    if (propertyId == null) return;
+    setState(() => _isLoading = true);
+    final repo = PropertyRepository();
+    final details = await repo.fetchPropertyDetails(propertyId);
+    if (!mounted) return;
+    setState(() {
+      _remoteProperty = details?.property;
+      _isLoading = false;
+    });
+  }
+
+  Map<String, String>? _remoteAttributes() {
+    final property = _remoteProperty;
+    if (property == null) return null;
+    final filtered = <String, String>{};
+    filtered["Location"] = property.address.isNotEmpty
+        ? property.address
+        : widget.location;
+    if (property.price.isNotEmpty) {
+      filtered["Price"] = "₹ ${formatPrice(property.price)}";
+    }
+    if (property.area.isNotEmpty) {
+      filtered["Area"] = property.area;
+    }
+    for (final attr in property.attributes) {
+      final value = attr.value?.toString().trim();
+      if (value == null || value.isEmpty || value.toLowerCase() == 'null') {
+        filtered[attr.attribute] = "-";
+      } else {
+        filtered[attr.attribute] = value;
+      }
+    }
+    return filtered.isEmpty ? null : filtered;
+  }
+
+  String _formatDate(String raw) {
+    final cleaned = raw.trim();
+    if (cleaned.isEmpty || cleaned == '-') return '-';
+    final normalized = cleaned.endsWith('Z') ? cleaned : '${cleaned}Z';
+    final parsed = DateTime.tryParse(normalized) ?? DateTime.tryParse(cleaned);
+    if (parsed == null) return raw;
+    return DateFormat('dd MMM yyyy, h:mm a').format(parsed.toLocal());
   }
 
   Widget _imageWidget(
@@ -114,11 +152,17 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final attributes =
-        propertyAttributes ??
-        (propertyType == PropertyType.township
-            ? _defaultTownshipAttributes()
-            : _defaultPlotAttributes());
+    if (widget.propertyId != null && _isLoading && _remoteProperty == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    final remoteAttrs = _remoteAttributes();
+    final attributes = remoteAttrs ?? widget.propertyAttributes ?? {};
+    final effectiveMapImage =
+        (_remoteProperty?.sitePlanImages.isNotEmpty ?? false)
+            ? _remoteProperty!.sitePlanImages.first.image
+            : (widget.mapImage ?? '');
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -167,7 +211,10 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
               onTap: () {
                 // open fullscreen preview
                 Get.to(
-                  () => FullscreenImageScreen(imagePath: image, tag: title),
+                  () => FullscreenImageScreen(
+                    imagePath: widget.image,
+                    tag: widget.title,
+                  ),
                 );
               },
               child: Container(
@@ -181,8 +228,12 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12.r),
                       child: Hero(
-                        tag: title,
-                        child: _imageWidget(image, width: 130.w, height: 96.h),
+                        tag: widget.title,
+                        child: _imageWidget(
+                          widget.image,
+                          width: 130.w,
+                          height: 96.h,
+                        ),
                       ),
                     ),
                     SizedBox(width: 12.w),
@@ -191,7 +242,7 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            title,
+                            widget.title,
                             style: TextStyle(
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w700,
@@ -211,7 +262,7 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
                               SizedBox(width: 6.w),
                               Expanded(
                                 child: Text(
-                                  location,
+                                  widget.location,
                                   style: TextStyle(
                                     fontSize: 12.sp,
                                     color: Colors.grey[600],
@@ -233,7 +284,7 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
                                   color: primary.withOpacity(0.15),
                                 ),
                                 child: Text(
-                                  tag,
+                                  widget.tag,
                                   style: TextStyle(
                                     color: primary,
                                     fontWeight: FontWeight.w600,
@@ -241,31 +292,31 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 8.w),
-                              if (view360Url != null)
-                                OutlinedButton.icon(
-                                  onPressed: () {
-                                    // open 360 view (placeholder)
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          "360 View: Open 360 viewer: $view360Url",
-                                        ),
-                                        behavior: SnackBarBehavior.floating,
-                                      ),
-                                    );
-                                  },
-                                  icon: Icon(Icons.threed_rotation, size: 16.w),
-                                  label: Text(
-                                    "360",
-                                    style: TextStyle(fontSize: 12.sp),
-                                  ),
-                                  style: OutlinedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12.r),
-                                    ),
-                                  ),
-                                ),
+                              // SizedBox(width: 8.w),
+                              // if (effective360 != null)
+                              //   OutlinedButton.icon(
+                              //     onPressed: () {
+                              //       // open 360 view (placeholder)
+                              //       ScaffoldMessenger.of(context).showSnackBar(
+                              //         SnackBar(
+                              //           content: Text(
+                              //             "360 View: Open 360 viewer: $effective360",
+                              //           ),
+                              //           behavior: SnackBarBehavior.floating,
+                              //         ),
+                              //       );
+                              //     },
+                              //     icon: Icon(Icons.threed_rotation, size: 16.w),
+                              //     label: Text(
+                              //       "360",
+                              //       style: TextStyle(fontSize: 12.sp),
+                              //     ),
+                              //     style: OutlinedButton.styleFrom(
+                              //       shape: RoundedRectangleBorder(
+                              //         borderRadius: BorderRadius.circular(12.r),
+                              //       ),
+                              //     ),
+                              //   ),
                             ],
                           ),
                         ],
@@ -290,9 +341,13 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
             SizedBox(height: 10.h),
             // _detailTile(context, "Check in", details["checkIn"] ?? "-"),
             // _detailTile(context, "Check out", details["checkOut"] ?? "-"),
-            _detailTile(context, "Owner name", details["owner"] ?? "-"),
-            _detailTile(context, "Transaction type", tag),
-            _detailTile(context, "Transaction Date", date),
+            _detailTile(context, "Owner name", widget.details["owner"] ?? "-"),
+            _detailTile(context, "Transaction type", widget.tag),
+            _detailTile(
+              context,
+              "Transaction Date",
+              _formatDate(widget.date),
+            ),
 
             SizedBox(height: 20.h),
 
@@ -351,7 +406,7 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
             SizedBox(height: 12.h),
 
             // Map preview + button
-            if ((mapImage ?? "").isNotEmpty)
+            if (effectiveMapImage.isNotEmpty)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -368,28 +423,18 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12.r),
                     child: GestureDetector(
                       onTap: () {
-                        if ((mapImage ?? "").startsWith('/mnt') ||
-                            (mapImage ?? "").startsWith('/data')) {
-                          Get.to(
-                            () => FullscreenImageScreen(
-                              imagePath: mapImage!,
-                              tag: "map-$title",
-                            ),
-                          );
-                        } else {
-                          Get.to(
-                            () => FullscreenImageScreen(
-                              imagePath: mapImage!,
-                              tag: "map-$title",
-                            ),
-                          );
-                        }
+                        Get.to(
+                          () => FullscreenImageScreen(
+                            imagePath: effectiveMapImage,
+                            tag: "map-${widget.title}",
+                          ),
+                        );
                       },
                       child: Container(
                         height: 160.h,
                         width: double.infinity,
                         color: Colors.grey.shade200,
-                        child: _imageWidget(mapImage!),
+                        child: _imageWidget(effectiveMapImage),
                       ),
                     ),
                   ),
@@ -400,78 +445,78 @@ class PropertyTransactionDetailScreen extends StatelessWidget {
             SizedBox(height: 8.h),
 
             // ---------------- PAYMENT DETAILS ----------------
-            Text(
-              "Payment Detail",
-              style: TextStyle(
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w700,
-                color: Theme.of(context).textTheme.bodyLarge?.color,
-              ),
-            ),
-            SizedBox(height: 12.h),
-            Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(16.r),
-              ),
-              child: Column(
-                children: [
-                  _detailTile(
-                    context,
-                    "Period time",
-                    paymentDetail["period"] ?? "-",
-                  ),
-                  _detailTile(
-                    context,
-                    "Total Amount",
-                    "₹ ${formatPrice(paymentDetail["total"])}",
-                  ),
-                  _detailTile(
-                    context,
-                    "Monthly payment",
-                    "₹ ${formatPrice(paymentDetail["monthly"])}",
-                  ),
-                  _detailTile(
-                    context,
-                    "Paid Amount",
-                    "₹ ${formatPrice(paymentDetail["paid"])}",
-                  ),
-                  _detailTile(
-                    context,
-                    "Balance Amount",
-                    "₹ ${formatPrice(paymentDetail["balance"])}",
-                  ),
-                  _detailTile(
-                    context,
-                    "Discount",
-                    "₹ ${formatPrice(paymentDetail["discount"])}",
-                  ),
-                  Divider(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Net Payable",
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).textTheme.bodyLarge?.color,
-                        ),
-                      ),
-                      Text(
-                        "₹ ${formatPrice(paymentDetail["total"])}",
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          color: primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            // Text(
+            //   "Payment Detail",
+            //   style: TextStyle(
+            //     fontSize: 15.sp,
+            //     fontWeight: FontWeight.w700,
+            //     color: Theme.of(context).textTheme.bodyLarge?.color,
+            //   ),
+            // ),
+            // SizedBox(height: 12.h),
+            // Container(
+            //   padding: EdgeInsets.all(16.w),
+            //   decoration: BoxDecoration(
+            //     color: Theme.of(context).cardColor,
+            //     borderRadius: BorderRadius.circular(16.r),
+            //   ),
+            //   child: Column(
+            //     children: [
+            //       _detailTile(
+            //         context,
+            //         "Period time",
+            //         paymentDetail["period"] ?? "-",
+            //       ),
+            //       _detailTile(
+            //         context,
+            //         "Total Amount",
+            //         "₹ ${formatPrice(paymentDetail["total"])}",
+            //       ),
+            //       _detailTile(
+            //         context,
+            //         "Monthly payment",
+            //         "₹ ${formatPrice(paymentDetail["monthly"])}",
+            //       ),
+            //       _detailTile(
+            //         context,
+            //         "Paid Amount",
+            //         "₹ ${formatPrice(paymentDetail["paid"])}",
+            //       ),
+            //       _detailTile(
+            //         context,
+            //         "Balance Amount",
+            //         "₹ ${formatPrice(paymentDetail["balance"])}",
+            //       ),
+            //       _detailTile(
+            //         context,
+            //         "Discount",
+            //         "₹ ${formatPrice(paymentDetail["discount"])}",
+            //       ),
+            //       Divider(),
+            //       Row(
+            //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //         children: [
+            //           Text(
+            //             "Net Payable",
+            //             style: TextStyle(
+            //               fontSize: 16.sp,
+            //               fontWeight: FontWeight.bold,
+            //               color: Theme.of(context).textTheme.bodyLarge?.color,
+            //             ),
+            //           ),
+            //           Text(
+            //             "₹ ${formatPrice(paymentDetail["total"])}",
+            //             style: TextStyle(
+            //               fontSize: 16.sp,
+            //               color: primary,
+            //               fontWeight: FontWeight.bold,
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ],
+            //   ),
+            // ),
 
             // SizedBox(height: 20.h),
 

@@ -105,13 +105,6 @@ class NewsDetailScreen extends StatelessWidget {
                   Text(
                     """${newsItem.description.replaceAll(RegExp(r'<[^>]*>|&nbsp;'), '')}
                     
-The real estate sector is witnessing a transformative phase with increasing demand for sustainable and luxury housing. Experts believe that the upcoming quarter will be crucial for investors and homebuyers alike.
-
-New infrastructure projects, such as metro lines and highway expansions, are expected to drive property prices up in suburban areas. 
-
-"We are seeing a shift in consumer behavior where amenities and connectivity are prioritized over just square footage," says a leading industry analyst.
-
-Keep an eye on emerging markets as they offer the best ROI in the current economic climate. Whether you are looking for a dream home or an investment opportunity, now might be the right time to make a move.
                     """,
                     style: TextStyle(
                       fontSize: 16.sp,

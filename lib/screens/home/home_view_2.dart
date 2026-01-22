@@ -110,57 +110,57 @@ class _HomeView2State extends State<HomeView2> {
                           SizedBox(height: 10.h),
                           // 2. Search Bar
                           const SearchTextField(),
-                          SizedBox(height: 20.h),
+                          // SizedBox(height: 20.h),
 
-                          // Stats Row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _buildStatItem(
-                                IconlyBold.home,
-                                "2500+",
-                                "Premium Homes",
-                              ),
-                              SizedBox(width: 20.w),
-                              _buildStatItem(
-                                IconlyBold.user_2,
-                                "100.00+",
-                                "Premium Customers",
-                              ),
-                              // const Spacer(),
-                              // // Rating Chip
-                              // Container(
-                              //   padding: EdgeInsets.symmetric(
-                              //     horizontal: 12.w,
-                              //     vertical: 8.h,
-                              //   ),
-                              //   decoration: BoxDecoration(
-                              //     color: const Color(0xFF1E1E1E),
-                              //     borderRadius: BorderRadius.circular(20.r),
-                              //     border: Border.all(
-                              //       color: Colors.white.withOpacity(0.1),
-                              //     ),
-                              //   ),
-                              //   child: Row(
-                              //     children: [
-                              //       const Icon(
-                              //         Icons.star,
-                              //         color: Colors.orange,
-                              //         size: 16,
-                              //       ),
-                              //       SizedBox(width: 6.w),
-                              //       Text(
-                              //         "5.8 (100)",
-                              //         style: TextStyle(
-                              //           color: Colors.white,
-                              //           fontWeight: FontWeight.bold,
-                              //         ),
-                              //       ),
-                              //     ],
-                              //   ),
-                              // ),
-                            ],
-                          ),
+                          // // Stats Row
+                          // Row(
+                          //   mainAxisAlignment: MainAxisAlignment.center,
+                          //   children: [
+                          //     _buildStatItem(
+                          //       IconlyBold.home,
+                          //       "2500+",
+                          //       "Premium Homes",
+                          //     ),
+                          //     SizedBox(width: 20.w),
+                          //     _buildStatItem(
+                          //       IconlyBold.user_2,
+                          //       "100.00+",
+                          //       "Premium Customers",
+                          //     ),
+                          //     // const Spacer(),
+                          //     // // Rating Chip
+                          //     // Container(
+                          //     //   padding: EdgeInsets.symmetric(
+                          //     //     horizontal: 12.w,
+                          //     //     vertical: 8.h,
+                          //     //   ),
+                          //     //   decoration: BoxDecoration(
+                          //     //     color: const Color(0xFF1E1E1E),
+                          //     //     borderRadius: BorderRadius.circular(20.r),
+                          //     //     border: Border.all(
+                          //     //       color: Colors.white.withOpacity(0.1),
+                          //     //     ),
+                          //     //   ),
+                          //     //   child: Row(
+                          //     //     children: [
+                          //     //       const Icon(
+                          //     //         Icons.star,
+                          //     //         color: Colors.orange,
+                          //     //         size: 16,
+                          //     //       ),
+                          //     //       SizedBox(width: 6.w),
+                          //     //       Text(
+                          //     //         "5.8 (100)",
+                          //     //         style: TextStyle(
+                          //     //           color: Colors.white,
+                          //     //           fontWeight: FontWeight.bold,
+                          //     //         ),
+                          //     //       ),
+                          //     //     ],
+                          //     //   ),
+                          //     // ),
+                          //   ],
+                          // ),
 
                           SizedBox(height: 30.h),
 
@@ -264,8 +264,8 @@ class _HomeView2State extends State<HomeView2> {
 
                           // News Section
                           SectionTitle(
-                            title: "News For You",
-                            subtitle: "Read whats happening in real estate",
+                            title: "Updates For You",
+                            subtitle: "Read whats happening in Real Estate",
                             actionText: "See all",
                             onActionTap: () => Get.toNamed(AppRoutes.newsList, arguments: controller.newsList),
                           ),
@@ -531,7 +531,7 @@ class _HomeView2State extends State<HomeView2> {
 
           // Bottom Content
           Positioned(
-            bottom: 24.h,
+            bottom: 10.h,
             left: 24.w,
             right: 24.w,
             child: Column(
@@ -540,8 +540,10 @@ class _HomeView2State extends State<HomeView2> {
                 // Title
                 Text(
                   title,
+                    maxLines: 1,
+                     overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
-                    fontSize: 24.sp,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                     shadows: [
@@ -552,6 +554,7 @@ class _HomeView2State extends State<HomeView2> {
                     ],
                   ),
                 ),
+
                 SizedBox(height: 12.h),
 
                 Row(

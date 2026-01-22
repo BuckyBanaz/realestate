@@ -230,6 +230,21 @@ class CustomImage extends StatelessWidget {
     this.fallbackAsset,
   }) : super(key: key);
 
+  Widget _buildLogo(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      color: Colors.grey.shade900,
+      alignment: Alignment.center,
+      child: Image.asset(
+        'assets/images/logo.png',
+        width: (width != null && width! > 0) ? width! * 0.4 : 40.w,
+        height: (height != null && height! > 0) ? height! * 0.4 : 40.w,
+        fit: BoxFit.contain,
+      ),
+    );
+  }
+
   Widget _buildFallback(BuildContext context) {
     if (fallbackAsset != null && fallbackAsset!.isNotEmpty) {
       return Image.asset(
@@ -239,12 +254,7 @@ class CustomImage extends StatelessWidget {
         fit: fit,
       );
     }
-    return Container(
-      width: width,
-      height: height,
-      color: Colors.grey.shade900,
-      child: const Icon(Icons.image_not_supported_outlined, color: Colors.white24),
-    );
+    return _buildLogo(context);
   }
 
   @override
@@ -263,16 +273,7 @@ class CustomImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
-        placeholder: placeholder ?? (context, url) => Center(
-          child: SizedBox(
-            width: 20.w,
-            height: 20.w,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: primary.withOpacity(0.5),
-            ),
-          ),
-        ),
+        placeholder: placeholder ?? (context, url) => _buildLogo(context),
         errorWidget: errorWidget ?? (context, url, error) => _buildFallback(context),
       ),
     );

@@ -28,25 +28,26 @@ class TopLocationsSection extends StatelessWidget {
           itemBuilder: (context, index) {
             final location = controller.topLocations[index];
             return LocationCard(
-              imageUrl: location.propertyImage ?? "https://via.placeholder.com/300x140",
-              title: location.title,
-              listings: "Explore",
-              onTap: () {
-                Get.toNamed(
-                  AppRoutes.locationDetail,
-                  arguments: {
-                    'locationName': location.title,
-                    'rank': "+${index + 1}",
-                    'heroImage': location.propertyImage,
-                    'subtitle': location.address,
-                    'addressId': location.id,
+                  imageUrl: location.propertyImage ?? "",
+                  title: location.title,
+                  address: location.address,
+                  listings: "Explore",
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.locationDetail,
+                      arguments: {
+                        'locationName': location.title,
+                        'rank': "+${index + 1}",
+                        'heroImage': location.propertyImage,
+                        'subtitle': location.address,
+                        'addressId': location.id,
+                      },
+                    );
                   },
-                );
-              },
-            )
-            .animate()
-            .fadeIn(delay: (100 * index).ms)
-            .slideX(begin: 0.2, end: 0, curve: Curves.easeOutQuad);
+                )
+                .animate()
+                .fadeIn(delay: (100 * index).ms)
+                .slideX(begin: 0.2, end: 0, curve: Curves.easeOutQuad);
           },
         ),
       ),
@@ -57,6 +58,7 @@ class TopLocationsSection extends StatelessWidget {
 class LocationCard extends StatelessWidget {
   final String imageUrl;
   final String title;
+  final String? address;
   final String listings;
   final VoidCallback? onTap;
 
@@ -64,6 +66,7 @@ class LocationCard extends StatelessWidget {
     Key? key,
     required this.imageUrl,
     required this.title,
+    this.address,
     required this.listings,
     this.onTap,
   }) : super(key: key);
@@ -114,7 +117,10 @@ class LocationCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 4.h,
+                    ),
                     decoration: BoxDecoration(
                       color: secondary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8.r),
@@ -143,14 +149,24 @@ class LocationCard extends StatelessWidget {
                   SizedBox(height: 4.h),
                   Row(
                     children: [
-                      Icon(IconlyLight.location, size: 12.sp, color: Colors.grey.shade600),
+                      Icon(
+                        IconlyLight.location,
+                        size: 12.sp,
+                        color: Colors.grey.shade600,
+                      ),
                       SizedBox(width: 4.w),
-                      Text(
-                        "Hisar, Haryana",
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
+                      Expanded(
+                        child: Text(
+                          (address != null && address!.trim().isNotEmpty)
+                              ? address!
+                              : "Location",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ],
@@ -160,7 +176,10 @@ class LocationCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 4.h,
+                        ),
                         decoration: BoxDecoration(
                           color: primary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8.r),
@@ -168,7 +187,11 @@ class LocationCard extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(IconlyBold.category, size: 10.sp, color: primary),
+                            Icon(
+                              IconlyBold.category,
+                              size: 10.sp,
+                              color: primary,
+                            ),
                             SizedBox(width: 4.w),
                             Text(
                               "$listings Estates",
@@ -197,5 +220,3 @@ class LocationCard extends StatelessWidget {
     );
   }
 }
-
-

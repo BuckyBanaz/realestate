@@ -129,7 +129,7 @@ class RecommendedProperties extends StatelessWidget {
                               ),
                             ],
                           ),
-                          SizedBox(height: 10.h),
+                          SizedBox(height: 8.h),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [

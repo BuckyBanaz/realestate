@@ -6,6 +6,7 @@ import '../../constant/app_colors.dart';
 import '../home/home_view_2.dart';
 import '../favorite/favorite_screen.dart';
 import '../profile/profile_screen.dart';
+import '../resources/resources_screen.dart';
 import '../transaction/transaction_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     () => HomeView2(showNavBar: false),
     () => TransactionListScreen(),
     () => FavoriteScreen(),
+    () => ResourcesScreen(),
     () => ProfileScreen(),
   ];
   final Map<int, Widget> _builtPages = {};
@@ -59,7 +61,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           // 2. Floating Glass Navbar
           Positioned(
-            bottom: 30.h,
+            bottom: 20.h,
             left: 20.w,
             right: 20.w,
             child: _buildGlassNavBar(),
@@ -110,8 +112,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               _navItem(IconlyLight.home, IconlyBold.home, "Home", 0),
               _navItem(IconlyLight.paper, IconlyBold.paper, "Transactions", 1),
-              _navItem(IconlyLight.heart, IconlyBold.heart, "Favorite", 2),
-              _navItem(IconlyLight.profile, IconlyBold.profile, "Profile", 3),
+              _navItem(IconlyLight.heart, IconlyBold.heart, "Favorites", 2),
+              _navItem(
+                IconlyLight.document,
+                IconlyBold.document,
+                "Resources",
+                3,
+              ),
+              _navItem(IconlyLight.profile, IconlyBold.profile, "Profile", 4),
             ],
           ),
         ),

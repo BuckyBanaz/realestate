@@ -5,6 +5,7 @@ import 'core/app.dart';
 import 'package:realestate/domain/app/local_storage.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'firebase_options.dart';
 import 'package:realestate/domain/app/notification_service.dart';
 
@@ -12,6 +13,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+  );
+  FirebaseMessaging.onBackgroundMessage(
+    NotificationService.handleBackgroundMessage,
   );
   await LocalStorage().init();
   await NotificationService().init();
