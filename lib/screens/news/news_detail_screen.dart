@@ -7,6 +7,7 @@ import 'package:realestate/constant/app_colors.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
 import 'package:realestate/data/models/home_data_model.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class NewsDetailScreen extends StatelessWidget {
   const NewsDetailScreen({Key? key}) : super(key: key);
@@ -45,6 +46,39 @@ class NewsDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (newsItem.type.toLowerCase() == 'video')
+                    Container(
+                      width: double.infinity,
+                      margin: EdgeInsets.only(bottom: 16.h),
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          final url = newsItem.videoUrl ?? '';
+                          final uri = Uri.tryParse(url);
+                          if (uri != null) {
+                            await launchUrl(
+                              uri,
+                              mode: LaunchMode.externalApplication,
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: secondary,
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                        ),
+                        icon: const Icon(Icons.play_circle_fill_rounded, color: Colors.white),
+                        label: Text(
+                          "Watch Video",
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14.sp,
+                          ),
+                        ),
+                      ),
+                    ),
                   // Meta Tags
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,

@@ -8,6 +8,7 @@ import 'package:realestate/constant/app_colors.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
 import 'package:realestate/data/models/home_data_model.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class NewsListScreen extends StatelessWidget {
   const NewsListScreen({Key? key}) : super(key: key);
@@ -41,87 +42,218 @@ class NewsListScreen extends StatelessWidget {
         separatorBuilder: (_, __) => SizedBox(height: 20.h),
         itemBuilder: (context, index) {
           final item = allNews[index];
-          return GestureDetector(
-            onTap: () => Get.toNamed(AppRoutes.newsDetail, arguments: item),
-            child: Container(
-              height: 120.h,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1E1E),
-                borderRadius: BorderRadius.circular(16.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+          final isVideo = item.type.toLowerCase() == 'video';
+          return isVideo
+              ? _VideoNewsListTile(
+                  item: item,
+                  onTap: () async {
+                    final url = item.videoUrl ?? '';
+                    final uri = Uri.tryParse(url);
+                    if (uri != null) {
+                      await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    }
+                  },
+                )
+              : _ResourceNewsListTile(
+                  item: item,
+                  onTap: () => Get.toNamed(
+                    AppRoutes.newsDetail,
+                    arguments: item,
                   ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  // Image
-                  CustomImage(
-                    imageUrl: item.resourceImage ?? "https://via.placeholder.com/120x120",
-                    width: 120.w,
-                    height: double.infinity,
-                    borderRadius: 16.r,
-                  ),
-                  
-                  // Content
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.all(12.w),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            item.title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          SizedBox(height: 6.h),
-                          Row(
-                            children: [
-                              Icon(IconlyLight.calendar, size: 12.sp, color: Colors.grey),
-                              SizedBox(width: 4.w),
-                              Expanded(
-                                child: Text(
-                                  DateFormat('dd MMM, yyyy').format(DateTime.tryParse(item.createdAt) ?? DateTime.now()),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 11.sp,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 8.w),
-                              Icon(IconlyLight.time_circle, size: 12.sp, color: secondary),
-                              SizedBox(width: 4.w),
-                              Text(
-                                "5 min read",
-                                style: TextStyle(
-                                  color: secondary,
-                                  fontSize: 11.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
+                );
+        },
+      ),
+    );
+  }
+}
+
+class _VideoNewsListTile extends StatelessWidget {
+  const _VideoNewsListTile({
+    required this.item,
+    required this.onTap,
+  });
+
+  final NewsItem item;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 120.h,
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: Colors.white.withOpacity(0.06)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Stack(
+              children: [
+                CustomImage(
+                  imageUrl: item.resourceImage ?? "https://via.placeholder.com/120x120",
+                  width: 120.w,
+                  height: double.infinity,
+                  borderRadius: 16.r,
+                ),
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black26,
+                      borderRadius: BorderRadius.circular(16.r),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.play_circle_fill_rounded,
+                        color: Colors.white,
+                        size: 32.sp,
                       ),
                     ),
-                  )
-                ],
-              ),
+                  ),
+                ),
+              ],
             ),
-          );
-        },
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(12.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      item.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 6.h),
+                    Row(
+                      children: [
+                        Icon(IconlyLight.play, size: 12.sp, color: secondary),
+                        SizedBox(width: 4.w),
+                        Text(
+                          'Watch video',
+                          style: TextStyle(
+                            color: secondary,
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ResourceNewsListTile extends StatelessWidget {
+  const _ResourceNewsListTile({
+    required this.item,
+    required this.onTap,
+  });
+
+  final NewsItem item;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 120.h,
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            CustomImage(
+              imageUrl: item.resourceImage ?? "https://via.placeholder.com/120x120",
+              width: 120.w,
+              height: double.infinity,
+              borderRadius: 16.r,
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(12.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      item.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 6.h),
+                    Row(
+                      children: [
+                        Icon(IconlyLight.calendar, size: 12.sp, color: Colors.grey),
+                        SizedBox(width: 4.w),
+                        Expanded(
+                          child: Text(
+                            DateFormat('dd MMM, yyyy')
+                                .format(DateTime.tryParse(item.createdAt) ?? DateTime.now()),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 11.sp,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Icon(IconlyLight.time_circle, size: 12.sp, color: secondary),
+                        SizedBox(width: 4.w),
+                        Text(
+                          "5 min read",
+                          style: TextStyle(
+                            color: secondary,
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

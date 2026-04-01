@@ -121,6 +121,8 @@ class NewsItem {
   final int id;
   final String title;
   final String description;
+  final String type;
+  final String? videoUrl;
   final String? resourceImage;
   final String createdAt;
 
@@ -128,6 +130,8 @@ class NewsItem {
     required this.id,
     required this.title,
     required this.description,
+    required this.type,
+    this.videoUrl,
     this.resourceImage,
     required this.createdAt,
   });
@@ -137,6 +141,8 @@ class NewsItem {
       id: json['id'] ?? 0,
       title: json['title'] ?? "",
       description: json['description'] ?? "",
+      type: json['type'] ?? "",
+      videoUrl: json['video_url'],
       resourceImage: json['resource_image'],
       createdAt: json['created_at'] ?? "",
     );
