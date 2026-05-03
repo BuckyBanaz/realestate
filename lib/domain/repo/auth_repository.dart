@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:realestate/domain/api/api_client.dart';
 import 'package:realestate/domain/app/local_storage.dart';
 
@@ -12,13 +14,30 @@ class AuthRepository {
     String? deviceToken,
   }) async {
     try {
-      final fcmToken = deviceToken ?? LocalStorage().getFcmToken();
+      // Try: passed param → local storage → fetch fresh from Firebase → fallback
+      String? fcmToken = deviceToken ?? LocalStorage().getFcmToken();
+      debugPrint('FCM Step 1 (param/localStorage): $fcmToken');
+      
+      if (fcmToken == null || fcmToken.isEmpty) {
+        try {
+          fcmToken = await FirebaseMessaging.instance.getToken();
+          debugPrint('FCM Step 2 (Firebase direct): $fcmToken');
+          if (fcmToken != null && fcmToken.isNotEmpty) {
+            await LocalStorage().saveFcmToken(fcmToken);
+          }
+        } catch (e) {
+          debugPrint('FCM Step 2 FAILED: $e');
+        }
+      }
+      fcmToken ??= 'no-token';
+      debugPrint('FCM Final token being sent: $fcmToken');
+
       final response = await _apiClient.dio.post(
         'login',
         data: {
           'email': email,
           'password': password,
-          'device_token': fcmToken ?? "",
+          'device_token': fcmToken,
         },
       );
 

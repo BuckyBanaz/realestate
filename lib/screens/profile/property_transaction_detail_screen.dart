@@ -6,8 +6,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:intl/intl.dart';
-import 'package:realestate/data/models/property_details_model.dart';
+import 'package:realestate/data/models/property_list_model.dart';
 import 'package:realestate/domain/repo/property_repository.dart';
+import 'package:realestate/data/models/property_details_model.dart';
 import '../../constant/app_colors.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
 
@@ -52,7 +53,7 @@ class PropertyTransactionDetailScreen extends StatefulWidget {
 
 class _PropertyTransactionDetailScreenState
     extends State<PropertyTransactionDetailScreen> {
-  PropertyDetailData? _remoteProperty;
+  PropertyListItem? _remoteProperty;
   bool _isLoading = false;
 
   @override
@@ -69,7 +70,7 @@ class _PropertyTransactionDetailScreenState
     final details = await repo.fetchPropertyDetails(propertyId);
     if (!mounted) return;
     setState(() {
-      _remoteProperty = details?.property;
+      _remoteProperty = details;
       _isLoading = false;
     });
   }
@@ -159,10 +160,15 @@ class _PropertyTransactionDetailScreenState
     }
     final remoteAttrs = _remoteAttributes();
     final attributes = remoteAttrs ?? widget.propertyAttributes ?? {};
-    final effectiveMapImage =
-        (_remoteProperty?.sitePlanImages.isNotEmpty ?? false)
-            ? _remoteProperty!.sitePlanImages.first.image
-            : (widget.mapImage ?? '');
+    
+    // Check attributes for map image
+    String? mapAttrUrl;
+    if (_remoteProperty != null) {
+      final mapAttr = _remoteProperty!.attributes.firstWhereOrNull((a) => a.attribute.toLowerCase().contains("map") || a.attribute.toLowerCase().contains("plan"));
+      mapAttrUrl = mapAttr?.value;
+    }
+
+    final effectiveMapImage = mapAttrUrl ?? (widget.mapImage ?? '');
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

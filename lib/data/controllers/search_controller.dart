@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:realestate/data/models/property_list_model.dart';
 import 'package:realestate/domain/repo/property_repository.dart';
+import 'package:realestate/data/models/category_filter_model.dart';
 
 class PropertySearchController extends GetxController {
   final TextEditingController searchController = TextEditingController();
@@ -13,7 +14,16 @@ class PropertySearchController extends GetxController {
   var isLoading = false.obs;
   var isMoreLoading = false.obs;
   var searchResults = <PropertyListItem>[].obs;
-  var selectedCategory = "All".obs;
+  
+  // Hierarchical Filter State
+  var categories = <CategoryFilter>[].obs;
+  var subCategories = <CategoryFilter>[].obs;
+  var subSubCategories = <CategoryFilter>[].obs;
+
+  var selectedCategory = Rxn<CategoryFilter>();
+  var selectedSubCategory = Rxn<CategoryFilter>();
+  var selectedSubSubCategory = Rxn<CategoryFilter>();
+  
   var minPrice = RxnDouble();
   var maxPrice = RxnDouble();
   
@@ -27,6 +37,7 @@ class PropertySearchController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    fetchCategories();
     fetchSearchResults();
     
     // Add scroll listener for pagination
@@ -53,6 +64,9 @@ class PropertySearchController extends GetxController {
         search: searchQuery.value,
         minPrice: minPrice.value,
         maxPrice: maxPrice.value,
+        categoryId: selectedCategory.value?.id,
+        subCategoryId: selectedSubCategory.value?.id,
+        subSubCategoryId: selectedSubSubCategory.value?.id,
       );
 
       if (response != null && response.status) {
@@ -92,19 +106,56 @@ class PropertySearchController extends GetxController {
     });
   }
 
-  void selectCategory(String category) {
-    selectedCategory.value = category;
-  }
-
   void applyPriceFilter({double? min, double? max}) {
     minPrice.value = min;
     maxPrice.value = max;
     fetchSearchResults();
   }
 
+  Future<void> fetchCategories() async {
+    final result = await _repository.fetchCategories();
+    categories.assignAll(result);
+  }
+
+  void onCategorySelected(CategoryFilter? category) {
+    selectedCategory.value = category;
+    selectedSubCategory.value = null;
+    selectedSubSubCategory.value = null;
+    
+    if (category != null) {
+      subCategories.assignAll(category.children);
+    } else {
+      subCategories.clear();
+    }
+    subSubCategories.clear();
+    fetchSearchResults();
+  }
+
+  void onSubCategorySelected(CategoryFilter? subCategory) {
+    selectedSubCategory.value = subCategory;
+    selectedSubSubCategory.value = null;
+
+    if (subCategory != null) {
+      subSubCategories.assignAll(subCategory.children);
+    } else {
+      subSubCategories.clear();
+    }
+    fetchSearchResults();
+  }
+
+  void onSubSubCategorySelected(CategoryFilter? subSubCategory) {
+    selectedSubSubCategory.value = subSubCategory;
+    fetchSearchResults();
+  }
+
   void clearFilters() {
     minPrice.value = null;
     maxPrice.value = null;
+    selectedCategory.value = null;
+    selectedSubCategory.value = null;
+    selectedSubSubCategory.value = null;
+    subCategories.clear();
+    subSubCategories.clear();
     fetchSearchResults();
   }
 

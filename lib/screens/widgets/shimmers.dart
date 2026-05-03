@@ -292,3 +292,34 @@ class CategoriesShimmer extends StatelessWidget {
     );
   }
 }
+
+// ---------------- Plots Grid Shimmer ----------------
+class PlotsGridShimmer extends StatelessWidget {
+  const PlotsGridShimmer({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      padding: EdgeInsets.zero,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 15,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 5,
+        crossAxisSpacing: 12.w,
+        mainAxisSpacing: 12.h,
+        childAspectRatio: 0.85,
+      ),
+      itemBuilder: (context, index) {
+        return BaseShimmer(
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E1E1E),
+              borderRadius: BorderRadius.circular(16.r),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

@@ -1,181 +1,219 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
+import 'package:realestate/data/controllers/home_controller.dart';
+import 'package:realestate/data/models/category_filter_model.dart';
+import 'package:realestate/constant/app_colors.dart';
+import 'package:iconly/iconly.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
-/// Simple data holder for a category — only title used for now.
-class CategoryItem {
-  final String title;
-  final String subtitle; // optional text like "in Hisar"
-  final String? iconUrl; // optional network image url
-  final String? assetIcon; // optional local asset path (SVG/PNG)
-
-  CategoryItem({
-    required this.title,
-    this.subtitle = '',
-    this.iconUrl,
-    this.assetIcon,
-  });
-}
-
-/// Main Categories widget (horizontal list)
 class Categories extends StatelessWidget {
-  final List<CategoryItem>? categories;
-  final void Function(CategoryItem)? onCategoryTap;
-
-  const Categories({Key? key, this.categories, this.onCategoryTap})
-    : super(key: key);
+  const Categories({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // fallback default list (NO ERROR)
-    final list =
-        categories ??
-        [
-          CategoryItem(
-            title: "FLATS / HOUSING",
-            subtitle: "in Hisar",
-            assetIcon: "assets/svg/flats_housing.svg",
-          ),
-          CategoryItem(
-            title: "TOWNSHIPS",
-            subtitle: "in Hisar",
-            assetIcon: "assets/svg/townships.svg",
-          ),
-          CategoryItem(
-            title: "FARM HOUSES",
-            subtitle: "in Hisar",
-            assetIcon: "assets/svg/farm_houses.svg",
-          ),
-          CategoryItem(
-            title: "SOCIETIES",
-            subtitle: "in Hisar",
-            assetIcon: "assets/svg/societies.svg",
-          ),
-          CategoryItem(
-            title: "PLOTS",
-            subtitle: "in Hisar",
-            assetIcon: "assets/svg/plots.svg",
-          ),
-          CategoryItem(
-            title: "AGRI LAND",
-            subtitle: "in Hisar",
-            assetIcon: "assets/svg/agri_land.svg",
-          ),
-        ];
+    final HomeController controller = Get.find<HomeController>();
 
-    return SizedBox(
-      height: 100.h,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.zero,
-        itemCount: list.length,
-        separatorBuilder: (_, __) => SizedBox(width: 12.w),
-        itemBuilder: (ctx, i) {
-          final item = list[i];
-          return PropertyCategoryCard(
-            title: item.title,
-            subtitle: item.subtitle,
-            iconUrl: item.iconUrl,
-            assetIcon: item.assetIcon,
-            // onTap: () => onCategoryTap?.call(item)
-              onTap: () => Get.toNamed(AppRoutes.subCategory),
-          );
-        },
+    return Obx(() {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. Tier 1: Main Categories
+          _buildMainCategoryHeader("Categories"),
+          SizedBox(height: 12.h),
+          if (controller.categories.isNotEmpty)
+            SizedBox(
+              height: 40.h,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.zero,
+                itemCount: controller.categories.length,
+                separatorBuilder: (_, __) => SizedBox(width: 10.w),
+                itemBuilder: (context, index) {
+                  final category = controller.categories[index];
+                  return _buildMainCategoryChip(controller, category);
+                },
+              ),
+            ),
+
+          // 2. Tier 2: Sub Categories (Animated appearance)
+          if (controller.subCategories.isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 20.h),
+                _buildSubHeader("Sub Categories"),
+                SizedBox(height: 10.h),
+                SizedBox(
+                  height: 38.h,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.zero,
+                    itemCount: controller.subCategories.length,
+                    separatorBuilder: (_, __) => SizedBox(width: 8.w),
+                    itemBuilder: (context, index) {
+                      final subCat = controller.subCategories[index];
+                      return _buildSubCategoryChip(controller, subCat, isSubSub: false);
+                    },
+                  ),
+                ).animate().fadeIn().slideX(begin: 0.1, end: 0),
+              ],
+            ),
+
+          // 3. Tier 3: Sub-Sub Categories
+          if (controller.subSubCategories.isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 16.h),
+                _buildSubHeader("Specific Type"),
+                SizedBox(height: 10.h),
+                SizedBox(
+                  height: 32.h,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.zero,
+                    itemCount: controller.subSubCategories.length,
+                    separatorBuilder: (_, __) => SizedBox(width: 8.w),
+                    itemBuilder: (context, index) {
+                      final subSubCat = controller.subSubCategories[index];
+                      return _buildSubCategoryChip(controller, subSubCat, isSubSub: true);
+                    },
+                  ),
+                ).animate().fadeIn().slideX(begin: 0.1, end: 0),
+              ],
+            ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildMainCategoryHeader(String title) {
+    return Text(
+      title,
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 16.sp,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 0.5,
       ),
     );
   }
-}
 
-/// Single card UI (matches the screenshot: white rounded card, icon left, text right)
-class PropertyCategoryCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final String? iconUrl; // optional network icon
-  final String? assetIcon; // optional local asset path (SVG or raster)
-  final VoidCallback? onTap;
+  Widget _buildSubHeader(String title) {
+    return Text(
+      title.toUpperCase(),
+      style: TextStyle(
+        color: Colors.grey.shade500,
+        fontSize: 10.sp,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 1.2,
+      ),
+    );
+  }
 
-  const PropertyCategoryCard({
-    Key? key,
-    required this.title,
-    this.subtitle = '',
-    this.iconUrl,
-    this.assetIcon,
-    this.onTap,
-  }) : super(key: key);
+  Widget _buildMainCategoryChip(HomeController controller, CategoryFilter category) {
+    final isActive = controller.selectedCategory.value?.id == category.id;
 
-  @override
-  Widget build(BuildContext context) {
-    final path = assetIcon!;
-    // ignore: unused_local_variable
-    final isSvg = path.toLowerCase().endsWith('.svg'); // Kept variable in case it's needed logic later
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 180.w,
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+      onTap: () => controller.onCategorySelected(isActive ? null : category),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: EdgeInsets.symmetric(horizontal: 18.w),
         decoration: BoxDecoration(
-           color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(12.r),
-          
-            border: Border.all(
-            color: Theme.of(context).brightness == Brightness.dark 
-              ? Colors.grey.shade800 
-              : Colors.grey.shade200
+          color: isActive ? secondary : const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(
+            color: isActive ? secondary : Colors.white.withOpacity(0.08),
+            width: 1,
           ),
-          boxShadow: [
+          boxShadow: isActive ? [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 6,
-              offset: Offset(0, 3),
-            ),
-          ],
+              color: secondary.withOpacity(0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ] : [],
         ),
-        child: Row(
-          children: [
-            if (iconUrl != null && iconUrl!.isNotEmpty)
-              CustomImage(
-                imageUrl: iconUrl!,
-                width: 40.w,
-                height: 40.w,
-                borderRadius: 8.r,
-              )
-            else
-              SvgPicture.asset(path, width: 40.w, height: 40.w, fit: BoxFit.contain),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (subtitle.isNotEmpty) ...[
-                    SizedBox(height: 2.h),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                  ],
-                ],
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                _getIconForCategory(category.name),
+                color: isActive ? Colors.white : Colors.grey.shade500,
+                size: 16.sp,
               ),
-            ),
-          ],
+              SizedBox(width: 8.w),
+              Text(
+                category.name,
+                style: TextStyle(
+                  color: isActive ? Colors.white : Colors.grey.shade400,
+                  fontSize: 13.sp,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Widget _buildSubCategoryChip(HomeController controller, CategoryFilter category, {required bool isSubSub}) {
+    final bool isActive = isSubSub 
+        ? controller.selectedSubSubCategory.value?.id == category.id
+        : controller.selectedSubCategory.value?.id == category.id;
+
+    return GestureDetector(
+      onTap: () => isSubSub 
+          ? controller.onSubSubCategorySelected(isActive ? null : category)
+          : controller.onSubCategorySelected(isActive ? null : category),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        decoration: BoxDecoration(
+          color: isActive ? secondary.withOpacity(0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(30.r),
+          border: Border.all(
+            color: isActive ? secondary : Colors.white.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isActive)
+                Padding(
+                  padding: EdgeInsets.only(right: 6.w),
+                  child: Icon(Icons.check, color: secondary, size: 14.sp),
+                ),
+              Text(
+                category.name,
+                style: TextStyle(
+                  color: isActive ? secondary : Colors.grey.shade400,
+                  fontSize: isSubSub ? 11.sp : 12.sp,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  IconData _getIconForCategory(String name) {
+    final n = name.toLowerCase();
+    if (n.contains('plot')) return Icons.grid_view_rounded;
+    if (n.contains('house') || n.contains('villa')) return IconlyBold.home;
+    if (n.contains('apartment') || n.contains('flat')) return Icons.apartment_rounded;
+    if (n.contains('commercial') || n.contains('office')) return Icons.business_rounded;
+    if (n.contains('land')) return Icons.landscape_rounded;
+    if (n.contains('farm')) return Icons.agriculture_rounded;
+    return Icons.category_rounded;
   }
 }

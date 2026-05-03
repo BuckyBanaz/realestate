@@ -9,11 +9,13 @@ import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/constant/app_colors.dart';
 import 'package:realestate/screens/property/plot_selection_screen.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
+import 'package:realestate/screens/widgets/shimmers.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:realestate/data/controllers/property_detail_controller.dart';
 import 'package:realestate/domain/repo/property_repository.dart';
 import 'package:realestate/data/models/property_details_model.dart';
+import 'package:realestate/data/models/property_list_model.dart';
 import 'package:realestate/domain/app/local_storage.dart';
 
 class PropertyDetailScreen extends StatefulWidget {
@@ -26,16 +28,21 @@ class PropertyDetailScreen extends StatefulWidget {
 }
 
 class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
-  final PropertyDetailController controller = Get.put(
-    PropertyDetailController(),
-  );
+  late final PropertyDetailController controller;
   String _selectedAreaUnit = '';
   String _lastAreaRaw = '';
 
   @override
   void initState() {
     super.initState();
+    controller = Get.put(PropertyDetailController(), tag: 'detail_${widget.propertyId}');
     controller.fetchPropertyDetails(widget.propertyId);
+  }
+
+  @override
+  void dispose() {
+    Get.delete<PropertyDetailController>(tag: 'detail_${widget.propertyId}');
+    super.dispose();
   }
 
   @override
@@ -46,7 +53,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
-        final property = controller.propertyDetails.value?.property;
+        final property = controller.propertyDetails.value;
         if (property == null) {
           return const Center(
             child: Text(
@@ -101,19 +108,29 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
                           if (result['success'] == true) {
                             // Update local state by recreating the entire model
-                            final updatedProperty = PropertyDetailData(
+                            final updatedProperty = PropertyListItem(
                               id: property.id,
                               title: property.title,
                               slug: property.slug,
-                              address: property.address,
+                              description: property.description,
+                              categoryId: property.categoryId,
+                              subcategoryId: property.subcategoryId,
+                              subSubCategoryId: property.subSubCategoryId,
                               price: property.price,
                               area: property.area,
+                              address: property.address,
+                              city: property.city,
+                              state: property.state,
+                              country: property.country,
+                              pincode: property.pincode,
+                              propertyType: property.propertyType,
                               status: property.status,
-                              views: property.views,
-                              category: property.category,
-                              subCategory: property.subCategory,
+                              createdBy: property.createdBy,
+                              createdAt: property.createdAt,
+                              updatedAt: property.updatedAt,
+                              ownerId: property.ownerId,
                               attributes: property.attributes,
-                              amenities: property.amenities,
+                              amenitiesList: property.amenitiesList,
                               mainImage: property.mainImage,
                               propertyImages: property.propertyImages,
                               threeSixtyView: property.threeSixtyView,
@@ -124,20 +141,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                               videoUrl: property.videoUrl,
                             );
 
-                            controller
-                                .propertyDetails
-                                .value = PropertyDetailsModel(
-                              status: controller.propertyDetails.value!.status,
-                              viewType:
-                                  controller.propertyDetails.value!.viewType,
-                              property: updatedProperty,
-                              similar:
-                                  controller.propertyDetails.value!.similar,
-                              plotData:
-                                  controller.propertyDetails.value!.plotData,
-                              amenities:
-                                  controller.propertyDetails.value!.amenities,
-                            );
+                            controller.propertyDetails.value = updatedProperty;
 
                             showCustomToast(
                               result['message'] ?? 'Favorite updated',
@@ -271,12 +275,11 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                     if ((controller
                                 .propertyDetails
                                 .value
-                                ?.property
-                                .videoUrl
+                                ?.videoUrl
                                 ?.trim()
                                 .isNotEmpty ??
                             false) &&
-                        controller.propertyDetails.value?.property.videoUrl !=
+                        controller.propertyDetails.value?.videoUrl !=
                             null) ...[
                       SizedBox(height: 24.h),
                       Text(
@@ -289,8 +292,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                       ).animate().fadeIn(delay: 340.ms),
                       SizedBox(height: 12.h),
                       GestureDetector(
-                        onTap: () => _openVideo(
-                          controller.propertyDetails.value!.property.videoUrl!,
+                         onTap: () => _openVideo(
+                          controller.propertyDetails.value!.videoUrl!,
                         ),
                         child: Container(
                           width: double.infinity,
@@ -350,9 +353,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                     if (controller
                             .propertyDetails
                             .value
-                            ?.property
-                            .threeSixtyView
-                            .isNotEmpty ??
+                            ?.attributes
+                            .any((a) => a.attribute.toLowerCase().contains("360")) ??
                         false) ...[
                       SizedBox(height: 24.h),
                       Text(
@@ -371,7 +373,6 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                           itemCount: controller
                               .propertyDetails
                               .value!
-                              .property
                               .threeSixtyView
                               .length,
                           separatorBuilder: (_, __) => SizedBox(width: 16.w),
@@ -379,7 +380,6 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                             final view = controller
                                 .propertyDetails
                                 .value!
-                                .property
                                 .threeSixtyView[index];
                             return Container(
                               width: 260.w,
@@ -444,44 +444,50 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                     SizedBox(height: 24.h),
 
                     // Plot Selection
-                    if (controller.propertyDetails.value?.plotData.isNotEmpty ??
-                        false) ...[
-                      Text(
-                        "Choose Plots",
-                        style: GoogleFonts.inter(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ).animate().fadeIn(delay: 400.ms),
-                      SizedBox(height: 12.h),
-                      PlotSelectionWidget(
-                            plotData:
-                                controller.propertyDetails.value?.plotData ??
-                                [],
-                            onPlotSelected: (plotNo, size) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Selected: $plotNo • $size"),
-                                  backgroundColor: primary,
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            },
-                          )
-                          .animate()
-                          .fadeIn(delay: 500.ms)
-                          .slideY(begin: 0.1, end: 0),
-                      SizedBox(height: 24.h),
-                    ],
+                    Obx(() {
+                      final p = controller.propertyDetails.value;
+                      final categoryName = p?.category?.name ?? '';
+                      final isPlotCategory = categoryName.toLowerCase().contains("plot");
+                      
+                      if (!isPlotCategory) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Choose Plots",
+                            style: GoogleFonts.inter(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ).animate().fadeIn(delay: 400.ms),
+                          SizedBox(height: 12.h),
+                          if (controller.isPlotsLoading.value)
+                            const PlotsGridShimmer()
+                          else if (controller.availablePlots.length > 1)
+                            PlotSelectionWidget(
+                              plotData: controller.availablePlots,
+                              selectedPropertyId: controller.selectedPropertyId.value,
+                              onPlotSelected: (plot) {
+                                controller.onPlotSelected(plot);
+                              },
+                            ).animate().fadeIn(delay: Duration(milliseconds: 500)).slideY(begin: 0.1, end: 0)
+                          else
+                            const SizedBox.shrink(),
+                          SizedBox(height: 24.h),
+                        ],
+                      );
+                    }),
 
                     // Site Plan - Only show if images exist
                     if (controller
                             .propertyDetails
                             .value
-                            ?.property
-                            .sitePlanImages
-                            .isNotEmpty ??
+                            ?.attributes
+                            .any((a) => a.attribute.toLowerCase().contains("map") || a.attribute.toLowerCase().contains("plan")) ??
                         false) ...[
                       Text(
                         "Map Images",
@@ -496,20 +502,16 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                         height: 140.h,
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
-                          itemCount: controller
-                              .propertyDetails
-                              .value!
-                              .property
-                              .sitePlanImages
-                              .length,
+                          itemCount: (controller.propertyDetails.value?.sitePlanImages.isNotEmpty ?? false) 
+                              ? controller.propertyDetails.value!.sitePlanImages.length 
+                              : 1,
                           separatorBuilder: (_, __) => SizedBox(width: 14.w),
                           itemBuilder: (context, index) {
-                            final image = controller
-                                .propertyDetails
-                                .value!
-                                .property
-                                .sitePlanImages[index]
-                                .image;
+                            final p = controller.propertyDetails.value!;
+                            final images = p.sitePlanImages.isNotEmpty 
+                                ? p.sitePlanImages.map((img) => img.image).toList()
+                                : [p.mainImageUrl ?? p.mainImage ?? ""];
+                            final image = images[index];
                             return GestureDetector(
                               onTap: () => Get.toNamed(
                                 AppRoutes.sitePlan,
@@ -539,23 +541,17 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                     ],
 
                     // Amenities - Only show if exist
-                    if (controller
+                    if ((controller
                             .propertyDetails
                             .value
-                            ?.amenities
-                            .isNotEmpty ??
-                        false) ...[
+                            ?.amenitiesList.isNotEmpty) ?? false) ...[
                       _buildAmenitiesCard(),
                     ],
 
                     SizedBox(height: 24.h),
 
                     // Similar Properties
-                    if (controller
-                        .propertyDetails
-                        .value!
-                        .similar
-                        .isNotEmpty) ...[
+                    if (controller.availablePlots.length > 1) ...[
                       Text(
                         "Similar Properties",
                         style: GoogleFonts.inter(
@@ -569,22 +565,14 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                         height: 180.h,
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
-                          itemCount:
-                              controller.propertyDetails.value!.similar.length,
+                          itemCount: controller.availablePlots.length,
                           separatorBuilder: (_, __) => SizedBox(width: 16.w),
                           itemBuilder: (context, index) {
-                            final sim = controller
-                                .propertyDetails
-                                .value!
-                                .similar[index];
+                            final sim = controller.availablePlots[index];
                             return GestureDetector(
                               onTap: () {
                                 // Reload with new property ID
-                                controller.fetchPropertyDetails(sim.id).then((
-                                  _,
-                                ) {
-                                  // Scroll to top if needed, or just let it reload
-                                });
+                                  controller.fetchPropertyDetails(sim.id);
                               },
                               child: Container(
                                 width: 160.w,
@@ -603,7 +591,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                         top: Radius.circular(20.r),
                                       ),
                                       child: CustomImage(
-                                        imageUrl: sim.image,
+                                        imageUrl: sim.mainImageUrl ?? sim.mainImage ?? "",
                                         height: 100.h,
                                         width: double.infinity,
                                       ),
@@ -696,10 +684,15 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
       fit: StackFit.expand,
       children: [
         // Main Background
-        CustomImage(
-          imageUrl: controller.propertyDetails.value?.property.mainImage ?? "",
-          width: double.infinity,
-          height: double.infinity,
+        GestureDetector(
+          onTap: () => _showFullScreenImage(
+            controller.propertyDetails.value?.mainImage ?? "",
+          ),
+          child: CustomImage(
+            imageUrl: controller.propertyDetails.value?.mainImage ?? "",
+            width: double.infinity,
+            height: double.infinity,
+          ),
         ),
         // Premium Dark Overlay Gradient
         Container(
@@ -733,7 +726,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                 Icon(IconlyLight.image, size: 16.sp, color: Colors.white),
                 SizedBox(width: 8.w),
                 Text(
-                  "1/${(controller.propertyDetails.value?.property.propertyImages.length ?? 0) + 1} Photos",
+                  "1/1 Photos",
                   style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: 11.sp,
@@ -749,17 +742,19 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   }
 
   Widget _buildGalleryThumb(String path, double w, double h, Duration delay) {
-    return Container(
-          width: w,
-          height: h,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24.r),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.2),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
+    return GestureDetector(
+      onTap: () => _showFullScreenImage(path),
+      child: Container(
+            width: w,
+            height: h,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24.r),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.2),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
                 color: Colors.black45,
                 blurRadius: 20,
                 offset: const Offset(0, 10),
@@ -778,9 +773,10 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                   ),
           ),
         )
-        .animate()
-        .fadeIn(delay: delay)
-        .scale(begin: const Offset(0.8, 0.8), curve: Curves.easeOutBack);
+            .animate()
+            .fadeIn(delay: delay)
+            .scale(begin: const Offset(0.8, 0.8), curve: Curves.easeOutBack),
+    );
   }
 
   Widget _buildDetailsCard(BuildContext context) {
@@ -833,8 +829,9 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                     _build360Badge(),
                   ],
                 ),
-                SizedBox(height: 20.h),
-                _buildMapPreview(),
+                if (controller.propertyDetails.value?.latitude != null && 
+                    controller.propertyDetails.value?.longitude != null)
+                  _buildMapPreview(),
               ],
             ),
           ),
@@ -850,54 +847,39 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
             padding: EdgeInsets.all(20.w),
             child: Column(
               children: [
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: EdgeInsets.zero,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 2.2,
-                    crossAxisSpacing: 16.w,
-                    mainAxisSpacing: 16.h,
-                  ),
-                  itemCount:
-                      (controller.propertyDetails.value?.property.attributes ??
-                              [])
-                          .where(
-                            (attr) =>
-                                attr.value != null &&
-                                attr.value!.toLowerCase() != "null" &&
-                                attr.value!.toLowerCase() != "n/a" &&
-                                attr.value!.trim().isNotEmpty,
-                          )
-                          .length,
-                  itemBuilder: (context, index) {
-                    final validAttrs =
-                        (controller
-                                    .propertyDetails
-                                    .value
-                                    ?.property
-                                    .attributes ??
-                                [])
-                            .where(
-                              (attr) =>
-                                  attr.value != null &&
-                                  attr.value!.toLowerCase() != "null" &&
-                                  attr.value!.toLowerCase() != "n/a" &&
-                                  attr.value!.trim().isNotEmpty,
-                            )
-                            .toList();
-                    final attr = validAttrs[index];
-                    return _buildQuickSpec(
-                      _getAttributeIcon(attr.attribute),
-                      attr.value!,
-                      attr.attribute,
-                    );
-                  },
-                ),
+                Builder(builder: (_) {
+                  final attrs = (controller.propertyDetails.value?.attributes ?? []).where(
+                    (attr) =>
+                        attr.value != null &&
+                        attr.value!.toLowerCase() != "null" &&
+                        attr.value!.toLowerCase() != "n/a" &&
+                        attr.value!.trim().isNotEmpty,
+                  ).toList();
+                  if (attrs.isEmpty) return const SizedBox.shrink();
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 1.6,
+                      crossAxisSpacing: 10.w,
+                      mainAxisSpacing: 10.h,
+                    ),
+                    itemCount: attrs.length,
+                    itemBuilder: (context, index) {
+                      final attr = attrs[index];
+                      return _buildQuickSpec(
+                        _getAttributeIcon(attr.attribute),
+                        attr.value!,
+                        attr.attribute,
+                      );
+                    },
+                  );
+                }),
                 SizedBox(height: 16.h),
                 _buildConvertibleAreaRow(
-                  controller.propertyDetails.value?.property.area ?? "N/A",
+                  controller.propertyDetails.value?.area ?? "N/A",
                 ),
               ],
             ),
@@ -930,13 +912,15 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
   String _guessUnit(String raw) {
     final l = raw.toLowerCase();
-    if (l.contains('yard') || l.contains('sq-yd') || l.contains('sq.yd')) {
+    if (l.contains('yard') || l.contains('sq-yd') || l.contains('sq.yd') || l.contains('sqyd')) {
       return 'Sq Yd';
     }
-    if (l.contains('sq m') || l.contains('sqm')) return 'Sq M';
+    if (l.contains('meter') || l.contains('sqm') || l.contains('sq-m') || l.contains('sq.m')) {
+      return 'Sq M';
+    }
     if (l.contains('acre')) return 'Acre';
     if (l.contains('ground')) return 'Grounds';
-    if (l.contains('aankadam') || l.contains('ankadam')) return 'Aankadam';
+    if (l.contains('aankadam')) return 'Aankadam';
     if (l.contains('rood')) return 'Rood';
     if (l.contains('chatak')) return 'Chatak';
     if (l.contains('perch')) return 'Perch';
@@ -1135,7 +1119,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "TOTAL PLOT AREA",
+                  "TOTAL ${(controller.propertyDetails.value?.category?.name ?? 'PROPERTY').toUpperCase()} AREA",
                   style: TextStyle(
                     fontSize: 9.sp,
                     color: Colors.grey.shade500,
@@ -1240,51 +1224,57 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
   Widget _buildQuickSpec(IconData icon, String value, String label) {
     return Container(
-      padding: EdgeInsets.all(12.w),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withOpacity(0.06),
+            Colors.white.withOpacity(0.02),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: Colors.white.withOpacity(0.07)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(
-              color: primary.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Icon(icon, size: 16.sp, color: primary),
-          ),
-          SizedBox(width: 10.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  label.toUpperCase(),
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(7.w),
+                decoration: BoxDecoration(
+                  color: primary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Icon(icon, size: 15.sp, color: primary),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Text(
+                  label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 8.sp,
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
+                    fontSize: 10.sp,
+                    color: Colors.grey.shade500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: 2.h),
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
+              ),
+            ],
+          ),
+          const Spacer(),
+          Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              height: 1.3,
             ),
           ),
         ],
@@ -1303,15 +1293,14 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
       ),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(14.r),
-            child: CustomImage(
-              imageUrl:
-                  "https://media.wired.com/photos/59269cd37034dc5f91bec0f1/191:100/w_1280,c_limit/GoogleMapTA.jpg",
-              width: 80.w,
-              height: 55.h,
-              fit: BoxFit.cover,
+          Container(
+            width: 80.w,
+            height: 55.h,
+            decoration: BoxDecoration(
+              color: primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(14.r),
             ),
+            child: Icon(IconlyBold.location, color: primary, size: 24.sp),
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -1358,13 +1347,15 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
   IconData _getAttributeIcon(String label) {
     final l = label.toLowerCase();
-    if (l.contains('price')) return IconlyLight.wallet;
-    if (l.contains('area')) return IconlyLight.discovery;
+    if (l.contains('price') || l.contains('rate')) return IconlyLight.wallet;
+    if (l.contains('area') || l.contains('size')) return IconlyLight.discovery;
     if (l.contains('facing')) return Icons.explore_outlined;
-    if (l.contains('dimension')) return Icons.straighten_rounded;
+    if (l.contains('dimension') || l.contains('length')) return Icons.straighten_rounded;
     if (l.contains('road')) return Icons.add_road_rounded;
     if (l.contains('bedroom') || l.contains('bhk')) return Icons.bed_outlined;
     if (l.contains('bathroom')) return Icons.bathtub_outlined;
+    if (l.contains('corner')) return Icons.grid_view_rounded;
+    if (l.contains('connectivity')) return Icons.connect_without_contact_rounded;
     return IconlyLight.info_square;
   }
 
@@ -1402,8 +1393,22 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
   Widget _buildBottomBar() {
     return Obx(() {
-      final p = controller.propertyDetails.value?.property;
+      final p = controller.propertyDetails.value;
       if (p == null) return const SizedBox.shrink();
+
+      final status = p.status.toLowerCase();
+      final isUnavailable = status == 'sold' || status == 'hold';
+      
+      String buttonText = "Submit Enquiry";
+      Color buttonColor = secondary;
+      
+      if (status == 'sold') {
+        buttonText = "Sold Out";
+        buttonColor = Colors.grey.shade700;
+      } else if (status == 'hold') {
+        buttonText = "On Hold";
+        buttonColor = Colors.grey.shade700;
+      }
 
       return Container(
         padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
@@ -1417,25 +1422,32 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
           height: 56.h,
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () => Get.toNamed(
-              AppRoutes.enquiry,
-              arguments: {
-                'propertyId': p.id,
-                'propertyName': p.title,
-                'propertyLocation': p.address,
-              },
-            ),
+            onPressed: isUnavailable 
+              ? () {
+                  showCustomToast(
+                    "Property already on hold or sold. Please choose another plot from the list above.",
+                    isError: true,
+                  );
+                }
+              : () => Get.toNamed(
+                  AppRoutes.enquiry,
+                  arguments: {
+                    'propertyId': p.id,
+                    'propertyName': p.title,
+                    'propertyLocation': p.address,
+                  },
+                ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: secondary,
+              backgroundColor: buttonColor,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18.r),
               ),
-              elevation: 8,
-              shadowColor: secondary.withOpacity(0.4),
+              elevation: isUnavailable ? 0 : 8,
+              shadowColor: isUnavailable ? Colors.transparent : secondary.withOpacity(0.4),
             ),
             child: Text(
-              "Submit Enquiry",
+              buttonText,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
@@ -1448,129 +1460,70 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   }
 
   Widget _buildAmenitiesCard() {
-    final amenities = controller.propertyDetails.value?.amenities ?? [];
+    final amenities = controller.propertyDetails.value?.amenitiesList ?? [];
+    if (amenities.isEmpty) return const SizedBox.shrink();
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         color: const Color(0xFF161616),
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(20.r),
         border: Border.all(color: Colors.white.withOpacity(0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Minimal Header
           Row(
             children: [
-              Container(
-                width: 2.5.w,
-                height: 16.h,
-                decoration: BoxDecoration(
-                  color: secondary,
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
-              ),
+              Icon(Icons.auto_awesome_rounded, size: 18.sp, color: secondary),
               SizedBox(width: 8.w),
               Text(
                 "Amenities",
                 style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
                   color: Colors.white,
-                ),
-              ),
-              SizedBox(width: 6.w),
-              Text(
-                "(${amenities.length})",
-                style: GoogleFonts.inter(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade600,
                 ),
               ),
             ],
           ),
-
-          SizedBox(height: 8.h),
-
-          Container(height: 0.5, color: Colors.white.withOpacity(0.08)),
-
-          SizedBox(height: 8.h),
-
-          // Ultra Compact List
-          Column(
-            children: amenities.asMap().entries.map((entry) {
-              final index = entry.key;
-              final amenity = entry.value;
-              return Column(
-                children: [
-                  if (index > 0) SizedBox(height: 6.h),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10.w,
-                      vertical: 6.h,
+          SizedBox(height: 16.h),
+          Wrap(
+            spacing: 12.w,
+            runSpacing: 12.h,
+            children: amenities.map((amenity) {
+              return Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.03),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: Colors.white.withOpacity(0.05)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _getAmenityIconFromName(amenity.icon),
+                      size: 14.sp,
+                      color: secondary,
                     ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.02),
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: Colors.white.withOpacity(0.04)),
+                    SizedBox(width: 8.w),
+                    Text(
+                      amenity.title,
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        color: Colors.white.withOpacity(0.8),
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(5.w),
-                          decoration: BoxDecoration(
-                            color: secondary.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8.r),
-                          ),
-                          child: Icon(
-                            _getAmenityIconFromName(amenity.icon),
-                            size: 14.sp,
-                            color: secondary,
-                          ),
-                        ),
-                        SizedBox(width: 10.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                amenity.title,
-                                style: GoogleFonts.inter(
-                                  color: Colors.white,
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              if (amenity.description.isNotEmpty) ...[
-                                SizedBox(height: 1.h),
-                                Text(
-                                  amenity.description,
-                                  style: GoogleFonts.inter(
-                                    color: Colors.grey.shade700,
-                                    fontSize: 9.sp,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               );
             }).toList(),
           ),
         ],
       ),
-    ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1, end: 0);
+    ).animate().fadeIn(delay: Duration(milliseconds: 300)).slideY(begin: 0.1, end: 0);
   }
 
   IconData _getAmenityIconFromName(String iconName) {
@@ -1603,5 +1556,51 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
       default:
         return Icons.check_circle_outline_rounded;
     }
+  }
+
+  void _showFullScreenImage(String imageUrl) {
+    if (imageUrl.isEmpty) return;
+
+    Get.to(
+      () => Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            Center(
+              child: InteractiveViewer(
+                panEnabled: true,
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Hero(
+                  tag: imageUrl,
+                  child: CustomImage(
+                    imageUrl: imageUrl,
+                    width: double.infinity,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: MediaQuery.of(Get.context!).padding.top + 10.h,
+              left: 20.w,
+              child: GestureDetector(
+                onTap: () => Get.back(),
+                child: Container(
+                  padding: EdgeInsets.all(10.w),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.close, color: Colors.white, size: 20.sp),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      transition: Transition.fadeIn,
+      fullscreenDialog: true,
+    );
   }
 }

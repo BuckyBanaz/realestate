@@ -12,16 +12,22 @@ class PropertyListResponse {
   });
 
   factory PropertyListResponse.fromJson(Map<String, dynamic> json) {
+    List<dynamic> listData = [];
+    Pagination? paginationData;
+
+    if (json['data'] is Map<String, dynamic>) {
+      listData = json['data']['data'] ?? [];
+      // Use the 'data' object itself as the pagination source if it contains pagination keys
+      paginationData = Pagination.fromJson(json['data']);
+    } else if (json['data'] is List<dynamic>) {
+      listData = json['data'];
+    }
+
     return PropertyListResponse(
       status: json['status'] ?? false,
       message: json['message'] ?? '',
-      data: (json['data'] as List<dynamic>?)
-              ?.map((item) => PropertyListItem.fromJson(item))
-              .toList() ??
-          [],
-      pagination: json['pagination'] != null 
-          ? Pagination.fromJson(json['pagination']) 
-          : null,
+      data: listData.map((item) => PropertyListItem.fromJson(item)).toList(),
+      pagination: paginationData ?? (json['pagination'] != null ? Pagination.fromJson(json['pagination']) : null),
     );
   }
 }
@@ -56,6 +62,7 @@ class PropertyListItem {
   final String description;
   final int categoryId;
   final int? subcategoryId;
+  final int? subSubCategoryId;
   final String price;
   final String area;
   final int? bedrooms;
@@ -80,7 +87,14 @@ class PropertyListItem {
   final String? amenities;
   final String? mainImageUrl;
   final PropertyCategory? category;
+  final PropertyCategory? subcategory;
+  final PropertyCategory? subSubcategory;
   final List<PropertyAttribute> attributes;
+  final List<Amenity> amenitiesList;
+  final List<PropertyImage> propertyImages;
+  final List<PropertyImage> sitePlanImages;
+  final List<PropertyImage> threeSixtyView;
+  final bool isFavorite;
 
   PropertyListItem({
     required this.id,
@@ -89,6 +103,7 @@ class PropertyListItem {
     required this.description,
     required this.categoryId,
     this.subcategoryId,
+    this.subSubCategoryId,
     required this.price,
     required this.area,
     this.bedrooms,
@@ -100,23 +115,54 @@ class PropertyListItem {
     required this.pincode,
     this.mainImage,
     this.furnishingStatus,
-    required this.propertyType,
-    required this.status,
-    required this.createdBy,
+    this.propertyType = '',
+    this.status = '',
+    this.createdBy = 0,
     this.views,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.ownerId,
+    this.createdAt = '',
+    this.updatedAt = '',
+    this.ownerId = 0,
     this.latitude,
     this.longitude,
     this.videoUrl,
     this.amenities,
     this.mainImageUrl,
     this.category,
+    this.subcategory,
+    this.subSubcategory,
     required this.attributes,
+    required this.amenitiesList,
+    this.propertyImages = const [],
+    this.sitePlanImages = const [],
+    this.threeSixtyView = const [],
+    this.isFavorite = false,
   });
 
   factory PropertyListItem.fromJson(Map<String, dynamic> json) {
+    // Parse attributes from Map to List<PropertyAttribute>
+    List<PropertyAttribute> parsedAttributes = [];
+    if (json['attributes'] is Map<String, dynamic>) {
+      (json['attributes'] as Map<String, dynamic>).forEach((key, value) {
+        parsedAttributes.add(PropertyAttribute(
+          id: 0,
+          propertyId: json['id'] ?? 0,
+          attribute: key,
+          value: value?.toString(),
+          createdAt: '',
+          updatedAt: '',
+        ));
+      });
+    } else if (json['attributes'] is List<dynamic>) {
+      parsedAttributes = (json['attributes'] as List<dynamic>)
+          .map((attr) => PropertyAttribute.fromJson(attr))
+          .toList();
+    }
+
+    String? mainImg = json['main_image_url'] ?? json['main_image'];
+    if (mainImg != null && !mainImg.startsWith('http')) {
+      mainImg = 'http://108.181.185.27/blapis/public/$mainImg';
+    }
+
     return PropertyListItem(
       id: json['id'] ?? 0,
       title: json['title'] ?? '',
@@ -124,6 +170,7 @@ class PropertyListItem {
       description: json['description'] ?? '',
       categoryId: json['category_id'] ?? 0,
       subcategoryId: json['subcategory_id'],
+      subSubCategoryId: json['sub_subcategory_id'],
       price: json['price']?.toString() ?? '0',
       area: json['area']?.toString() ?? '',
       bedrooms: json['bedrooms'],
@@ -133,7 +180,7 @@ class PropertyListItem {
       state: json['state'] ?? '',
       country: json['country'] ?? '',
       pincode: json['pincode'] ?? '',
-      mainImage: json['main_image'],
+      mainImage: mainImg,
       furnishingStatus: json['furnishing_status'],
       propertyType: json['property_type'] ?? '',
       status: json['status'] ?? '',
@@ -142,18 +189,67 @@ class PropertyListItem {
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
       ownerId: json['owner_id'] ?? 0,
-      latitude: json['latitude'],
-      longitude: json['longitude'],
+      latitude: json['latitude']?.toString(),
+      longitude: json['longitude']?.toString(),
       videoUrl: json['video_url'],
-      amenities: json['amenities'],
-      mainImageUrl: json['main_image_url'],
+      amenities: json['amenities']?.toString(), 
+      amenitiesList: _parseAmenities(json['amenities']),
+      mainImageUrl: mainImg,
       category: json['category'] != null
           ? PropertyCategory.fromJson(json['category'])
           : null,
-      attributes: (json['attributes'] as List<dynamic>?)
-              ?.map((attr) => PropertyAttribute.fromJson(attr))
-              .toList() ??
-          [],
+      subcategory: json['subcategory'] != null
+          ? PropertyCategory.fromJson(json['subcategory'])
+          : null,
+      subSubcategory: json['sub_subcategory'] != null
+          ? PropertyCategory.fromJson(json['sub_subcategory'])
+          : null,
+      attributes: parsedAttributes,
+      propertyImages: _parseImages(json['property_images']),
+      sitePlanImages: _parseImages(json['map_Properties_images']),
+      threeSixtyView: _parseImages(json['three_sixty_view_images']),
+      isFavorite: json['is_favourite'] ?? false,
+    );
+  }
+
+  static List<Amenity> _parseAmenities(dynamic raw) {
+    if (raw == null) return [];
+    if (raw is List) {
+      return raw.map((e) => Amenity.fromJson(e)).toList();
+    }
+    if (raw is String && raw.startsWith('[')) {
+      try {
+        // This handles cases where it's a stringified list of IDs or objects
+      } catch (e) {}
+    }
+    return [];
+  }
+
+  static List<PropertyImage> _parseImages(dynamic raw) {
+    if (raw == null || raw is! List) return [];
+    return raw.map((item) => PropertyImage.fromJson(item)).toList();
+  }
+}
+
+class Amenity {
+  final int id;
+  final String icon;
+  final String title;
+  final String description;
+
+  Amenity({
+    required this.id,
+    required this.icon,
+    required this.title,
+    required this.description,
+  });
+
+  factory Amenity.fromJson(Map<String, dynamic> json) {
+    return Amenity(
+      id: json['id'] ?? 0,
+      icon: json['icon'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
     );
   }
 }
@@ -218,6 +314,24 @@ class PropertyAttribute {
       value: json['value'],
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
+    );
+  }
+}
+
+class PropertyImage {
+  final int id;
+  final String image;
+
+  PropertyImage({required this.id, required this.image});
+
+  factory PropertyImage.fromJson(Map<String, dynamic> json) {
+    String? img = json['image'] ?? json['file_name'];
+    if (img != null && !img.startsWith('http')) {
+      img = 'http://108.181.185.27/blapis/public/$img';
+    }
+    return PropertyImage(
+      id: json['id'] ?? 0,
+      image: img ?? '',
     );
   }
 }

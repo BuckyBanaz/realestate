@@ -7,15 +7,16 @@ import 'package:realestate/data/models/owner_document_model.dart';
 import 'package:realestate/data/models/account_data_model.dart';
 import 'package:realestate/data/models/property_list_model.dart';
 import 'package:realestate/data/models/favorite_model.dart';
+import 'package:realestate/data/models/category_filter_model.dart';
 
 class PropertyRepository {
   final ApiClient _apiClient = ApiClient();
 
-  Future<PropertyDetailsModel?> fetchPropertyDetails(int propertyId) async {
+  Future<PropertyListItem?> fetchPropertyDetails(int propertyId) async {
     try {
-      final response = await _apiClient.dio.get('property-details/$propertyId');
-      if (response.statusCode == 200) {
-        return PropertyDetailsModel.fromJson(response.data);
+      final response = await _apiClient.dio.get('property/$propertyId');
+      if (response.statusCode == 200 && response.data['status'] == true) {
+        return PropertyListItem.fromJson(response.data['data']);
       }
       return null;
     } catch (e) {
@@ -189,6 +190,9 @@ class PropertyRepository {
     double? minPrice,
     double? maxPrice,
     String? search,
+    int? categoryId,
+    int? subCategoryId,
+    int? subSubCategoryId,
   }) async {
     try {
       final Map<String, dynamic> queryParameters = {
@@ -200,6 +204,9 @@ class PropertyRepository {
       if (maxPrice != null) queryParameters['max_price'] = maxPrice;
       if (search != null && search.isNotEmpty)
         queryParameters['search'] = search;
+      if (categoryId != null) queryParameters['category_id'] = categoryId;
+      if (subCategoryId != null) queryParameters['subcategory_id'] = subCategoryId;
+      if (subSubCategoryId != null) queryParameters['sub_subcategory_id'] = subSubCategoryId;
 
       final response = await _apiClient.dio.get(
         'properties',
@@ -213,6 +220,20 @@ class PropertyRepository {
     } catch (e) {
       print('Search Properties Error: $e');
       return null;
+    }
+  }
+
+  Future<List<CategoryFilter>> fetchCategories() async {
+    try {
+      final response = await _apiClient.dio.get('categories');
+      if (response.statusCode == 200) {
+        final res = CategoryFilterResponse.fromJson(response.data);
+        return res.data;
+      }
+      return [];
+    } catch (e) {
+      print("Fetch Categories Error: $e");
+      return [];
     }
   }
 }

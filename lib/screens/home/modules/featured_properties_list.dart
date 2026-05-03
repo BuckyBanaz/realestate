@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:realestate/data/controllers/home_controller.dart';
 import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/constant/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,43 +14,63 @@ class FeaturedPropertiesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Adjusted height for a more compact list
-    final double listHeight = 155.h;
-    return SizedBox(
-      height: listHeight,
-      child: ListView.separated(
-        // padding: EdgeInsets.symmetric(horizontal: 20.w), // Match home padding
-        scrollDirection: Axis.horizontal,
-        itemCount: nearbyEstates.length,
-        clipBehavior: Clip.none,
-        separatorBuilder: (_, __) => SizedBox(width: 12.w),
-        itemBuilder: (ctx, i) {
-          final e = nearbyEstates[i];
-          return GestureDetector(
-            onTap: () => Get.toNamed(AppRoutes.propertyDetail),
-            child: SizedBox(
-              width: 280.w, // Restore fixed width here for horizontal list
-              child: FeatureCard(
-                imageUrl: e['image']!,
-                title: e['title']!,
-                location: e['location']!,
-                price: e['price']!,
-                beds: e['beds']!,
-                area: e['area']!,
-                tag: e['tag']!,
-                rating: e['rating']!,
-                onFavoritePressed: () {
-                  // Handle favorite toggle
-                },
-              ),
+    final HomeController controller = Get.find<HomeController>();
+
+    return Obx(() {
+      if (controller.isPropertiesLoading.value && controller.filteredProperties.isEmpty) {
+        return SizedBox(
+          height: 155.h,
+          child: Center(child: CircularProgressIndicator(color: secondary)),
+        );
+      }
+
+      if (controller.filteredProperties.isEmpty) {
+        return SizedBox(
+          height: 100.h,
+          child: const Center(
+            child: Text(
+              "No properties found for this category",
+              style: TextStyle(color: Colors.grey),
             ),
-          )
-          .animate()
-          .fadeIn(delay: (100 * i).ms)
-          .slideX(begin: 0.2, end: 0, curve: Curves.easeOutQuad);
-        },
-      ),
-    );
+          ),
+        );
+      }
+
+      return SizedBox(
+        height: 155.h,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: controller.filteredProperties.length,
+          clipBehavior: Clip.none,
+          separatorBuilder: (_, __) => SizedBox(width: 12.w),
+          itemBuilder: (ctx, i) {
+            final property = controller.filteredProperties[i];
+            return GestureDetector(
+              onTap: () => Get.toNamed(AppRoutes.propertyDetail, arguments: property.id),
+              child: SizedBox(
+                width: 280.w,
+                child: FeatureCard(
+                  imageUrl: property.mainImageUrl ?? property.mainImage ?? "",
+                  title: property.title,
+                  location: property.address,
+                  price: property.price,
+                  beds: property.bedrooms?.toString() ?? "—",
+                  area: "${property.area} Sq.Ft",
+                  tag: property.propertyType,
+                  rating: "4.5", // Static since API doesn't provide rating yet
+                  onFavoritePressed: () {
+                    // Handle favorite toggle if needed
+                  },
+                ),
+              ),
+            )
+            .animate()
+            .fadeIn(delay: (100 * i).ms)
+            .slideX(begin: 0.2, end: 0, curve: Curves.easeOutQuad);
+          },
+        ),
+      );
+    });
   }
 }
 

@@ -9,6 +9,8 @@ import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
 import 'package:realestate/data/controllers/search_controller.dart';
 import 'package:realestate/data/models/property_list_model.dart';
+import 'package:realestate/data/models/category_filter_model.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class SearchScreen extends StatelessWidget {
   SearchScreen({super.key});
@@ -97,25 +99,81 @@ class SearchScreen extends StatelessWidget {
               ),
             ),
 
-            // Category Filters (Horizontal)
-            // SizedBox(
-            //   height: 55.h,
-            //   child: Obx(() {
-            //     final categories = _buildCategories(controller.searchResults);
-            //     return ListView.separated(
-            //       scrollDirection: Axis.horizontal,
-            //       padding: EdgeInsets.symmetric(
-            //         horizontal: 16.w,
-            //         vertical: 8.h,
-            //       ),
-            //       itemCount: categories.length,
-            //       separatorBuilder: (_, __) => SizedBox(width: 10.w),
-            //       itemBuilder: (context, index) {
-            //         return _buildCategoryChip(controller, categories[index]);
-            //       },
-            //     );
-            //   }),
-            // ),
+            // Hierarchical Filters
+            Obx(() {
+              final hasFilters = controller.selectedCategory.value != null || 
+                                controller.selectedSubCategory.value != null || 
+                                controller.selectedSubSubCategory.value != null;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. Tier 1: Main Categories
+                  if (controller.categories.isNotEmpty)
+                    SizedBox(
+                      height: 40.h,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.symmetric(horizontal: 16.w),
+                        itemCount: controller.categories.length,
+                        separatorBuilder: (_, __) => SizedBox(width: 10.w),
+                        itemBuilder: (context, index) {
+                          final category = controller.categories[index];
+                          return _buildMainCategoryChip(controller, category);
+                        },
+                      ),
+                    ),
+
+                  // 2. Tier 2: Sub Categories
+                  if (controller.subCategories.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 12.h),
+                        SizedBox(
+                          height: 36.h,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            padding: EdgeInsets.symmetric(horizontal: 16.w),
+                            itemCount: controller.subCategories.length,
+                            separatorBuilder: (_, __) => SizedBox(width: 8.w),
+                            itemBuilder: (context, index) {
+                              final subCat = controller.subCategories[index];
+                              return _buildSubCategoryChip(controller, subCat, isSubSub: false);
+                            },
+                          ),
+                        ).animate().fadeIn().slideX(begin: 0.1, end: 0),
+                      ],
+                    ),
+
+                  // 3. Tier 3: Sub-Sub Categories
+                  if (controller.subSubCategories.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 12.h),
+                        SizedBox(
+                          height: 32.h,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            padding: EdgeInsets.symmetric(horizontal: 16.w),
+                            itemCount: controller.subSubCategories.length,
+                            separatorBuilder: (_, __) => SizedBox(width: 8.w),
+                            itemBuilder: (context, index) {
+                              final subSubCat = controller.subSubCategories[index];
+                              return _buildSubCategoryChip(controller, subSubCat, isSubSub: true);
+                            },
+                          ),
+                        ).animate().fadeIn().slideX(begin: 0.1, end: 0),
+                      ],
+                    ),
+
+                  // Clear Filters & Breadcrumb Bar
+                  if (hasFilters) 
+                    _buildFilterBreadcrumb(controller),
+                ],
+              );
+            }),
 
             // Results Section
             Expanded(
@@ -129,12 +187,7 @@ class SearchScreen extends StatelessWidget {
                   return _buildEmptyState();
                 }
 
-                final filteredResults = controller.searchResults.where((item) {
-                  final selected = controller.selectedCategory.value;
-                  if (selected == "All") return true;
-                  return item.propertyType.toLowerCase() ==
-                      selected.toLowerCase();
-                }).toList();
+                final filteredResults = controller.searchResults;
 
                 if (filteredResults.isEmpty) {
                   return _buildEmptyState();
@@ -145,28 +198,32 @@ class SearchScreen extends StatelessWidget {
                   physics: const BouncingScrollPhysics(),
                   slivers: [
                     SliverPadding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 12.h,
-                      ),
+                      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
                       sliver: SliverToBoxAdapter(
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                              decoration: BoxDecoration(
+                                color: secondary,
+                                borderRadius: BorderRadius.circular(20.r),
+                              ),
+                              child: Text(
+                                "${filteredResults.length} Properties",
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
                             Text(
                               "Find results in your area",
                               style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                              ),
-                            ),
-                            Text(
-                              "${filteredResults.length} Results",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: secondary,
-                                fontWeight: FontWeight.w600,
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade400,
                               ),
                             ),
                           ],
@@ -363,46 +420,190 @@ class SearchScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryChip(
+  Widget _buildMainCategoryChip(
     PropertySearchController controller,
-    String category,
+    CategoryFilter category,
   ) {
     return Obx(() {
-      final isActive = controller.selectedCategory.value == category;
+      final isActive = controller.selectedCategory.value?.id == category.id;
       return GestureDetector(
-        onTap: () => controller.selectCategory(category),
+        onTap: () => controller.onCategorySelected(isActive ? null : category),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
           decoration: BoxDecoration(
             color: isActive ? secondary : cardColor,
-            borderRadius: BorderRadius.circular(25.r),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
-              color: isActive ? secondary : Colors.white.withOpacity(0.05),
+              color: isActive ? secondary : Colors.white.withOpacity(0.08),
+              width: 1,
             ),
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                      color: secondary.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : null,
           ),
           child: Center(
-            child: Text(
-              category,
-              style: GoogleFonts.inter(
-                color: isActive ? Colors.white : Colors.grey.shade400,
-                fontSize: 13.sp,
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _getIconForCategory(category.name),
+                  color: isActive ? Colors.white : Colors.grey.shade500,
+                  size: 14.sp,
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  category.name,
+                  style: GoogleFonts.inter(
+                    color: isActive ? Colors.white : Colors.grey.shade400,
+                    fontSize: 13.sp,
+                    fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
+                if (category.children.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(left: 6.w),
+                    child: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: isActive ? Colors.white70 : Colors.grey.shade600,
+                      size: 16.sp,
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
       );
     });
+  }
+
+  Widget _buildSubCategoryChip(PropertySearchController controller, CategoryFilter category, {required bool isSubSub}) {
+    final bool isActive = isSubSub 
+        ? controller.selectedSubSubCategory.value?.id == category.id
+        : controller.selectedSubCategory.value?.id == category.id;
+
+    return GestureDetector(
+      onTap: () => isSubSub 
+          ? controller.onSubSubCategorySelected(isActive ? null : category)
+          : controller.onSubCategorySelected(isActive ? null : category),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: EdgeInsets.symmetric(horizontal: 14.w),
+        decoration: BoxDecoration(
+          color: isActive ? secondary : cardColor,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: isActive ? secondary : Colors.white.withOpacity(0.08),
+            width: 1,
+          ),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                category.name,
+                style: TextStyle(
+                  color: isActive ? Colors.white : Colors.grey.shade400,
+                  fontSize: 12.sp,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+              if (!isSubSub && category.children.isNotEmpty)
+                Padding(
+                  padding: EdgeInsets.only(left: 4.w),
+                  child: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: isActive ? Colors.white70 : Colors.grey.shade600,
+                    size: 14.sp,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterBreadcrumb(PropertySearchController controller) {
+    String path = "";
+    if (controller.selectedCategory.value != null) {
+      path += controller.selectedCategory.value!.name;
+    }
+    if (controller.selectedSubCategory.value != null) {
+      path += " > ${controller.selectedSubCategory.value!.name}";
+    }
+    if (controller.selectedSubSubCategory.value != null) {
+      path += " > ${controller.selectedSubSubCategory.value!.name}";
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          child: InkWell(
+            onTap: () => controller.clearFilters(),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.close, color: Colors.redAccent.withOpacity(0.7), size: 14.sp),
+                SizedBox(width: 4.w),
+                Text(
+                  "Clear all filters",
+                  style: TextStyle(
+                    color: Colors.redAccent.withOpacity(0.7),
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Container(
+          width: double.infinity,
+          margin: EdgeInsets.symmetric(horizontal: 16.w),
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.03),
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: Colors.white.withOpacity(0.05)),
+          ),
+          child: Row(
+            children: [
+              Icon(IconlyBold.filter, color: secondary, size: 14.sp),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Text(
+                  path,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () => controller.clearFilters(),
+                child: Icon(Icons.close, color: Colors.grey, size: 14.sp),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 8.h),
+      ],
+    );
+  }
+
+  IconData _getIconForCategory(String name) {
+    final n = name.toLowerCase();
+    if (n.contains('plot')) return Icons.grid_view_rounded;
+    if (n.contains('house') || n.contains('villa')) return IconlyBold.home;
+    if (n.contains('apartment') || n.contains('flat')) return Icons.apartment_rounded;
+    if (n.contains('commercial') || n.contains('office')) return Icons.business_rounded;
+    if (n.contains('land')) return Icons.landscape_rounded;
+    if (n.contains('farm')) return Icons.agriculture_rounded;
+    return Icons.category_rounded;
   }
 
   Widget _buildEmptyState() {

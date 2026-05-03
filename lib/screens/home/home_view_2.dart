@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:realestate/constant/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:realestate/screens/home/modules/categories.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
 import 'package:realestate/screens/home/modules/search_text_field.dart';
 import 'modules/news_section.dart';
@@ -162,68 +163,17 @@ class _HomeView2State extends State<HomeView2> {
                           //   ],
                           // ),
 
-                          SizedBox(height: 30.h),
+                          SizedBox(height: 20.h),
 
-                          // 3. Categories (Dynamic from API)
-                          Obx(() {
-                            if (controller.isLoading.value && controller.categoriesWithProperties.isEmpty) {
-                              return const CategoriesShimmer();
-                            }
-                            if (controller.categoriesWithProperties.isEmpty) {
-                              return const SizedBox.shrink();
-                            }
-                            return SizedBox(
-                              height: 38.h,
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: controller.categoriesWithProperties.length,
-                                separatorBuilder: (_, __) => SizedBox(width: 8.w),
-                                itemBuilder: (context, index) {
-                                  return Obx(() {
-                                    final isSelected = controller.selectedCategoryIndex.value == index;
-                                    final category = controller.categoriesWithProperties[index];
-                                    return GestureDetector(
-                                      onTap: () => controller.selectedCategoryIndex.value = index,
-                                      child: AnimatedContainer(
-                                        duration: const Duration(milliseconds: 300),
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 16.w,
-                                        ),
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? primary.withOpacity(0.1)
-                                              : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(10.r),
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? primary
-                                                : Colors.white.withOpacity(0.1),
-                                            width: 1,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          category.name,
-                                          style: TextStyle(
-                                            color: isSelected
-                                                ? primary
-                                                : Colors.grey.shade500,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12.sp,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  });
-                                },
-                              ),
-                            );
-                          }),
+                          // 3. Categories (Dynamic from API with Hierarchical Filtering)
+                          Categories(),
 
-                          SizedBox(height: 30.h),
+                          SizedBox(height: 20.h),
 
                           // 4. Featured Properties Horizontal List
-                          Obx(() => controller.isLoading.value ? const FeaturedShimmer() : _buildFeaturedPropertiesList()),
+                          Obx(() => (controller.isLoading.value || (controller.isPropertiesLoading.value && controller.filteredProperties.isEmpty)) 
+                              ? const FeaturedShimmer() 
+                              : _buildFeaturedPropertiesList()),
 
                           // SizedBox(height: 30.h),
 
@@ -392,34 +342,27 @@ class _HomeView2State extends State<HomeView2> {
       ],
     );
   }
-
-  // Featured Properties Horizontal List
+// Featured Properties Horizontal List
   Widget _buildFeaturedPropertiesList() {
     return Obx(
       () {
-        if (controller.categoriesWithProperties.isEmpty) {
-          return const SizedBox.shrink();
+        if (controller.isPropertiesLoading.value && controller.filteredProperties.isEmpty) {
+           return const FeaturedShimmer();
         }
 
-        // Safeguard for index range
-        if (controller.selectedCategoryIndex.value >= controller.categoriesWithProperties.length) {
-          controller.selectedCategoryIndex.value = 0;
-        }
-
-        final category = controller.categoriesWithProperties[controller.selectedCategoryIndex.value];
-        final properties = category.properties;
-
-        if (properties.isEmpty) {
+        if (controller.filteredProperties.isEmpty) {
           return SizedBox(
             height: 320.h,
             child: Center(
               child: Text(
-                "No Properties in ${category.name}",
+                "No Properties found",
                 style: TextStyle(color: Colors.grey, fontSize: 14.sp),
               ),
             ),
           );
         }
+
+        final properties = controller.filteredProperties;
 
         return SizedBox(
           height: 320.h,
@@ -438,7 +381,7 @@ class _HomeView2State extends State<HomeView2> {
                       location: property.address,
                       area: property.area,
                       price: "₹${formatPrice(property.price)}",
-                      imageUrl: property.propertyImage ?? "https://via.placeholder.com/300X320",
+                      imageUrl: property.mainImageUrl ?? property.mainImage ?? "https://via.placeholder.com/300X320",
                     ),
               )
                   .animate(

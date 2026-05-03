@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../constant/app_colors.dart';
-import '../../data/models/property_details_model.dart'; // Add this import
+import '../../data/models/property_list_model.dart';
 
 final Color _primary = primary;
 
@@ -15,7 +15,6 @@ class PlotModel {
   final String roadSide;
   final String facing;
   bool booked;
-  final bool premium;
 
   PlotModel({
     required this.no,
@@ -23,17 +22,18 @@ class PlotModel {
     required this.roadSide,
     required this.facing,
     this.booked = false,
-    this.premium = false,
   });
 }
 
 class PlotSelectionWidget extends StatefulWidget {
-  final List<PlotData> plotData; // Added
-  final Function(String plotNo, String size) onPlotSelected;
+  final List<PropertyListItem> plotData;
+  final int? selectedPropertyId;
+  final Function(PropertyListItem plot) onPlotSelected;
 
   const PlotSelectionWidget({
     super.key, 
-    required this.plotData, // Added
+    required this.plotData,
+    this.selectedPropertyId,
     required this.onPlotSelected,
   });
 
@@ -42,41 +42,64 @@ class PlotSelectionWidget extends StatefulWidget {
 }
 
 class _PlotSelectionWidgetState extends State<PlotSelectionWidget> {
-  String? selectedPlot;
-
-  late final List<PlotModel> plots;
+  late List<PlotModel> plots;
+  late Map<String, PropertyListItem> plotToProperty;
 
   @override
   void initState() {
     super.initState();
+    _prepareData();
+  }
+
+  @override
+  void didUpdateWidget(PlotSelectionWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.plotData != widget.plotData || oldWidget.selectedPropertyId != widget.selectedPropertyId) {
+      _prepareData();
+    }
+  }
+
+  void _prepareData() {
+    plotToProperty = {};
     if (widget.plotData.isNotEmpty) {
       plots = widget.plotData.map((e) {
+        String plotNo = "";
+        // Try to get Plot Number from attributes if available
+        final attr = e.attributes.firstWhereOrNull((a) => 
+          a.attribute.toLowerCase().contains("plot number") || 
+          a.attribute.toLowerCase() == "number" ||
+          a.attribute.toLowerCase() == "plot no"
+        );
+        
+        if (attr != null && attr.value != null && attr.value!.trim().isNotEmpty) {
+           plotNo = attr.value!.trim();
+        } else {
+           // Heuristic: If title is "Plot A66 Raja Ram Aero City", take "A66"
+           final parts = e.title.split(' ');
+           if (parts.length >= 2 && parts[0].toLowerCase() == 'plot') {
+             plotNo = parts[1];
+           } else {
+             plotNo = e.title; // Fallback to full title if it's short
+           }
+        }
+        
+        // Final sanity check: if plotNo is too long or empty, truncate or fallback
+        if (plotNo.length > 10) {
+           plotNo = plotNo.split(' ').first;
+        }
+        
+        plotToProperty[plotNo] = e;
+        
         return PlotModel(
-          no: e.number.split(' ').last, // Simple way to get 1001 from "Anandvan FarmHouses 1001"
-          size: e.size,
-          roadSide: "Main Road", // Default or you could parse from elsewhere
-          facing: "North", // Default
-          booked: e.status.toLowerCase() == 'booked' || e.status.toLowerCase() == 'sold',
-          premium: e.number.contains('Premium'), 
+          no: plotNo,
+          size: e.area,
+          roadSide: "Main Road",
+          facing: "North",
+          booked: e.status.toLowerCase() == 'sold' || e.status.toLowerCase() == 'hold',
         );
       }).toList();
     } else {
-      // Fallback or leave empty as per "if/else" logic
-      plots = [
-        PlotModel(no: "101", size: "30×50", roadSide: "Main Road", facing: "East"),
-        PlotModel(no: "102", size: "30×50", roadSide: "Inner Road", facing: "North", booked: true),
-        PlotModel(no: "103", size: "30×50", roadSide: "Inner Road", facing: "East"),
-        PlotModel(no: "104", size: "40×60", roadSide: "Main Road", facing: "South"),
-        PlotModel(no: "105", size: "40×60", roadSide: "Inner Road", facing: "West"),
-        PlotModel(no: "201", size: "30×50", roadSide: "Service Lane", facing: "North"),
-        PlotModel(no: "202", size: "35×55", roadSide: "Inner Road", facing: "East"),
-        PlotModel(no: "203", size: "30×50", roadSide: "Inner Road", facing: "West", booked: true),
-        PlotModel(no: "204", size: "50×80", roadSide: "Main Road", facing: "South", premium: true),
-        PlotModel(no: "301", size: "40×60", roadSide: "Inner Road", facing: "North"),
-        PlotModel(no: "302", size: "40×60", roadSide: "Inner Road", facing: "East"),
-        PlotModel(no: "PH-1", size: "60×90", roadSide: "Main Road", facing: "North-East", premium: true),
-        PlotModel(no: "PH-2", size: "60×90", roadSide: "Main Road", facing: "North-West", premium: true),
-      ];
+      plots = [];
     }
   }
 
@@ -114,8 +137,6 @@ class _PlotSelectionWidgetState extends State<PlotSelectionWidget> {
           _legendItem(Icons.square_rounded, Colors.red.withOpacity(0.4), "Sold"),
           SizedBox(width: 16.w),
           _legendItem(Icons.square_rounded, primary, "Selected"),
-          SizedBox(width: 16.w),
-          _legendItem(Icons.stars_rounded, Colors.amber.withOpacity(0.8), "Premium"),
         ],
       ),
     );
@@ -165,9 +186,12 @@ class _PlotSelectionWidgetState extends State<PlotSelectionWidget> {
             ),
             itemBuilder: (context, index) {
               final p = plots[index];
+              final property = plotToProperty[p.no];
+              final bool isSelected = property?.id == widget.selectedPropertyId;
+
               return _PlotBoxWidget(
                 model: p,
-                isSelected: selectedPlot == p.no,
+                isSelected: isSelected,
                 onTap: _handleTap,
               ).animate()
                .fadeIn(delay: (index * 50).ms)
@@ -180,12 +204,26 @@ class _PlotSelectionWidgetState extends State<PlotSelectionWidget> {
   }
 
   void _handleTap(String plotNo) {
-    final model = plotByNo(plotNo);
-    if (model == null || model.booked) return;
-    setState(() {
-      selectedPlot = plotNo;
-    });
-    widget.onPlotSelected(model.no, model.size);
+    final property = plotToProperty[plotNo];
+    if (property == null) return;
+    
+    final status = property.status.toLowerCase();
+    if (status == 'sold' || status == 'hold') {
+      Get.defaultDialog(
+        title: "Plot Unavailable",
+        backgroundColor: const Color(0xFF1E1E1E),
+        titleStyle: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold),
+        middleTextStyle: GoogleFonts.inter(color: Colors.white70),
+        middleText: "This plot is already ${status == 'sold' ? 'Sold' : 'on Hold'}. Please select another available plot.",
+        textConfirm: "OK",
+        confirmTextColor: Colors.white,
+        buttonColor: primary,
+        onConfirm: () => Get.back(),
+      );
+      return;
+    }
+    
+    widget.onPlotSelected(property);
   }
 }
 
@@ -203,7 +241,6 @@ class _PlotBoxWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool booked = model.booked;
-    final bool premium = model.premium;
 
     Color borderColor;
     Color bgColor;
@@ -216,9 +253,6 @@ class _PlotBoxWidget extends StatelessWidget {
     } else if (isSelected) {
       borderColor = primary;
       bgColor = primary.withOpacity(0.2);
-    } else if (premium) {
-      borderColor = Colors.amber.withOpacity(0.5);
-      bgColor = Colors.amber.withOpacity(0.1);
     } else {
       borderColor = Colors.white.withOpacity(0.1);
       bgColor = Colors.white.withOpacity(0.05);
@@ -247,12 +281,6 @@ class _PlotBoxWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.r),
           child: Stack(
             children: [
-              if (premium && !booked)
-                Positioned(
-                  top: 6.r,
-                  right: 6.r,
-                  child: Icon(Icons.stars_rounded, size: 12.sp, color: Colors.amber),
-                ),
               Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
