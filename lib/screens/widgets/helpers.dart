@@ -296,7 +296,22 @@ class CustomImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
-        placeholder: placeholder ?? (context, url) => _buildLogo(context),
+        placeholder: placeholder,
+        progressIndicatorBuilder: placeholder != null ? null : (context, url, downloadProgress) => Stack(
+          alignment: Alignment.center,
+          children: [
+            _buildLogo(context),
+            SizedBox(
+              width: 30.w,
+              height: 30.w,
+              child: CircularProgressIndicator(
+                value: downloadProgress.progress,
+                color: primary,
+                strokeWidth: 2.5,
+              ),
+            ),
+          ],
+        ),
         errorWidget: errorWidget ?? (context, url, error) => _buildFallback(context),
       ),
     );

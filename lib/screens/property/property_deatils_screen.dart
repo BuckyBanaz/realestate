@@ -29,16 +29,20 @@ class PropertyDetailScreen extends StatefulWidget {
 
 class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   late final PropertyDetailController controller;
+  int _currentImageIndex = 0;
+  late final PageController _pageController;
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
     controller = Get.put(PropertyDetailController(), tag: 'detail_${widget.propertyId}');
     controller.fetchPropertyDetails(widget.propertyId);
   }
 
   @override
   void dispose() {
+    _pageController.dispose();
     Get.delete<PropertyDetailController>(tag: 'detail_${widget.propertyId}');
     super.dispose();
   }
@@ -773,70 +777,125 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   }
 
   Widget _buildHeaderGallery() {
-    return GestureDetector(
-      onTap: () => _showFullScreenImage(
-        controller.propertyDetails.value?.mainImage ?? "",
-      ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Main Background
-          CustomImage(
-            imageUrl: controller.propertyDetails.value?.mainImage ?? "",
-            width: double.infinity,
-            height: double.infinity,
-          ),
-          // Premium Dark Overlay Gradient
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withOpacity(0.4),
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.2),
-                  Theme.of(Get.context!).scaffoldBackgroundColor,
-                ],
-                stops: const [0.0, 0.4, 0.8, 1.0],
+    final property = controller.propertyDetails.value;
+    if (property == null) return const SizedBox.shrink();
+
+    final List<String> allImages = [];
+    if (property.mainImage != null && property.mainImage!.isNotEmpty) {
+      allImages.add(property.mainImage!);
+    }
+    if (property.propertyImages.isNotEmpty) {
+      allImages.addAll(property.propertyImages.map((e) => e.image).toList());
+    }
+
+    if (allImages.isEmpty) {
+      return Container(color: Colors.grey.shade900);
+    }
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            // Main Background
+            PageView.builder(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentImageIndex = index;
+                });
+              },
+              itemCount: allImages.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () => _showFullScreenImage(allImages, index),
+                  child: CustomImage(
+                    imageUrl: allImages[index],
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                );
+              },
+            ),
+            // Premium Dark Overlay Gradient
+            IgnorePointer(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.4),
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.2),
+                      Theme.of(Get.context!).scaffoldBackgroundColor,
+                    ],
+                    stops: const [0.0, 0.4, 0.8, 1.0],
+                  ),
+                ),
               ),
             ),
-          ),
-          // Gallery Counter / Detail Chip
-          Positioned(
-            bottom: 30.h,
-            right: 20.w,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: Colors.white.withOpacity(0.2)),
-              ),
-              child: Row(
-                children: [
-                  Icon(IconlyLight.image, size: 16.sp, color: Colors.white),
-                  SizedBox(width: 8.w),
-                  Text(
-                    "1/1 Photos",
-                    style: GoogleFonts.inter(
-                      color: Colors.white,
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
+            // Indicators
+            if (allImages.length > 1)
+              Positioned(
+                bottom: 80.h,
+                left: 0,
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    allImages.length,
+                    (index) => AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      margin: EdgeInsets.symmetric(horizontal: 4.w),
+                      width: _currentImageIndex == index ? 20.w : 8.w,
+                      height: 8.h,
+                      decoration: BoxDecoration(
+                        color: _currentImageIndex == index
+                            ? primary
+                            : Colors.white.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
                     ),
                   ),
-                ],
+                ),
+              ),
+            // Gallery Counter / Detail Chip
+            Positioned(
+              bottom: 30.h,
+              right: 20.w,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(16.r),
+                  border: Border.all(color: Colors.white.withOpacity(0.2)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(IconlyLight.image, size: 16.sp, color: Colors.white),
+                    SizedBox(width: 8.w),
+                    Text(
+                      "${_currentImageIndex + 1}/${allImages.length} Photos",
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      }
     );
   }
 
   Widget _buildGalleryThumb(String path, double w, double h, Duration delay) {
     return GestureDetector(
-      onTap: () => _showFullScreenImage(path),
+      onTap: () => _showFullScreenImage([path], 0),
       child: Container(
             width: w,
             height: h,
@@ -1549,28 +1608,34 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     }
   }
 
-  void _showFullScreenImage(String imageUrl) {
-    if (imageUrl.isEmpty) return;
+  void _showFullScreenImage(List<String> images, int initialIndex) {
+    if (images.isEmpty) return;
 
     Get.to(
       () => Scaffold(
         backgroundColor: Colors.black,
         body: Stack(
           children: [
-            Center(
-              child: InteractiveViewer(
-                panEnabled: true,
-                minScale: 0.5,
-                maxScale: 4.0,
-                child: Hero(
-                  tag: imageUrl,
-                  child: CustomImage(
-                    imageUrl: imageUrl,
-                    width: double.infinity,
-                    fit: BoxFit.contain,
+            PageView.builder(
+              controller: PageController(initialPage: initialIndex),
+              itemCount: images.length,
+              itemBuilder: (context, index) {
+                return Center(
+                  child: InteractiveViewer(
+                    panEnabled: true,
+                    minScale: 0.5,
+                    maxScale: 4.0,
+                    child: Hero(
+                      tag: 'fs_${images[index]}_$index',
+                      child: CustomImage(
+                        imageUrl: images[index],
+                        width: double.infinity,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
             Positioned(
               top: MediaQuery.of(Get.context!).padding.top + 10.h,
@@ -1587,6 +1652,30 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                 ),
               ),
             ),
+            if (images.length > 1)
+              Positioned(
+                bottom: MediaQuery.of(Get.context!).padding.bottom + 20.h,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: IgnorePointer(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                      child: Text(
+                        "Swipe to see more",
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

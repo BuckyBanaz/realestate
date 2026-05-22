@@ -130,8 +130,6 @@ class OtpController extends GetxController {
 
   @override
   void onClose() {
-    newPasswordController.dispose();
-    confirmPasswordController.dispose();
     stopTimer();
     super.onClose();
   }

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:iconly/iconly.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../constant/app_colors.dart';
@@ -284,14 +285,12 @@ class DocumentDetailScreen extends StatelessWidget {
     }
 
     try {
-      final dir = await getApplicationDocumentsDirectory();
-      final fileName = Uri.parse(url).pathSegments.isNotEmpty
-          ? Uri.parse(url).pathSegments.last
-          : "document-${doc.id}.jpg";
-      final savePath = "${dir.path}/$fileName";
-
-      await Dio().download(url, savePath);
-      showCustomToast("Downloaded to: $savePath");
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        showCustomToast("Could not open document link", isError: true);
+      }
     } catch (e) {
       showCustomToast("Download failed", isError: true);
     }
@@ -417,6 +416,7 @@ class DocumentDetailScreen extends StatelessWidget {
             SizedBox(height: 32.h),
 
             // Action Button
+            /*
             SizedBox(
               width: double.infinity,
               height: 56.h,
@@ -432,6 +432,7 @@ class DocumentDetailScreen extends StatelessWidget {
                   style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15.sp, color: Colors.white)),
               ),
             ).animate().fadeIn(delay: 600.ms),
+            */
           ],
         ),
       ),

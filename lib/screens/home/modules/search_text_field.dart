@@ -302,27 +302,7 @@ class _FilterBottomSheetContent extends GetView<HomeController> {
                       ),
                       SizedBox(height: 32.h),
 
-                      // Price Range Section
-                      _buildSectionHeader("Price Range", "Set your budget"),
                       SizedBox(height: 16.h),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildModernPriceField(
-                              "Min Price",
-                              controller.minPriceController,
-                            ),
-                          ),
-                          SizedBox(width: 16.w),
-                          Expanded(
-                            child: _buildModernPriceField(
-                              "Max Price",
-                              controller.maxPriceController,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 40.h),
 
                       // Apply Button
                       Container(
@@ -500,34 +480,6 @@ class _FilterBottomSheetContent extends GetView<HomeController> {
               activeColor: primary,
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildModernPriceField(
-    String hint,
-    TextEditingController textController,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
-      ),
-      child: TextField(
-        controller: textController,
-        keyboardType: TextInputType.number,
-        style: GoogleFonts.inter(color: Colors.white, fontSize: 14.sp),
-        decoration: InputDecoration(
-          hintText: hint,
-          prefixIcon: Icon(Icons.currency_rupee, color: primary, size: 16.sp),
-          hintStyle: TextStyle(
-            color: Colors.white.withOpacity(0.2),
-            fontSize: 14.sp,
-          ),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 18.h),
         ),
       ),
     );

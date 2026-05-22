@@ -196,20 +196,7 @@ class FeatureCard extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Icon(Icons.star_rounded, size: 14.sp, color: Colors.amber),
-                              SizedBox(width: 3.w),
-                              Text(
-                                rating,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+                       
                           GestureDetector(
                             onTap: onFavoritePressed,
                             child: Icon(
@@ -256,36 +243,7 @@ class FeatureCard extends StatelessWidget {
 
                       const Spacer(),
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Flexible(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildMiniDetail(IconlyLight.info_square, beds),
-                                SizedBox(height: 2.h),
-                                _buildMiniDetail(IconlyLight.discovery, area),
-                              ],
-                            ),
-                          ),
-                          SizedBox(width: 8.w),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                "₹${formatFullPrice(price)}",
-                                style: TextStyle(
-                                  color: primary,
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                     
                     ],
                   ),
                 ),
@@ -320,61 +278,61 @@ class FeatureCard extends StatelessWidget {
 }
 
 
-// ---------------- Dummy richer data for nearbyEstates ----------------
-final List<Map<String, String>> nearbyEstates = [
-  {
-    "title": "Shree Shyam Kunj — Plot No. 5",
-    "price": "12,00,000",
-    "rating": "4.8",
-    "location": "Sector 15, Hisar",
-    "image":
-        "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
-    "beds": "—", // plots don't have beds; keep placeholder
-    "area": "200 sq.m",
-    "tag": "Top",
-  },
-  {
-    "title": "Fairview Apartment — 2 BHK",
-    "price": "23,00,000",
-    "rating": "4.9",
-    "location": "Hisar Cantt",
-    "image":
-        "https://www.deccanproperties.com/assets/images/property_images/property2856.jpg",
-    "beds": "2 BHK",
-    "area": "95 sq.m",
-    "tag": "Hot",
-  },
-  {
-    "title": "Rajguru Farmhouse",
-    "price": "31,00,000",
-    "rating": "4.7",
-    "location": "Rajguru Nagar, Hisar",
-    "image":
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_pWH24HG5pnZvjYuP5Z85ZYgT3cYMFdUXMw&s",
-    "beds": "3 BHK",
-    "area": "250 sq.m",
-    "tag": "Popular",
-  },
-  {
-    "title": "Plot — Camp Chowk (East)",
-    "price": "9,50,000",
-    "rating": "4.6",
-    "location": "Camp Chowk, Hisar",
-    "image":
-        "https://assets-news.housing.com/news/wp-content/uploads/2022/04/04144614/Types-of-plots-and-various-types-of-housing-plots-in-India-feature-compressed.jpg",
-    "beds": "—",
-    "area": "150 sq.m",
-    "tag": "New",
-  },
-  {
-    "title": "Green Acres — Agricultural Land",
-    "price": "18,00,000",
-    "rating": "4.7",
-    "location": "Rajguru Nagar, Hisar",
-    "image":
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuDC_Szol-NA_sCgrIcS33Mkzklznk2UGY0Q&s",
-    "beds": "—",
-    "area": "500 sq.m",
-    "tag": "Agri",
-  },
-];
+// // ---------------- Dummy richer data for nearbyEstates ----------------
+// final List<Map<String, String>> nearbyEstates = [
+//   {
+//     "title": "Shree Shyam Kunj — Plot No. 5",
+//     "price": "12,00,000",
+//     "rating": "4.8",
+//     "location": "Sector 15, Hisar",
+//     "image":
+//         "https://www.housingman.com/news/wp-content/uploads/2019/06/image-1-copy-2.jpg",
+//     "beds": "—", // plots don't have beds; keep placeholder
+//     "area": "200 sq.m",
+//     "tag": "Top",
+//   },
+//   {
+//     "title": "Fairview Apartment — 2 BHK",
+//     "price": "23,00,000",
+//     "rating": "4.9",
+//     "location": "Hisar Cantt",
+//     "image":
+//         "https://www.deccanproperties.com/assets/images/property_images/property2856.jpg",
+//     "beds": "2 BHK",
+//     "area": "95 sq.m",
+//     "tag": "Hot",
+//   },
+//   {
+//     "title": "Rajguru Farmhouse",
+//     "price": "31,00,000",
+//     "rating": "4.7",
+//     "location": "Rajguru Nagar, Hisar",
+//     "image":
+//         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_pWH24HG5pnZvjYuP5Z85ZYgT3cYMFdUXMw&s",
+//     "beds": "3 BHK",
+//     "area": "250 sq.m",
+//     "tag": "Popular",
+//   },
+//   {
+//     "title": "Plot — Camp Chowk (East)",
+//     "price": "9,50,000",
+//     "rating": "4.6",
+//     "location": "Camp Chowk, Hisar",
+//     "image":
+//         "https://assets-news.housing.com/news/wp-content/uploads/2022/04/04144614/Types-of-plots-and-various-types-of-housing-plots-in-India-feature-compressed.jpg",
+//     "beds": "—",
+//     "area": "150 sq.m",
+//     "tag": "New",
+//   },
+//   {
+//     "title": "Green Acres — Agricultural Land",
+//     "price": "18,00,000",
+//     "rating": "4.7",
+//     "location": "Rajguru Nagar, Hisar",
+//     "image":
+//         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuDC_Szol-NA_sCgrIcS33Mkzklznk2UGY0Q&s",
+//     "beds": "—",
+//     "area": "500 sq.m",
+//     "tag": "Agri",
+//   },
+// ];

@@ -178,7 +178,7 @@ class PropertyDetailData {
             [],
         amenities: parsedAmenities,
         mainImage: json['main_image'] ?? "",
-        propertyImages: (json['property_images'] as List?)?.map((e) => e.toString()).toList() ?? [],
+        propertyImages: (json['images'] as List?)?.map((e) => e['image']?.toString() ?? '').toList() ?? [],
         threeSixtyView: (json['360_view'] as List?)
                 ?.map((e) => PropertyThreeSixtyView.fromJson(e))
                 .toList() ??

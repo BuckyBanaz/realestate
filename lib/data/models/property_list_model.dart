@@ -207,7 +207,7 @@ class PropertyListItem {
           ? PropertyCategory.fromJson(json['sub_subcategory'])
           : null,
       attributes: parsedAttributes,
-      propertyImages: _parseImages(json['property_images']),
+      propertyImages: _parseImages(json['images'] ?? json['property_images']),
       sitePlanImages: _parseImages(json['map_Properties_images']),
       threeSixtyView: _parseImages(json['three_sixty_view_images']),
       isFavorite: json['is_favourite'] ?? false,

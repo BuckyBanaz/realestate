@@ -100,7 +100,7 @@ class _OTPScreenState extends State<OTPScreen> {
                   SizedBox(height: 8.h),
                   stagger(
                     2, Text(
-                      "Enter the 4 digit code that we just sent to",
+                      "Enter the 6 digit code that we just sent to",
 
                       style: TextStyle(fontSize: 14.sp, color: Theme.of(context).textTheme.bodyMedium?.color),
                     ),
@@ -252,8 +252,8 @@ class _OTPScreenState extends State<OTPScreen> {
               //             ? null
               //             : () {
               //           final pin = _pinController.text.trim();
-              //           if (pin.length != 4) {
-              //             Get.snackbar("Invalid", "Enter a 4 digit code", snackPosition: SnackPosition.BOTTOM);
+              //           if (pin.length != 6) {
+              //             Get.snackbar("Invalid", "Enter a 6 digit code", snackPosition: SnackPosition.BOTTOM);
               //             return;
               //           }
               //           _authC.verifyOtp(otp: pin, contact: widget.contact);

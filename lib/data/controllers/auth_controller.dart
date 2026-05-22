@@ -101,7 +101,6 @@ class AuthController extends GetxController {
 
   @override
   void onClose() {
-    forgotPasswordEmailController.dispose();
     super.onClose();
   }
 }

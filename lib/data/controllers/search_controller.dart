@@ -176,8 +176,6 @@ class PropertySearchController extends GetxController {
 
   @override
   void onClose() {
-    searchController.dispose();
-    scrollController.dispose();
     _debounce?.cancel();
     super.onClose();
   }

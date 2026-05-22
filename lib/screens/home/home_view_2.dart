@@ -19,6 +19,7 @@ import 'modules/recommended_properties.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../data/controllers/home_controller.dart'; // Import controller
 import '../widgets/shimmers.dart';
+import 'modules/budget_filter.dart';
 
 class HomeView2 extends StatefulWidget {
   final bool showNavBar;
@@ -111,6 +112,9 @@ class _HomeView2State extends State<HomeView2> {
                           SizedBox(height: 10.h),
                           // 2. Search Bar
                           const SearchTextField(),
+                          SizedBox(height: 16.h),
+                          // 2b. Price Range / Budget Filter
+                          const BudgetFilterWidget(),
                           // SizedBox(height: 20.h),
 
                           // // Stats Row
