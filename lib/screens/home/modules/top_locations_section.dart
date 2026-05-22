@@ -27,8 +27,11 @@ class TopLocationsSection extends StatelessWidget {
           separatorBuilder: (_, __) => SizedBox(width: 14.w),
           itemBuilder: (context, index) {
             final location = controller.topLocations[index];
+            final imgUrl = (location.propertyImage != null && location.propertyImage!.startsWith('http'))
+                ? location.propertyImage!
+                : "";
             return LocationCard(
-                  imageUrl: location.propertyImage ?? "",
+                  imageUrl: imgUrl,
                   title: location.title,
                   address: location.address,
                   listings: "Explore",
@@ -38,7 +41,7 @@ class TopLocationsSection extends StatelessWidget {
                       arguments: {
                         'locationName': location.title,
                         'rank': "+${index + 1}",
-                        'heroImage': location.propertyImage,
+                        'heroImage': imgUrl,
                         'subtitle': location.address,
                         'addressId': location.id,
                       },

@@ -134,7 +134,7 @@ class RecommendedProperties extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "₹${formatPrice(item.price)}",
+                                "₹${formatFullPrice(item.price)}",
                                 style: TextStyle(
                                   color: secondary,
                                   fontSize: 16.sp,

@@ -29,8 +29,6 @@ class PropertyDetailScreen extends StatefulWidget {
 
 class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   late final PropertyDetailController controller;
-  String _selectedAreaUnit = '';
-  String _lastAreaRaw = '';
 
   @override
   void initState() {
@@ -139,6 +137,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                   result['is_favourite'] ??
                                   !property.isFavorite,
                               videoUrl: property.videoUrl,
+                              activeHold: property.activeHold,
                             );
 
                             controller.propertyDetails.value = updatedProperty;
@@ -201,15 +200,46 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                    property.title,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 24.sp,
-                                      fontWeight: FontWeight.w900,
-                                      color: Colors.white,
-                                      letterSpacing: -0.5,
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                          property.title,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 24.sp,
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.white,
+                                            letterSpacing: -0.5,
+                                          ),
+                                        ),
+                                  ),
+                                  if (property.status.toLowerCase() != 'active')
+                                    Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                                      decoration: BoxDecoration(
+                                        color: property.status.toLowerCase() == 'sold' 
+                                          ? Colors.redAccent.withOpacity(0.1) 
+                                          : Colors.orangeAccent.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8.r),
+                                        border: Border.all(
+                                          color: property.status.toLowerCase() == 'sold' 
+                                            ? Colors.redAccent.withOpacity(0.5) 
+                                            : Colors.orangeAccent.withOpacity(0.5)
+                                        ),
+                                      ),
+                                      child: Text(
+                                        property.status.toUpperCase(),
+                                        style: GoogleFonts.inter(
+                                          fontSize: 10.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: property.status.toLowerCase() == 'sold' 
+                                            ? Colors.redAccent 
+                                            : Colors.orangeAccent,
+                                        ),
+                                      ),
                                     ),
-                                  )
+                                ],
+                              )
                                   .animate()
                                   .fadeIn(duration: 600.ms)
                                   .slideX(begin: -0.1, end: 0),
@@ -239,7 +269,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                   .slideX(begin: -0.1, end: 0),
                               SizedBox(height: 12.h),
                               Text(
-                                    "₹${formatPrice(property.price)}",
+                                    "₹${formatFullPrice(property.price)}",
                                     style: GoogleFonts.inter(
                                       fontSize: 22.sp,
                                       fontWeight: FontWeight.bold,
@@ -264,6 +294,43 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                     ),
 
                     SizedBox(height: 20.h),
+
+                    // Hold Details Section
+                    if (property.status.toLowerCase() == 'hold' && property.activeHold != null) ...[
+                      Container(
+                        padding: EdgeInsets.all(16.w),
+                        decoration: BoxDecoration(
+                          color: Colors.orangeAccent.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(20.r),
+                          border: Border.all(color: Colors.orangeAccent.withOpacity(0.2)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(IconlyLight.info_square, color: Colors.orangeAccent, size: 20.sp),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  "Hold Details",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 12.h),
+                            _buildHoldInfoRow("Customer", property.activeHold!.customerName),
+                            _buildHoldInfoRow("Until", property.activeHold!.holdUntil.split('T')[0]),
+                            if (property.activeHold!.user != null)
+                              _buildHoldInfoRow("Held By", property.activeHold!.user!.name),
+                          ],
+                        ),
+                      ).animate().fadeIn(delay: 250.ms).slideY(begin: 0.1, end: 0),
+                      SizedBox(height: 20.h),
+                    ],
 
                     // Details Card
                     _buildDetailsCard(context)
@@ -646,6 +713,32 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     );
   }
 
+  Widget _buildHoldInfoRow(String label, String value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey.shade400,
+              fontSize: 14.sp,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCircleButton(
     IconData icon,
     VoidCallback onTap, {
@@ -680,64 +773,64 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   }
 
   Widget _buildHeaderGallery() {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // Main Background
-        GestureDetector(
-          onTap: () => _showFullScreenImage(
-            controller.propertyDetails.value?.mainImage ?? "",
-          ),
-          child: CustomImage(
+    return GestureDetector(
+      onTap: () => _showFullScreenImage(
+        controller.propertyDetails.value?.mainImage ?? "",
+      ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Main Background
+          CustomImage(
             imageUrl: controller.propertyDetails.value?.mainImage ?? "",
             width: double.infinity,
             height: double.infinity,
           ),
-        ),
-        // Premium Dark Overlay Gradient
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withOpacity(0.4),
-                Colors.transparent,
-                Colors.black.withOpacity(0.2),
-                Theme.of(Get.context!).scaffoldBackgroundColor,
-              ],
-              stops: const [0.0, 0.4, 0.8, 1.0],
-            ),
-          ),
-        ),
-        // Gallery Counter / Detail Chip
-        Positioned(
-          bottom: 30.h,
-          right: 20.w,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+          // Premium Dark Overlay Gradient
+          Container(
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
-              borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
-            ),
-            child: Row(
-              children: [
-                Icon(IconlyLight.image, size: 16.sp, color: Colors.white),
-                SizedBox(width: 8.w),
-                Text(
-                  "1/1 Photos",
-                  style: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withOpacity(0.4),
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.2),
+                  Theme.of(Get.context!).scaffoldBackgroundColor,
+                ],
+                stops: const [0.0, 0.4, 0.8, 1.0],
+              ),
             ),
           ),
-        ),
-      ],
+          // Gallery Counter / Detail Chip
+          Positioned(
+            bottom: 30.h,
+            right: 20.w,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.6),
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(color: Colors.white.withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  Icon(IconlyLight.image, size: 16.sp, color: Colors.white),
+                  SizedBox(width: 8.w),
+                  Text(
+                    "1/1 Photos",
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -889,93 +982,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     );
   }
 
-  double _convertArea(double value, String from, String to) {
-    const toSqFt = {
-      'Sq Ft': 1.0,
-      'Sq Yd': 9.0,
-      'Sq M': 10.7639,
-      'Acre': 43560.0,
-      'Grounds': 2400.0,
-      'Aankadam': 72.0,
-      'Rood': 10890.0,
-      'Chatak': 45.0,
-      'Perch': 272.25,
-      'Guntha': 1089.0,
-      'Ares': 1076.39,
-      'Biswa (Pucca)': 1361.25,
-      'Biswa (Kaccha)': 900.0,
-    };
-    final fromFactor = toSqFt[from] ?? 1.0;
-    final toFactor = toSqFt[to] ?? 1.0;
-    return (value * fromFactor) / toFactor;
-  }
-
-  String _guessUnit(String raw) {
-    final l = raw.toLowerCase();
-    if (l.contains('yard') || l.contains('sq-yd') || l.contains('sq.yd') || l.contains('sqyd')) {
-      return 'Sq Yd';
-    }
-    if (l.contains('meter') || l.contains('sqm') || l.contains('sq-m') || l.contains('sq.m')) {
-      return 'Sq M';
-    }
-    if (l.contains('acre')) return 'Acre';
-    if (l.contains('ground')) return 'Grounds';
-    if (l.contains('aankadam')) return 'Aankadam';
-    if (l.contains('rood')) return 'Rood';
-    if (l.contains('chatak')) return 'Chatak';
-    if (l.contains('perch')) return 'Perch';
-    if (l.contains('guntha')) return 'Guntha';
-    if (l.contains('are')) return 'Ares';
-    if (l.contains('biswa') && l.contains('kaccha')) return 'Biswa (Kaccha)';
-    if (l.contains('biswa')) return 'Biswa (Pucca)';
-    if (l.contains('ft') || l.contains('sqft') || l.contains('sq.ft')) {
-      return 'Sq Ft';
-    }
-    return 'Sq Ft';
-  }
-
-  String _extractNumber(String raw) {
-    final match = RegExp(r'([\d]+(\.[\d]+)?)').firstMatch(raw);
-    return match?.group(1) ?? '';
-  }
-
-  String _unitLabel(String unit) {
-    switch (unit) {
-      case 'Sq Ft':
-        return 'sq.ft.';
-      case 'Sq Yd':
-        return 'sq.yd.';
-      case 'Sq M':
-        return 'sq.m.';
-      case 'Acre':
-        return 'acre';
-      case 'Grounds':
-        return 'grounds';
-      case 'Aankadam':
-        return 'aankadam';
-      case 'Rood':
-        return 'rood';
-      case 'Chatak':
-        return 'chataks';
-      case 'Perch':
-        return 'perch';
-      case 'Guntha':
-        return 'guntha';
-      case 'Ares':
-        return 'ares';
-      case 'Biswa (Pucca)':
-        return 'biswa (pucca)';
-      case 'Biswa (Kaccha)':
-        return 'biswa (kaccha)';
-      default:
-        return unit.toLowerCase();
-    }
-  }
-
-  String _formatNumber(double value) {
-    if (value % 1 == 0) return value.toStringAsFixed(0);
-    return value.toStringAsFixed(2);
-  }
+  // Manual unit conversion logic removed (now in controller)
 
   void _openUnitPicker(BuildContext context, String currentUnit) {
     const units = [
@@ -1044,7 +1051,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                         final selected = unit == currentUnit;
                         return ListTile(
                           onTap: () {
-                            setState(() => _selectedAreaUnit = unit);
+                            controller.updateAreaUnit(unit);
                             Navigator.pop(context);
                           },
                           contentPadding: EdgeInsets.zero,
@@ -1052,7 +1059,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                               ? const Icon(Icons.check, color: Colors.white)
                               : const SizedBox(width: 24),
                           title: Text(
-                            _unitLabel(unit),
+                            controller.unitLabel(unit),
                             style: TextStyle(
                               fontSize: 14.sp,
                               color: Colors.white,
@@ -1075,124 +1082,108 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   }
 
   Widget _buildConvertibleAreaRow(String rawValue) {
-    final baseUnit = _guessUnit(rawValue);
-    final baseValueStr = _extractNumber(rawValue);
-    final baseValue = double.tryParse(baseValueStr);
+    return Obx(() {
+      final displayValue = controller.getDisplayArea(rawValue);
+      final currentUnit = controller.selectedAreaUnit.value;
 
-    if (_lastAreaRaw != rawValue) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        setState(() {
-          _lastAreaRaw = rawValue;
-          _selectedAreaUnit = baseUnit;
-        });
-      });
-    }
-
-    final selectedUnit = _selectedAreaUnit.isEmpty
-        ? baseUnit
-        : _selectedAreaUnit;
-    final displayValue = baseValue == null
-        ? rawValue
-        : _formatNumber(_convertArea(baseValue, baseUnit, selectedUnit));
-
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: primary.withOpacity(0.04),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: primary.withOpacity(0.1)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(10.w),
-            decoration: BoxDecoration(
-              color: primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(14.r),
+      return Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: primary.withOpacity(0.04),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: primary.withOpacity(0.1)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10.w),
+              decoration: BoxDecoration(
+                color: primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(14.r),
+              ),
+              child: Icon(IconlyLight.discovery, size: 20.sp, color: primary),
             ),
-            child: Icon(IconlyLight.discovery, size: 20.sp, color: primary),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "TOTAL ${(controller.propertyDetails.value?.category?.name ?? 'PROPERTY').toUpperCase()} AREA",
-                  style: TextStyle(
-                    fontSize: 9.sp,
-                    color: Colors.grey.shade500,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Row(
-                  children: [
-                    RichText(
-                      text: TextSpan(
-                        style: GoogleFonts.inter(
-                          fontSize: 15.sp,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                        ),
-                        children: [
-                          TextSpan(text: displayValue),
-                          const TextSpan(text: " "),
-                          TextSpan(
-                            text: _unitLabel(selectedUnit),
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                          ),
-                        ],
-                      ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "TOTAL ${(controller.propertyDetails.value?.propertyType ?? 'PROPERTY').toUpperCase()} AREA",
+                    style: TextStyle(
+                      fontSize: 9.sp,
+                      color: Colors.grey.shade500,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
                     ),
-                    SizedBox(width: 8.w),
-                    GestureDetector(
-                      onTap: () => _openUnitPicker(context, selectedUnit),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10.w,
-                          vertical: 6.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(10.r),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.12),
+                  ),
+                  SizedBox(height: 4.h),
+                  Row(
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          style: GoogleFonts.inter(
+                            fontSize: 15.sp,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
                           ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              _unitLabel(selectedUnit),
+                            TextSpan(text: displayValue),
+                            const TextSpan(text: " "),
+                            TextSpan(
+                              text: controller.unitLabel(currentUnit),
                               style: TextStyle(
-                                fontSize: 12.sp,
                                 color: Colors.white.withOpacity(0.9),
-                                fontWeight: FontWeight.w600,
                               ),
-                            ),
-                            SizedBox(width: 4.w),
-                            Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              size: 16.sp,
-                              color: Colors.white.withOpacity(0.8),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      SizedBox(width: 8.w),
+                      GestureDetector(
+                        onTap: () => _openUnitPicker(context, currentUnit),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 10.w,
+                            vertical: 6.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(10.r),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.12),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                controller.unitLabel(currentUnit),
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              SizedBox(width: 4.w),
+                              Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                size: 16.sp,
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 
   Widget _build360Badge() {

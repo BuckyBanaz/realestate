@@ -300,123 +300,297 @@ class SearchScreen extends StatelessWidget {
       text: controller.maxPrice.value?.toString() ?? '',
     );
 
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF1E1E1E),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+    Get.bottomSheet(
+      DraggableScrollableSheet(
+        initialChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (context, scrollController) {
+          return Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF121212),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 40,
+                  offset: const Offset(0, -10),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                SizedBox(height: 12.h),
+                Container(
+                  width: 40.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Advanced Filters",
+                              style: GoogleFonts.outfit(
+                                fontSize: 24.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                controller.clearFilters();
+                                minController.clear();
+                                maxController.clear();
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                                decoration: BoxDecoration(
+                                  color: Colors.redAccent.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20.r),
+                                ),
+                                child: Text(
+                                  "Clear All",
+                                  style: GoogleFonts.inter(
+                                    color: Colors.redAccent,
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 30.h),
+
+                        // 1. Hierarchical Categories
+                        _buildSectionHeader("Category", "Main property type"),
+                        SizedBox(height: 12.h),
+                        Obx(() => Wrap(
+                          spacing: 10.w,
+                          runSpacing: 10.h,
+                          children: controller.categories.map((cat) => _buildModernFilterChip(
+                            cat.name,
+                            controller.selectedCategory.value?.id == cat.id,
+                            () => controller.onCategorySelected(controller.selectedCategory.value?.id == cat.id ? null : cat),
+                          )).toList(),
+                        )),
+                        SizedBox(height: 24.h),
+
+                        Obx(() => controller.subCategories.isNotEmpty ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSectionHeader("Sub Category", "Refine your search"),
+                            SizedBox(height: 12.h),
+                            Wrap(
+                              spacing: 10.w,
+                              runSpacing: 10.h,
+                              children: controller.subCategories.map((sub) => _buildModernFilterChip(
+                                sub.name,
+                                controller.selectedSubCategory.value?.id == sub.id,
+                                () => controller.onSubCategorySelected(controller.selectedSubCategory.value?.id == sub.id ? null : sub),
+                              )).toList(),
+                            ),
+                            SizedBox(height: 24.h),
+                          ],
+                        ) : const SizedBox.shrink()),
+
+                        Obx(() => controller.subSubCategories.isNotEmpty ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSectionHeader("Project / Area", "Select specific location"),
+                            SizedBox(height: 12.h),
+                            Wrap(
+                              spacing: 10.w,
+                              runSpacing: 10.h,
+                              children: controller.subSubCategories.map((ssc) => _buildModernFilterChip(
+                                ssc.name,
+                                controller.selectedSubSubCategory.value?.id == ssc.id,
+                                () => controller.onSubSubCategorySelected(controller.selectedSubSubCategory.value?.id == ssc.id ? null : ssc),
+                              )).toList(),
+                            ),
+                            SizedBox(height: 24.h),
+                          ],
+                        ) : const SizedBox.shrink()),
+
+                        // 2. Facing
+                        _buildSectionHeader("Facing", "Plot orientation"),
+                        SizedBox(height: 12.h),
+                        Obx(() => Wrap(
+                          spacing: 10.w,
+                          runSpacing: 10.h,
+                          children: ['North', 'East', 'South', 'West', 'North-East', 'South-East', 'South-West', 'North-West'].map((f) => _buildModernFilterChip(
+                            f,
+                            controller.selectedFacing.value == f,
+                            () => controller.selectedFacing.value = controller.selectedFacing.value == f ? "" : f,
+                          )).toList(),
+                        )),
+                        SizedBox(height: 24.h),
+
+                        // 3. Corner Plot
+                        _buildSectionHeader("Attributes", "Special features"),
+                        SizedBox(height: 12.h),
+                        Obx(() => _buildModernToggleCard(
+                          "Corner Plot Only",
+                          "Show only corner properties",
+                          IconlyLight.discovery,
+                          controller.isCornerPlot.value,
+                          () => controller.isCornerPlot.toggle(),
+                        )),
+                        SizedBox(height: 24.h),
+
+                        // 4. Price Range
+                        _buildSectionHeader("Price Range", "Set your budget"),
+                        SizedBox(height: 16.h),
+                        Row(
+                          children: [
+                            Expanded(child: _buildModernPriceField("Min Price", (val) => minController.text = val, minController)),
+                            SizedBox(width: 16.w),
+                            Expanded(child: _buildModernPriceField("Max Price", (val) => maxController.text = val, maxController)),
+                          ],
+                        ),
+                        SizedBox(height: 40.h),
+
+                        // Apply Button
+                        Container(
+                          width: double.infinity,
+                          height: 60.h,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20.r),
+                            gradient: LinearGradient(colors: [secondary, secondary.withOpacity(0.8)]),
+                            boxShadow: [
+                              BoxShadow(color: secondary.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              controller.minPrice.value = double.tryParse(minController.text);
+                              controller.maxPrice.value = double.tryParse(maxController.text);
+                              controller.applyFilters();
+                              Get.back();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+                            ),
+                            child: Text(
+                              "Apply Filters",
+                              style: GoogleFonts.outfit(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 30.h),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
-      builder: (_) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-              ),
-              SizedBox(height: 16.h),
-              Text(
-                "Filter by Price",
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16.sp,
-                ),
-              ),
-              SizedBox(height: 16.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: minController,
-                      keyboardType: TextInputType.number,
-                      style: TextStyle(color: Colors.white, fontSize: 14.sp),
-                      decoration: InputDecoration(
-                        hintText: "Min price",
-                        hintStyle: TextStyle(color: Colors.grey.shade500),
-                        filled: true,
-                        fillColor: cardColor,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: TextField(
-                      controller: maxController,
-                      keyboardType: TextInputType.number,
-                      style: TextStyle(color: Colors.white, fontSize: 14.sp),
-                      decoration: InputDecoration(
-                        hintText: "Max price",
-                        hintStyle: TextStyle(color: Colors.grey.shade500),
-                        filled: true,
-                        fillColor: cardColor,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        controller.clearFilters();
-                        Get.back();
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.white24),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                      ),
-                      child: Text(
-                        "Clear",
-                        style: TextStyle(color: Colors.white, fontSize: 13.sp),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        final min = double.tryParse(minController.text.trim());
-                        final max = double.tryParse(maxController.text.trim());
-                        controller.applyPriceFilter(min: min, max: max);
-                        Get.back();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: secondary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                      ),
-                      child: Text(
-                        "Apply",
-                        style: TextStyle(color: Colors.white, fontSize: 13.sp),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+    );
+  }
+
+  Widget _buildSectionHeader(String title, String subtitle) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: GoogleFonts.outfit(fontSize: 18.sp, fontWeight: FontWeight.w600, color: Colors.white)),
+        SizedBox(height: 4.h),
+        Text(subtitle, style: GoogleFonts.inter(fontSize: 12.sp, color: Colors.white.withOpacity(0.4))),
+      ],
+    );
+  }
+
+  Widget _buildModernFilterChip(String label, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: isSelected ? secondary : Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: isSelected ? secondary : Colors.white.withOpacity(0.08), width: 1.5),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            color: isSelected ? Colors.black : Colors.white.withOpacity(0.7),
+            fontSize: 13.sp,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
           ),
-        );
-      },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernToggleCard(String title, String subtitle, IconData icon, bool isActive, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: isActive ? secondary : Colors.white.withOpacity(0.08), width: 1.5),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10.w),
+              decoration: BoxDecoration(color: isActive ? secondary.withOpacity(0.1) : Colors.white.withOpacity(0.05), shape: BoxShape.circle),
+              child: Icon(icon, color: isActive ? secondary : Colors.white.withOpacity(0.4), size: 20.sp),
+            ),
+            SizedBox(width: 16.w),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.white)),
+                Text(subtitle, style: GoogleFonts.inter(fontSize: 11.sp, color: Colors.white.withOpacity(0.4))),
+              ],
+            ),
+            const Spacer(),
+            Switch.adaptive(value: isActive, onChanged: (_) => onTap(), activeColor: secondary),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernPriceField(String hint, Function(String) onChanged, TextEditingController textController) {
+    return Container(
+      decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(16.r), border: Border.all(color: Colors.white.withOpacity(0.08))),
+      child: TextField(
+        controller: textController,
+        onChanged: onChanged,
+        keyboardType: TextInputType.number,
+        style: GoogleFonts.inter(color: Colors.white, fontSize: 14.sp),
+        decoration: InputDecoration(
+          hintText: hint,
+          prefixIcon: Icon(Icons.currency_rupee, color: secondary, size: 16.sp),
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 14.sp),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(vertical: 18.h),
+        ),
+      ),
     );
   }
 
@@ -432,12 +606,19 @@ class SearchScreen extends StatelessWidget {
           duration: const Duration(milliseconds: 300),
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           decoration: BoxDecoration(
-            color: isActive ? secondary : cardColor,
-            borderRadius: BorderRadius.circular(12.r),
+            color: isActive ? secondary.withOpacity(0.15) : cardColor,
+            borderRadius: BorderRadius.circular(16.r),
             border: Border.all(
               color: isActive ? secondary : Colors.white.withOpacity(0.08),
-              width: 1,
+              width: 1.5,
             ),
+            boxShadow: isActive ? [
+              BoxShadow(
+                color: secondary.withOpacity(0.2),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              )
+            ] : null,
           ),
           child: Center(
             child: Row(
@@ -487,11 +668,11 @@ class SearchScreen extends StatelessWidget {
         duration: const Duration(milliseconds: 250),
         padding: EdgeInsets.symmetric(horizontal: 14.w),
         decoration: BoxDecoration(
-          color: isActive ? secondary : cardColor,
-          borderRadius: BorderRadius.circular(12.r),
+          color: isActive ? secondary.withOpacity(0.15) : cardColor,
+          borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
             color: isActive ? secondary : Colors.white.withOpacity(0.08),
-            width: 1,
+            width: 1.5,
           ),
         ),
         child: Center(
@@ -532,6 +713,15 @@ class SearchScreen extends StatelessWidget {
     }
     if (controller.selectedSubSubCategory.value != null) {
       path += " > ${controller.selectedSubSubCategory.value!.name}";
+    }
+    if (controller.selectedFacing.value.isNotEmpty) {
+      path += " | ${controller.selectedFacing.value}";
+    }
+    if (controller.isCornerPlot.value) {
+      path += " | Corner Plot";
+    }
+    if (controller.selectedMinArea.value > 0) {
+      path += " | ${controller.selectedMinArea.value}+ sqyd";
     }
 
     return Column(
@@ -647,6 +837,20 @@ class PropertyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final status = property.status.toLowerCase();
+    Color statusColor = const Color(0xFF00C853); // Green for active/default
+    String statusText = 'ACTIVE';
+
+    if (status == 'sold') {
+      statusColor = Colors.redAccent;
+      statusText = 'SOLD';
+    } else if (status == 'hold') {
+      statusColor = Colors.orangeAccent;
+      statusText = 'HOLD';
+    } else if (status.isNotEmpty) {
+      statusText = status.toUpperCase();
+    }
+
     return GestureDetector(
       onTap: () =>
           Get.toNamed(AppRoutes.propertyDetail, arguments: property.id),
@@ -681,6 +885,7 @@ class PropertyCard extends StatelessWidget {
                     fallbackAsset: 'assets/images/download.jpg',
                   ),
                 ),
+                // Status Badge (Top Right)
                 Positioned(
                   top: 12.h,
                   right: 12.w,
@@ -690,19 +895,47 @@ class PropertyCard extends StatelessWidget {
                       vertical: 6.h,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.6),
+                      color: statusColor.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(10.r),
+                      border: Border.all(
+                        color: statusColor.withOpacity(0.5),
+                        width: 1,
+                      ),
                     ),
                     child: Text(
-                      property.propertyType,
-                      style: TextStyle(
-                        color: Colors.white,
+                      statusText,
+                      style: GoogleFonts.inter(
+                        color: statusColor,
                         fontSize: 10.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
+                // Property Type Badge (Top Left - only if not empty)
+                if (property.propertyType.trim().isNotEmpty)
+                  Positioned(
+                    top: 12.h,
+                    left: 12.w,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 6.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.6),
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      child: Text(
+                        property.propertyType,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
                 Positioned(
                   bottom: 12.h,
                   left: 12.w,
@@ -716,7 +949,7 @@ class PropertyCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10.r),
                     ),
                     child: Text(
-                      "₹${formatPrice(property.price)}",
+                      "₹${formatFullPrice(property.price)}",
                       style: GoogleFonts.inter(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,

@@ -193,6 +193,9 @@ class PropertyRepository {
     int? categoryId,
     int? subCategoryId,
     int? subSubCategoryId,
+    String? facing,
+    bool? isCornerPlot,
+    int? minArea,
   }) async {
     try {
       final Map<String, dynamic> queryParameters = {
@@ -205,8 +208,15 @@ class PropertyRepository {
       if (search != null && search.isNotEmpty)
         queryParameters['search'] = search;
       if (categoryId != null) queryParameters['category_id'] = categoryId;
-      if (subCategoryId != null) queryParameters['subcategory_id'] = subCategoryId;
-      if (subSubCategoryId != null) queryParameters['sub_subcategory_id'] = subSubCategoryId;
+      if (subCategoryId != null)
+        queryParameters['subcategory_id'] = subCategoryId;
+      if (subSubCategoryId != null)
+        queryParameters['sub_subcategory_id'] = subSubCategoryId;
+      
+      // New Filters
+      if (facing != null && facing.isNotEmpty) queryParameters['facing'] = facing;
+      if (isCornerPlot == true) queryParameters['corner_plot'] = 1;
+      if (minArea != null && minArea > 0) queryParameters['min_area'] = minArea;
 
       final response = await _apiClient.dio.get(
         'properties',

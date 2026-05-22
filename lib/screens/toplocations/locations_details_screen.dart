@@ -63,15 +63,15 @@ class _LocationDetailScreenState extends State<LocationDetailScreen> {
                 () => Get.back(),
               ),
             ),
-            actions: [
-              Padding(
-                padding: EdgeInsets.only(right: 20.w, top: 12.h),
-                child: _buildCircleButton(
-                  IconlyLight.send,
-                  () {},
-                ),
-              ),
-            ],
+            // actions: [
+            //   Padding(
+            //     padding: EdgeInsets.only(right: 20.w, top: 12.h),
+            //     child: _buildCircleButton(
+            //       IconlyLight.send,
+            //       () {},
+            //     ),
+            //   ),
+            // ],
             flexibleSpace: FlexibleSpaceBar(
               stretchModes: const [
                 StretchMode.zoomBackground,
@@ -272,33 +272,7 @@ class _LocationDetailScreenState extends State<LocationDetailScreen> {
           ),
         ),
 
-        // Properties Badge
-        Positioned(
-          bottom: 30.h,
-          right: 20.w,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
-              borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
-            ),
-            child: Row(
-              children: [
-                Icon(IconlyLight.home, size: 16.sp, color: Colors.white),
-                SizedBox(width: 8.w),
-                Obx(() => Text(
-                  "${controller.properties.length}+ Estates",
-                  style: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                )),
-              ],
-            ),
-          ),
-        ),
+    
       ],
     );
   }

@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconly/iconly.dart';
 import 'package:realestate/constant/app_colors.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
+import 'package:get/get.dart';
+import 'package:realestate/data/controllers/home_controller.dart';
 
 class PromotionalBanners extends StatefulWidget {
   final double responsiveWidth;
@@ -18,40 +20,14 @@ class _PromotionalBannersState extends State<PromotionalBanners> {
   final PageController _pageController = PageController(viewportFraction: 0.92);
   int _currentPage = 0;
   Timer? _autoTimer;
-
-  final List<Map<String, dynamic>> banners = [
-    {
-      "title": "Hisar — New Flats Available",
-      "subtitle": "Modern 2 & 3 BHK apartments • Ready to move",
-      "price": "From ₹2.3 Lakh / sq.ft",
-      "badge": "Hot",
-      "image":
-          "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1200", // optional
-    },
-    {
-      "title": "New Plots Coming Soon",
-      "subtitle": "Limited plots in Shree Shyam Kunj — Register interest",
-      "price": "Plots from ₹12 Lakh",
-      "badge": "Coming Soon",
-      "image":
-          "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1200",
-    },
-    {
-      "title": "Family House — Prime Location",
-      "subtitle": "3 BHK independent house near Raipur Road",
-      "price": "Starting ₹31 Lakh",
-      "badge": "Popular",
-      "image":
-          "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1200",
-    },
-  ];
+  final HomeController controller = Get.find<HomeController>();
 
   @override
   void initState() {
     super.initState();
     _autoTimer = Timer.periodic(const Duration(seconds: 5), (t) {
-      if (_pageController.hasClients && banners.isNotEmpty) {
-        final next = (_currentPage + 1) % banners.length;
+      if (_pageController.hasClients && controller.newsList.isNotEmpty) {
+        final next = (_currentPage + 1) % controller.newsList.length;
         _pageController.animateToPage(
           next,
           duration: const Duration(milliseconds: 650),
@@ -68,56 +44,73 @@ class _PromotionalBannersState extends State<PromotionalBanners> {
     super.dispose();
   }
 
+  String _stripHtml(String htmlString) {
+    RegExp exp = RegExp(r"<[^>]*>", multiLine: true, caseSensitive: true);
+    return htmlString.replaceAll(exp, '').replaceAll('&nbsp;', ' ').replaceAll('&mdash;', '-').replaceAll('&rdquo;', '"').replaceAll('&ldquo;', '"').trim();
+  }
+
   @override
   Widget build(BuildContext context) {
     final double cardWidth = widget.responsiveWidth * 0.90;
     final double cardHeight = cardWidth * 0.50;
 
-    return Column(
-      children: [
-        SizedBox(
-          height: cardHeight,
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: banners.length,
-            onPageChanged: (value) {
-              setState(() => _currentPage = value);
-            },
-            itemBuilder: (_, index) {
-              final data = banners[index];
-              return Padding(
-                padding: EdgeInsets.symmetric(horizontal: 2.w),
-                child: PromoCardWhite(
-                  title: data["title"] as String,
-                  subtitle: data["subtitle"] as String,
-                  price: data["price"] as String,
-                  badge: data["badge"] as String,
-                  imageUrl: data["image"] as String?,
-                ),
-              );
-            },
+    return Obx(() {
+      if (controller.isLoading.value && controller.newsList.isEmpty) {
+        return SizedBox(height: cardHeight, child: Center(child: CircularProgressIndicator(color: primary)));
+      }
+      
+      if (controller.newsList.isEmpty) {
+        return const SizedBox();
+      }
+
+      final items = controller.newsList;
+
+      return Column(
+        children: [
+          SizedBox(
+            height: cardHeight,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: items.length,
+              onPageChanged: (value) {
+                setState(() => _currentPage = value);
+              },
+              itemBuilder: (_, index) {
+                final item = items[index];
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 2.w),
+                  child: PromoCardWhite(
+                    title: item.title,
+                    subtitle: _stripHtml(item.description),
+                    price: "", // News doesn't have a price
+                    badge: item.type.toUpperCase(),
+                    imageUrl: item.resourceImage,
+                  ),
+                );
+              },
+            ),
           ),
-        ),
-        SizedBox(height: 12.h),
-        // Dots
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            banners.length,
-            (index) => AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              margin: EdgeInsets.symmetric(horizontal: 4.w),
-              width: _currentPage == index ? 26.w : 8.w,
-              height: 8.h,
-              decoration: BoxDecoration(
-                color: _currentPage == index ? primary : Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(12.r),
+          SizedBox(height: 12.h),
+          // Dots
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              items.length,
+              (index) => AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                margin: EdgeInsets.symmetric(horizontal: 4.w),
+                width: _currentPage == index ? 26.w : 8.w,
+                height: 8.h,
+                decoration: BoxDecoration(
+                  color: _currentPage == index ? primary : Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
               ),
             ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }
 
@@ -225,15 +218,17 @@ class PromoCardWhite extends StatelessWidget {
                     const Spacer(),
                     Row(
                       children: [
-                        Text(
-                          price,
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w800,
-                            // color: Colors.black87,
+                        if (price.isNotEmpty)
+                          Text(
+                            price,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w800,
+                              // color: Colors.black87,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 8.w),
+                        if (price.isNotEmpty)
+                          SizedBox(width: 8.w),
                         Expanded(child: Container()),
                         // CTA button
                       ],

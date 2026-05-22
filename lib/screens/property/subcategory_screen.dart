@@ -6,6 +6,7 @@ import 'package:realestate/Routes/appRoutes.dart';
 import 'package:realestate/screens/property/property_deatils_screen.dart';
 import '../../constant/app_colors.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
+import 'package:realestate/data/controllers/home_controller.dart';
 
 const String sitePlanImagePath =
     'https://media.istockphoto.com/id/1458263734/photo/land-plot-management-real-estate-concept-with-a-vacant-land-parcel-available-for-building.jpg?s=2048x2048&w=is&k=20&c=9put_u4dxBRj9VOEPG_ES52tcKYh-FyK6z6HPv0B0L4=';
@@ -107,48 +108,9 @@ class SitePlanHeader extends StatelessWidget {
 class PlotsOnlyScreen extends StatelessWidget {
   const PlotsOnlyScreen({Key? key}) : super(key: key);
 
-  // All plots focused on Hisar
-  static const List<Map<String, String>> plots = [
-    {
-      "title": "Shree Shyam Kunj Phase 2",
-      "size": "30×50 ft",
-      "price": "18.5",
-      "location": "Raipur Road, Hisar, Haryana",
-      "facing": "East Facing",
-      "type": "Corner Plot",
-      "rating": "4.9",
-      "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
-      "status": "available",
-    },
-    {
-      "title": "Shree Shyam Kunj Phase 2",
-      "size": "40×60 ft",
-      "price": "32.0",
-      "location": "Raipur Road, Hisar, Haryana",
-      "facing": "North-East",
-      "type": "Premium Corner",
-      "rating": "4.8",
-      "image": "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800",
-      "status": "available",
-    },
-    {
-      "title": "Shree Shyam Kunj Phase 2",
-      "size": "35×60 ft",
-      "price": "28.5",
-      "location": "Raipur Road, Hisar, Haryana",
-      "facing": "Park Facing",
-      "type": "Regular",
-      "rating": "4.6",
-      "image": "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800",
-      "status": "sold",
-    },
-
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final availableCount =
-        plots.where((p) => p["status"] == "available").length;
+    final HomeController controller = Get.find<HomeController>();
 
     return ScreenUtilInit(
       designSize: const Size(375, 812),
@@ -179,70 +141,48 @@ class PlotsOnlyScreen extends StatelessWidget {
           body: Column(
             children: [
               // subtle header card with faint site-plan background
-              SitePlanHeader(availableCount: 10,),
-
-              // simple, non-intrusive filter chips (placeholder)
-              // Padding(
-              //   padding: EdgeInsets.symmetric(horizontal: 12.w),
-              //   child: SizedBox(
-              //     height: 42.h,
-              //     child: ListView(
-              //       scrollDirection: Axis.horizontal,
-              //       children: [
-              //         _MinimalChip(label: 'All', selected: true),
-              //         SizedBox(width: 8.w),
-              //         _MinimalChip(label: 'Corner'),
-              //         SizedBox(width: 8.w),
-              //         _MinimalChip(label: 'Park Facing'),
-              //         SizedBox(width: 8.w),
-              //         _MinimalChip(label: '30×50'),
-              //         SizedBox(width: 8.w),
-              //         _MinimalChip(label: '40×60'),
-              //       ],
-              //     ),
-              //   ),
-              // ),
+              Obx(() => SitePlanHeader(availableCount: controller.filteredProperties.length)),
 
               SizedBox(height: 12.h),
 
               // minimal list view of plot cards
               Expanded(
-                child: ListView.separated(
-                  padding:
-                  EdgeInsets.symmetric(horizontal: 6.w, vertical: 8.h),
-                  itemCount: plots.length,
-                  separatorBuilder: (_, __) => SizedBox(height: 10.h),
-                  itemBuilder: (context, i) {
-                    final p = plots[i];
-                    return _PlotCard(
-                      title: p['title']!,
-                      size: p['size']!,
-                      price: p['price']!,
-                      location: p['location'] ?? '',
-                      imageUrl: p['image']!,
-                      type: p['type'] ?? '',
-                      rating: p['rating'] ?? '0',
-                      isSold: p['status'] == 'sold',
-                      onTap: () {
-                        if (p['status'] != 'sold') {
-                          Get.toNamed(AppRoutes.propertyDetail);
-                        }
-                      },
-                    );
-                  },
-                ),
+                child: Obx(() {
+                  if (controller.isPropertiesLoading.value && controller.filteredProperties.isEmpty) {
+                    return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
+                  }
+                  
+                  if (controller.filteredProperties.isEmpty) {
+                    return const Center(child: Text("No properties found for this category"));
+                  }
+
+                  return ListView.separated(
+                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 8.h),
+                    itemCount: controller.filteredProperties.length,
+                    separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                    itemBuilder: (context, i) {
+                      final p = controller.filteredProperties[i];
+                      return _PlotCard(
+                        title: p.title,
+                        size: "${p.area} Sq.Ft",
+                        price: p.price,
+                        location: p.address,
+                        imageUrl: p.mainImageUrl ?? p.mainImage ?? "",
+                        type: p.propertyType,
+                        rating: "4.5",
+                        isSold: p.status.toLowerCase() == 'sold',
+                        onTap: () {
+                          if (p.status.toLowerCase() != 'sold') {
+                            Get.toNamed(AppRoutes.propertyDetail, arguments: p.id);
+                          }
+                        },
+                      );
+                    },
+                  );
+                }),
               ),
             ],
           ),
-          // floatingActionButton: FloatingActionButton(
-          //   backgroundColor: primary,
-          //   child: Icon(Icons.map_outlined, color: Colors.white),
-          //   onPressed: () {
-          //     // Get.to(() => PlotSelectionScreen(onPlotSelected: (plotNo, size) {
-          //     //   // handle selected plot
-          //     // }));
-          //   },
-          // ),
         );
       },
     );

@@ -147,7 +147,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    "₹${formatPrice(property.price)}",
+                                    "₹${formatFullPrice(property.price)}",
                                     style: GoogleFonts.inter(
                                       fontSize: 15.sp,
                                       fontWeight: FontWeight.w800,

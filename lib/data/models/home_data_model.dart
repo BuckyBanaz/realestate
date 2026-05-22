@@ -108,11 +108,17 @@ class TopLocation {
   });
 
   factory TopLocation.fromJson(Map<String, dynamic> json) {
+    String? img = json['property_image'];
+    if (img != null && img.trim().isNotEmpty) {
+      if (!img.startsWith('http')) {
+        img = 'http://108.181.185.27/bladmin/public/uploads/properties/$img';
+      }
+    }
     return TopLocation(
       id: json['id'] ?? 0,
       title: json['title'] ?? "",
       address: json['address'] ?? "",
-      propertyImage: json['property_image'],
+      propertyImage: img,
     );
   }
 }

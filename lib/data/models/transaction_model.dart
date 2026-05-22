@@ -45,11 +45,21 @@ class TransactionModel {
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
+    final amountStr = json['amount'] ?? "";
+    double parsedAmountValue = 0.0;
+    if (json['amount_value'] != null) {
+      parsedAmountValue = double.tryParse(json['amount_value'].toString()) ?? 0.0;
+    } else if (amountStr.isNotEmpty) {
+      // Remove currency symbols, commas, and whitespace, e.g. "₹1,433,337.30" -> "1433337.30"
+      final cleanAmount = amountStr.toString().replaceAll(RegExp(r'[^\d.]'), '');
+      parsedAmountValue = double.tryParse(cleanAmount) ?? 0.0;
+    }
+
     return TransactionModel(
       propertyName: json['property_name'] ?? "",
       date: json['date'] ?? "",
-      amount: json['amount'] ?? "",
-      amountValue: json['amount_value'] ?? 0,
+      amount: amountStr,
+      amountValue: parsedAmountValue,
       emiNumber: json['emi_number'] ?? 0,
       paymentType: json['payment_type'] ?? "",
       status: json['status'] ?? "",

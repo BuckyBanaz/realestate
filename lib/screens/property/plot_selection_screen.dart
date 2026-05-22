@@ -254,8 +254,8 @@ class _PlotBoxWidget extends StatelessWidget {
       borderColor = primary;
       bgColor = primary.withOpacity(0.2);
     } else {
-      borderColor = Colors.white.withOpacity(0.1);
-      bgColor = Colors.white.withOpacity(0.05);
+      borderColor = Colors.green.withOpacity(0.3);
+      bgColor = Colors.green.withOpacity(0.1);
     }
 
     return GestureDetector(

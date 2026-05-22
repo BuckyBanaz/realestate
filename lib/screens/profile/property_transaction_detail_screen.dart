@@ -83,7 +83,7 @@ class _PropertyTransactionDetailScreenState
         ? property.address
         : widget.location;
     if (property.price.isNotEmpty) {
-      filtered["Price"] = "₹ ${formatPrice(property.price)}";
+      filtered["Price"] = "₹ ${formatFullPrice(property.price)}";
     }
     if (property.area.isNotEmpty) {
       filtered["Area"] = property.area;

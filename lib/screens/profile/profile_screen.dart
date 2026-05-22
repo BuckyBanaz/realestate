@@ -115,6 +115,7 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     final double avatarSize = 120.w.clamp(72.0, 120.0);
     final ctrl = Get.find<ProfileController>();
+    final double innerSize = (avatarSize / 2.5) * 2;
 
     return Obx(
       () => Column(
@@ -122,19 +123,34 @@ class ProfileScreen extends StatelessWidget {
           Stack(
             alignment: Alignment.bottomRight,
             children: [
-              CircleAvatar(
-                radius: avatarSize / 2.5,
-                backgroundColor: Colors.grey.shade300,
-                backgroundImage: ctrl.currentUser['profile_image'] != null
-                    ? NetworkImage(ctrl.currentUser['profile_image'])
-                    : null,
-                child: ctrl.currentUser['profile_image'] == null
-                    ? Icon(
-                        IconlyBold.profile,
-                        size: avatarSize / 3,
-                        color: Colors.white,
+              Container(
+                width: innerSize,
+                height: innerSize,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  shape: BoxShape.circle,
+                ),
+                child: ctrl.currentUser['profile_image'] != null &&
+                        ctrl.currentUser['profile_image'].toString().isNotEmpty
+                    ? ClipOval(
+                        child: CustomImage(
+                          imageUrl: ctrl.currentUser['profile_image'].toString(),
+                          width: innerSize,
+                          height: innerSize,
+                          fit: BoxFit.cover,
+                          fallbackAsset: 'assets/images/download.jpg',
+                          errorWidget: (_, __, ___) => Icon(
+                            IconlyBold.profile,
+                            size: innerSize * 0.5,
+                            color: Colors.white,
+                          ),
+                        ),
                       )
-                    : null,
+                    : Icon(
+                        IconlyBold.profile,
+                        size: innerSize * 0.5,
+                        color: Colors.white,
+                      ),
               ),
               GestureDetector(
                 onTap: () => Get.to(const EditProfileScreen()),

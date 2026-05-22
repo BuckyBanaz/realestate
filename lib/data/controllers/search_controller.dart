@@ -27,6 +27,11 @@ class PropertySearchController extends GetxController {
   var minPrice = RxnDouble();
   var maxPrice = RxnDouble();
   
+  // Advanced Filters
+  var selectedFacing = "".obs;
+  var isCornerPlot = false.obs;
+  var selectedMinArea = 0.obs;
+  
   // Pagination
   int currentPage = 1;
   bool hasNextPage = true;
@@ -67,6 +72,9 @@ class PropertySearchController extends GetxController {
         categoryId: selectedCategory.value?.id,
         subCategoryId: selectedSubCategory.value?.id,
         subSubCategoryId: selectedSubSubCategory.value?.id,
+        facing: selectedFacing.value,
+        isCornerPlot: isCornerPlot.value,
+        minArea: selectedMinArea.value,
       );
 
       if (response != null && response.status) {
@@ -112,6 +120,10 @@ class PropertySearchController extends GetxController {
     fetchSearchResults();
   }
 
+  void applyFilters() {
+    fetchSearchResults();
+  }
+
   Future<void> fetchCategories() async {
     final result = await _repository.fetchCategories();
     categories.assignAll(result);
@@ -154,6 +166,9 @@ class PropertySearchController extends GetxController {
     selectedCategory.value = null;
     selectedSubCategory.value = null;
     selectedSubSubCategory.value = null;
+    selectedFacing.value = "";
+    isCornerPlot.value = false;
+    selectedMinArea.value = 0;
     subCategories.clear();
     subSubCategories.clear();
     fetchSearchResults();

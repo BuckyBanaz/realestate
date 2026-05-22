@@ -275,7 +275,7 @@ class FeatureCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                "₹${formatPrice(price)}",
+                                "₹${formatFullPrice(price)}",
                                 style: TextStyle(
                                   color: primary,
                                   fontSize: 13.sp,

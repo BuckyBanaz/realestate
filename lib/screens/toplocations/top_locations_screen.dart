@@ -41,27 +41,6 @@ class TopLocationsScreen extends StatelessWidget {
                 ),
               ),
             ),
-            actions: [
-              Padding(
-                padding: EdgeInsets.only(right: 20.w),
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    width: 45.w,
-                    height: 45.w,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      IconlyLight.filter,
-                      color: Colors.white,
-                      size: 20.sp,
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ),
 
           SliverToBoxAdapter(
@@ -164,6 +143,7 @@ class _LocationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imgUrl = imageUrl.startsWith('http') ? imageUrl : "";
     return GestureDetector(
       onTap: () {
         Get.toNamed(
@@ -171,7 +151,7 @@ class _LocationCard extends StatelessWidget {
           arguments: {
             'locationName': title,
             'rank': rank,
-            'heroImage': imageUrl,
+            'heroImage': imgUrl,
             'subtitle': listingCount,
             'addressId': addressId,
           },
@@ -196,7 +176,7 @@ class _LocationCard extends StatelessWidget {
             children: [
               // Image
               CustomImage(
-                imageUrl: imageUrl.startsWith('http') ? imageUrl : "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600",
+                imageUrl: imgUrl,
                 width: double.infinity,
                 height: double.infinity,
                 borderRadius: 24.r,

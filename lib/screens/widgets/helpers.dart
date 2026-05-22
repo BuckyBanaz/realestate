@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../constant/app_colors.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -34,6 +35,25 @@ String formatPrice(dynamic price) {
   } else {
     return priceNum.toStringAsFixed(0);
   }
+}
+
+String formatFullPrice(dynamic price) {
+  if (price == null) return "0";
+  double? priceNum;
+  if (price is String) {
+    priceNum = double.tryParse(price);
+  } else if (price is num) {
+    priceNum = price.toDouble();
+  }
+
+  if (priceNum == null) return price.toString();
+
+  final formatter = NumberFormat.currency(
+    locale: 'en_IN',
+    symbol: '',
+    decimalDigits: 2,
+  );
+  return formatter.format(priceNum);
 }
 
   Widget circleIconButton(BuildContext context, IconData icon, VoidCallback onTap) {
@@ -259,7 +279,10 @@ class CustomImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final normalizedUrl = imageUrl.trim();
+    var normalizedUrl = imageUrl.trim();
+    if (normalizedUrl.contains('/uploads/uploads/')) {
+      normalizedUrl = normalizedUrl.replaceAll('/uploads/uploads/', '/uploads/');
+    }
     if (normalizedUrl.isEmpty) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius ?? 0),

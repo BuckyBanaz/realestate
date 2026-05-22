@@ -380,7 +380,7 @@ class _HomeView2State extends State<HomeView2> {
                       title: property.title,
                       location: property.address,
                       area: property.area,
-                      price: "₹${formatPrice(property.price)}",
+                      price: "₹${formatFullPrice(property.price)}",
                       imageUrl: property.mainImageUrl ?? property.mainImage ?? "https://via.placeholder.com/300X320",
                     ),
               )

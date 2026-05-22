@@ -95,6 +95,7 @@ class PropertyListItem {
   final List<PropertyImage> sitePlanImages;
   final List<PropertyImage> threeSixtyView;
   final bool isFavorite;
+  final ActiveHold? activeHold;
 
   PropertyListItem({
     required this.id,
@@ -136,6 +137,7 @@ class PropertyListItem {
     this.sitePlanImages = const [],
     this.threeSixtyView = const [],
     this.isFavorite = false,
+    this.activeHold,
   });
 
   factory PropertyListItem.fromJson(Map<String, dynamic> json) {
@@ -160,7 +162,7 @@ class PropertyListItem {
 
     String? mainImg = json['main_image_url'] ?? json['main_image'];
     if (mainImg != null && !mainImg.startsWith('http')) {
-      mainImg = 'http://108.181.185.27/blapis/public/$mainImg';
+      mainImg = 'http://108.181.185.27/bladmin/public/uploads/properties/$mainImg';
     }
 
     return PropertyListItem(
@@ -209,6 +211,7 @@ class PropertyListItem {
       sitePlanImages: _parseImages(json['map_Properties_images']),
       threeSixtyView: _parseImages(json['three_sixty_view_images']),
       isFavorite: json['is_favourite'] ?? false,
+      activeHold: json['active_hold'] != null ? ActiveHold.fromJson(json['active_hold']) : null,
     );
   }
 
@@ -332,6 +335,76 @@ class PropertyImage {
     return PropertyImage(
       id: json['id'] ?? 0,
       image: img ?? '',
+    );
+  }
+}
+
+class ActiveHold {
+  final int id;
+  final int propertyId;
+  final int userId;
+  final String customerName;
+  final String customerMobile;
+  final String amount;
+  final List<String> documents;
+  final String holdUntil;
+  final String status;
+  final String createdAt;
+  final String updatedAt;
+  final ActiveHoldUser? user;
+
+  ActiveHold({
+    required this.id,
+    required this.propertyId,
+    required this.userId,
+    required this.customerName,
+    required this.customerMobile,
+    required this.amount,
+    required this.documents,
+    required this.holdUntil,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+    this.user,
+  });
+
+  factory ActiveHold.fromJson(Map<String, dynamic> json) {
+    return ActiveHold(
+      id: json['id'] ?? 0,
+      propertyId: json['property_id'] ?? 0,
+      userId: json['user_id'] ?? 0,
+      customerName: json['customer_name'] ?? '',
+      customerMobile: json['customer_mobile'] ?? '',
+      amount: json['amount']?.toString() ?? '0',
+      documents: List<String>.from(json['documents'] ?? []),
+      holdUntil: json['hold_until'] ?? '',
+      status: json['status'] ?? '',
+      createdAt: json['created_at'] ?? '',
+      updatedAt: json['updated_at'] ?? '',
+      user: json['user'] != null ? ActiveHoldUser.fromJson(json['user']) : null,
+    );
+  }
+}
+
+class ActiveHoldUser {
+  final int id;
+  final String name;
+  final String mobileNo;
+  final String role;
+
+  ActiveHoldUser({
+    required this.id,
+    required this.name,
+    required this.mobileNo,
+    required this.role,
+  });
+
+  factory ActiveHoldUser.fromJson(Map<String, dynamic> json) {
+    return ActiveHoldUser(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      mobileNo: json['mobile_no'] ?? '',
+      role: json['role'] ?? '',
     );
   }
 }

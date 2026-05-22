@@ -8,6 +8,7 @@ import 'package:realestate/data/models/transaction_model.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:realestate/screens/widgets/pdf_helper.dart';
 
 class TransactionDetailsScreen extends StatelessWidget {
   const TransactionDetailsScreen({Key? key}) : super(key: key);
@@ -18,7 +19,8 @@ class TransactionDetailsScreen extends StatelessWidget {
       return const Scaffold(body: Center(child: Text("No transaction data")));
     }
     final TransactionModel transaction = Get.arguments as TransactionModel;
-    final bool isCompleted = transaction.status.toLowerCase() == 'completed';
+    final String statusStr = transaction.status.toLowerCase();
+    final bool isSuccess = statusStr == 'completed' || statusStr == 'paid' || statusStr == 'success';
     final bool isReceived = transaction.amount.startsWith('+');
 
     return Scaffold(
@@ -51,20 +53,20 @@ class TransactionDetailsScreen extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.all(20.w),
                     decoration: BoxDecoration(
-                      color: isCompleted
+                      color: isSuccess
                           ? Colors.green.withOpacity(0.1)
                           : Colors.orange.withOpacity(0.1),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isCompleted
+                        color: isSuccess
                             ? Colors.green.withOpacity(0.2)
                             : Colors.orange.withOpacity(0.2),
                         width: 2,
                       ),
                     ),
                     child: Icon(
-                      isCompleted ? Icons.check_circle_rounded : Icons.access_time_filled_rounded,
-                      color: isCompleted ? Colors.green : Colors.orange,
+                      isSuccess ? Icons.check_circle_rounded : Icons.access_time_filled_rounded,
+                      color: isSuccess ? Colors.green : Colors.orange,
                       size: 48.sp,
                     ),
                   ).animate().scale(duration: const Duration(milliseconds: 500), curve: Curves.elasticOut),
@@ -72,7 +74,7 @@ class TransactionDetailsScreen extends StatelessWidget {
                   Text(
                     transaction.status.toUpperCase(),
                     style: TextStyle(
-                      color: isCompleted ? Colors.green : Colors.orange,
+                      color: isSuccess ? Colors.green : Colors.orange,
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 2,
@@ -80,7 +82,7 @@ class TransactionDetailsScreen extends StatelessWidget {
                   ).animate().fadeIn(delay: const Duration(milliseconds: 300)),
                   SizedBox(height: 8.h),
                   Text(
-                    "${isReceived ? '+' : '-'} ₹${formatPrice(transaction.amountValue)}",
+                    "${isReceived ? '+' : '-'} ₹${formatFullPrice(transaction.amountValue)}",
                     style: GoogleFonts.inter(
                       color: Colors.white,
                       fontSize: 32.sp,
@@ -132,7 +134,7 @@ class TransactionDetailsScreen extends StatelessWidget {
                   child: _buildActionButton(
                     "Download Receipt",
                     IconlyLight.download,
-                    onTap: () {},
+                    onTap: () => ReceiptPdfHelper.generateAndDownloadReceipt(transaction),
                   ),
                 ),
                 SizedBox(width: 16.w),
@@ -181,7 +183,7 @@ class TransactionDetailsScreen extends StatelessWidget {
 
   void _shareDetails(TransactionModel transaction) {
     final status = transaction.status.toUpperCase();
-    final amount = "${transaction.amount.startsWith('+') ? '+' : '-'} ₹${formatPrice(transaction.amountValue)}";
+    final amount = "${transaction.amount.startsWith('+') ? '+' : '-'} ₹${formatFullPrice(transaction.amountValue)}";
     final message = [
       "Transaction Receipt",
       "Status: $status",

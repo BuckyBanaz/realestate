@@ -17,6 +17,10 @@ class Categories extends StatelessWidget {
     final HomeController controller = Get.find<HomeController>();
 
     return Obx(() {
+      final selectedCat = controller.selectedCategory.value;
+      final selectedSubCat = controller.selectedSubCategory.value;
+      final selectedSubSubCat = controller.selectedSubSubCategory.value;
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -33,7 +37,11 @@ class Categories extends StatelessWidget {
                 separatorBuilder: (_, __) => SizedBox(width: 10.w),
                 itemBuilder: (context, index) {
                   final category = controller.categories[index];
-                  return _buildMainCategoryChip(controller, category);
+                  return _buildMainCategoryChip(
+                    controller: controller,
+                    category: category,
+                    selectedCategory: selectedCat,
+                  );
                 },
               ),
             ),
@@ -55,7 +63,13 @@ class Categories extends StatelessWidget {
                     separatorBuilder: (_, __) => SizedBox(width: 8.w),
                     itemBuilder: (context, index) {
                       final subCat = controller.subCategories[index];
-                      return _buildSubCategoryChip(controller, subCat, isSubSub: false);
+                      return _buildSubCategoryChip(
+                        controller: controller,
+                        category: subCat,
+                        isSubSub: false,
+                        selectedSubCategory: selectedSubCat,
+                        selectedSubSubCategory: selectedSubSubCat,
+                      );
                     },
                   ),
                 ).animate().fadeIn().slideX(begin: 0.1, end: 0),
@@ -68,7 +82,7 @@ class Categories extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 16.h),
-                _buildSubHeader("Specific Type"),
+                _buildSubHeader("PROJECTS"),
                 SizedBox(height: 10.h),
                 SizedBox(
                   height: 32.h,
@@ -79,7 +93,13 @@ class Categories extends StatelessWidget {
                     separatorBuilder: (_, __) => SizedBox(width: 8.w),
                     itemBuilder: (context, index) {
                       final subSubCat = controller.subSubCategories[index];
-                      return _buildSubCategoryChip(controller, subSubCat, isSubSub: true);
+                      return _buildSubCategoryChip(
+                        controller: controller,
+                        category: subSubCat,
+                        isSubSub: true,
+                        selectedSubCategory: selectedSubCat,
+                        selectedSubSubCategory: selectedSubSubCat,
+                      );
                     },
                   ),
                 ).animate().fadeIn().slideX(begin: 0.1, end: 0),
@@ -114,8 +134,12 @@ class Categories extends StatelessWidget {
     );
   }
 
-  Widget _buildMainCategoryChip(HomeController controller, CategoryFilter category) {
-    final isActive = controller.selectedCategory.value?.id == category.id;
+  Widget _buildMainCategoryChip({
+    required HomeController controller,
+    required CategoryFilter category,
+    required CategoryFilter? selectedCategory,
+  }) {
+    final isActive = selectedCategory?.id == category.id;
 
     return GestureDetector(
       onTap: () => controller.onCategorySelected(isActive ? null : category),
@@ -162,10 +186,16 @@ class Categories extends StatelessWidget {
     );
   }
 
-  Widget _buildSubCategoryChip(HomeController controller, CategoryFilter category, {required bool isSubSub}) {
+  Widget _buildSubCategoryChip({
+    required HomeController controller,
+    required CategoryFilter category,
+    required bool isSubSub,
+    required CategoryFilter? selectedSubCategory,
+    required CategoryFilter? selectedSubSubCategory,
+  }) {
     final bool isActive = isSubSub 
-        ? controller.selectedSubSubCategory.value?.id == category.id
-        : controller.selectedSubCategory.value?.id == category.id;
+        ? selectedSubSubCategory?.id == category.id
+        : selectedSubCategory?.id == category.id;
 
     return GestureDetector(
       onTap: () => isSubSub 

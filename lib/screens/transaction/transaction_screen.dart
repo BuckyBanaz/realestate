@@ -112,8 +112,23 @@ class TransactionListScreen extends StatelessWidget {
                     physics: const AlwaysScrollableScrollPhysics(),
                     itemBuilder: (ctx, i) {
                       final t = controller.transactions[i];
-                      final isCompleted = t.status.toLowerCase() == 'completed';
+                      final status = t.status.toLowerCase();
+                      final isSuccess = status == 'completed' || status == 'paid' || status == 'success';
                       final isReceived = t.amount.startsWith('+');
+
+                      Color statusColor;
+                      Color statusBg;
+
+                      if (isSuccess) {
+                        statusColor = const Color(0xFF00C853);
+                        statusBg = statusColor.withOpacity(0.12);
+                      } else if (status == 'pending' || status == 'processing') {
+                        statusColor = const Color(0xFFFFAB00);
+                        statusBg = statusColor.withOpacity(0.12);
+                      } else {
+                        statusColor = Colors.grey;
+                        statusBg = statusColor.withOpacity(0.12);
+                      }
 
                       return GestureDetector(
                         onTap: () => Get.toNamed(AppRoutes.transactionDetail, arguments: t),
@@ -138,20 +153,16 @@ class TransactionListScreen extends StatelessWidget {
                               Container(
                                 padding: EdgeInsets.all(10.w),
                                 decoration: BoxDecoration(
-                                  color: isCompleted
-                                      ? Colors.green.withOpacity(0.1)
-                                      : Colors.orange.withOpacity(0.1),
+                                  color: statusBg,
                                   borderRadius: BorderRadius.circular(12.r),
                                 ),
                                 child: Icon(
                                   isReceived
                                       ? IconlyBold.arrow_down_2
-                                      : isCompleted
+                                      : isSuccess
                                           ? Icons.check_circle_rounded
                                           : Icons.access_time_filled_rounded,
-                                  color: isCompleted
-                                      ? Colors.green
-                                      : Colors.orange,
+                                  color: statusColor,
                                   size: 20.sp,
                                 ),
                               ),
@@ -221,16 +232,22 @@ class TransactionListScreen extends StatelessWidget {
                                       fontSize: 15.sp,
                                     ),
                                   ),
-                                  SizedBox(height: 4.h),
-                                  Text(
-                                    t.status.toUpperCase(),
-                                    style: TextStyle(
-                                      color: isCompleted
-                                          ? Colors.green
-                                          : Colors.orange,
-                                      fontSize: 9.sp,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.5,
+                                  SizedBox(height: 6.h),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                                    decoration: BoxDecoration(
+                                      color: statusBg,
+                                      borderRadius: BorderRadius.circular(6.r),
+                                      border: Border.all(color: statusColor.withOpacity(0.2), width: 0.5),
+                                    ),
+                                    child: Text(
+                                      t.status.toUpperCase(),
+                                      style: TextStyle(
+                                        color: statusColor,
+                                        fontSize: 8.sp,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 0.5,
+                                      ),
                                     ),
                                   ),
                                 ],
