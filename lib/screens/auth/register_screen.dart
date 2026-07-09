@@ -9,6 +9,8 @@ import 'package:realestate/screens/auth/login_screen.dart';
 import '../../Routes/appRoutes.dart';
 import '../../constant/app_colors.dart';
 import '../widgets/helpers.dart';
+import '../profile/privacy_policy_screen.dart';
+import '../profile/terms_conditions_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -289,7 +291,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 SizedBox(height: 10.h),
 
-                // OR divider
+                // Social login hidden for now
+                /*
                 stagger(
                   9,
                   Row(
@@ -331,7 +334,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       SizedBox(width: 10.w),
                       _circleSocialButton(
-                        child: Icon(
+                        child: FaIcon(
                           FontAwesomeIcons.facebookF,
                           size: 22.sp,
                           color: Colors.blueAccent,
@@ -340,7 +343,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       SizedBox(width: 10.w),
                       _circleSocialButton(
-                        child: Icon(
+                        child: FaIcon(
                           FontAwesomeIcons.apple,
                           size: 22.sp,
                           color: Colors.black,
@@ -350,6 +353,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ],
                   ),
                 ),
+                */
 
                 SizedBox(height: 20.h),
 
@@ -387,6 +391,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
 
+                SizedBox(height: 40.h),
+                stagger(
+                  12, Center(
+                    child: Column(
+                      children: [
+                        Text(
+                          "By continuing, you agree to our",
+                          style: TextStyle(color: Colors.grey[600], fontSize: 11.sp),
+                        ),
+                        SizedBox(height: 4.h),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            GestureDetector(
+                              onTap: () => Get.to(() => const TermsConditionsScreen()),
+                              child: Text(
+                                "Terms & Conditions",
+                                style: TextStyle(color: secondary, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Text(
+                              " & ",
+                              style: TextStyle(color: Colors.grey[600], fontSize: 11.sp),
+                            ),
+                            GestureDetector(
+                              onTap: () => Get.to(() => const PrivacyPolicyScreen()),
+                              child: Text(
+                                "Privacy Policy",
+                                style: TextStyle(color: secondary, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 SizedBox(height: 6.h),
               ],
             ),

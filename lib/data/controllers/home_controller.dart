@@ -54,9 +54,9 @@ class HomeController extends GetxController {
     minPriceController.addListener(() => minPrice.value = minPriceController.text.trim());
     maxPriceController.addListener(() => maxPrice.value = maxPriceController.text.trim());
 
-    // Debounce to filter properties locally when price changes
-    debounce(minPrice, (_) => fetchFilteredProperties(forceRefreshNetwork: false), time: const Duration(milliseconds: 300));
-    debounce(maxPrice, (_) => fetchFilteredProperties(forceRefreshNetwork: false), time: const Duration(milliseconds: 300));
+    // Debounce to filter properties when price changes (forces API call to fetch correct subset)
+    debounce(minPrice, (_) => fetchFilteredProperties(forceRefreshNetwork: true), time: const Duration(milliseconds: 300));
+    debounce(maxPrice, (_) => fetchFilteredProperties(forceRefreshNetwork: true), time: const Duration(milliseconds: 300));
     
     _loadData();
     fetchCategories();
@@ -116,12 +116,17 @@ class HomeController extends GetxController {
   List<PropertyListItem> _unfilteredProperties = [];
 
   Future<void> fetchFilteredProperties({bool forceRefreshNetwork = true}) async {
+    final double? minPriceVal = double.tryParse(minPrice.value);
+    final double? maxPriceVal = double.tryParse(maxPrice.value);
+
     if (forceRefreshNetwork || _unfilteredProperties.isEmpty) {
       isPropertiesLoading.value = true;
       final response = await _propertyRepo.searchProperties(
         categoryId: selectedCategory.value?.id,
         subCategoryId: selectedSubCategory.value?.id,
         subSubCategoryId: selectedSubSubCategory.value?.id,
+        minPrice: minPriceVal,
+        maxPrice: maxPriceVal,
         perPage: 50, // Get more results for filtered lists
       );
       if (response != null) {
@@ -134,7 +139,7 @@ class HomeController extends GetxController {
     var results = List<PropertyListItem>.from(_unfilteredProperties);
     
     // Advanced local filtering based on attributes and fields
-    if (selectedFacing.isNotEmpty || isCornerPlot.value || selectedMinArea.value > 0 || minPrice.value.isNotEmpty || maxPrice.value.isNotEmpty) {
+    if (selectedFacing.isNotEmpty || isCornerPlot.value || selectedMinArea.value > 0) {
       results = results.where((p) {
         bool matches = true;
 
@@ -164,20 +169,6 @@ class HomeController extends GetxController {
           }
         }
 
-        // 4. Price Range Filter
-        if (matches) {
-          final priceStr = p.price.toLowerCase().replaceAll(RegExp(r'[^0-9.]'), '');
-          final priceVal = double.tryParse(priceStr) ?? 0.0;
-          if (minPrice.value.isNotEmpty) {
-            final min = double.tryParse(minPrice.value) ?? 0.0;
-            if (priceVal < min) matches = false;
-          }
-          if (matches && maxPrice.value.isNotEmpty) {
-            final max = double.tryParse(maxPrice.value) ?? double.infinity;
-            if (priceVal > max) matches = false;
-          }
-        }
-
         return matches;
       }).toList();
     }
@@ -204,7 +195,7 @@ class HomeController extends GetxController {
   }
 
   void applyAdvancedFilters() {
-    fetchFilteredProperties(forceRefreshNetwork: false);
+    fetchFilteredProperties(forceRefreshNetwork: true);
   }
 
   void onCategorySelected(CategoryFilter? category) {

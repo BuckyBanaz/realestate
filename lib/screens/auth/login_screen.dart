@@ -13,6 +13,8 @@ import 'package:realestate/screens/widgets/helpers.dart';
 import 'package:realestate/data/controllers/auth_controller.dart';
 
 import '../../constant/app_colors.dart';
+import '../profile/privacy_policy_screen.dart';
+import '../profile/terms_conditions_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -239,7 +241,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 SizedBox(height: 10.h),
 
-                // OR divider
+                // Social login hidden for now
+                /*
                 stagger(
                   7, Row(
                     children: [
@@ -261,7 +264,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 SizedBox(height: 10.h),
 
-                // Social buttons row (three rounded boxes)
                 stagger(
                   8, Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -295,6 +297,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                 ),
+                */
 
 
                 SizedBox(height: 20.h),
@@ -327,7 +330,43 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-
+                SizedBox(height: 40.h),
+                stagger(
+                  10, Center(
+                    child: Column(
+                      children: [
+                        Text(
+                          "By continuing, you agree to our",
+                          style: TextStyle(color: Colors.grey[600], fontSize: 11.sp),
+                        ),
+                        SizedBox(height: 4.h),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            GestureDetector(
+                              onTap: () => Get.to(() => const TermsConditionsScreen()),
+                              child: Text(
+                                "Terms & Conditions",
+                                style: TextStyle(color: secondary, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Text(
+                              " & ",
+                              style: TextStyle(color: Colors.grey[600], fontSize: 11.sp),
+                            ),
+                            GestureDetector(
+                              onTap: () => Get.to(() => const PrivacyPolicyScreen()),
+                              child: Text(
+                                "Privacy Policy",
+                                style: TextStyle(color: secondary, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 SizedBox(height: 6.h),
               ],
             ),

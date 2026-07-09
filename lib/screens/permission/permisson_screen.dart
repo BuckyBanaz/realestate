@@ -1,8 +1,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
+import 'package:get/get.dart';
 
 import '../../constant/app_colors.dart';
+import '../profile/privacy_policy_screen.dart';
+import '../profile/terms_conditions_screen.dart';
 
 
 
@@ -21,7 +24,7 @@ class PermissionsScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          "Allow Required Permissions",
+          "Settings & Permissions",
           style: TextStyle(
             color: Theme.of(context).textTheme.bodyLarge?.color,
             fontSize: 18,
@@ -109,6 +112,33 @@ class PermissionsScreen extends StatelessWidget {
               ),
             ),
 
+            const SizedBox(height: 24),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Legal & Information",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 0.5),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _linkTile(
+              context,
+              icon: IconlyBold.shield_done,
+              iconColor: primary,
+              title: "Privacy Policy",
+              subtitle: "Read our privacy policy.",
+              onTap: () => Get.to(() => const PrivacyPolicyScreen()),
+            ),
+            const SizedBox(height: 12),
+            _linkTile(
+              context,
+              icon: IconlyBold.document,
+              iconColor: primary,
+              title: "Terms & Conditions",
+              subtitle: "Read our terms & conditions.",
+              onTap: () => Get.to(() => const TermsConditionsScreen()),
+            ),
+
             const Spacer(),
 
             // Continue Button
@@ -116,7 +146,7 @@ class PermissionsScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // Next screen pe jao
+                  Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primary,
@@ -126,7 +156,7 @@ class PermissionsScreen extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  "Continue",
+                  "Done",
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
@@ -191,6 +221,56 @@ class PermissionsScreen extends StatelessWidget {
             inactiveTrackColor: Colors.grey.shade300,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _linkTile(BuildContext context, {
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade800 : Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: iconColor, size: 28),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
+          ],
+        ),
       ),
     );
   }

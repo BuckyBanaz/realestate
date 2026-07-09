@@ -51,22 +51,20 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyD3wj6QqLRzsu8cKaBqBc5bDsCKJS70_jg',
-    appId: '1:402708018802:android:ed60e72a032008dadef4eb',
-    messagingSenderId: '402708018802',
-    projectId: 'bladmin-26b27',
-    storageBucket: 'bladmin-26b27.firebasestorage.app',
+    apiKey: 'AIzaSyA8WIxcZcsWQfhdWLu7dRc77gUppmc2ydE',
+    appId: '1:1072318429261:android:8da702ff2877ee1ed50404',
+    messagingSenderId: '1072318429261',
+    projectId: 'bl-real-estate',
+    storageBucket: 'bl-real-estate.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAvWqBjKMU04DJYvYY0UAkiK4ZqJfRes2c',
-    appId: '1:402708018802:ios:6bbec43b672fb040def4eb',
-    messagingSenderId: '402708018802',
-    projectId: 'bladmin-26b27',
-    storageBucket: 'bladmin-26b27.firebasestorage.app',
+    apiKey: 'AIzaSyBxGosuLa--H6jSkGBIqw92gIr9IcejHQ8',
+    appId: '1:1072318429261:ios:288bb06282cf8459d50404',
+    messagingSenderId: '1072318429261',
+    projectId: 'bl-real-estate',
+    storageBucket: 'bl-real-estate.firebasestorage.app',
     iosBundleId: 'com.bla.realestate',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAvWqBjKMU04DJYvYY0UAkiK4ZqJfRes2c',
     appId: '1:402708018802:ios:6bbec43b672fb040def4eb',

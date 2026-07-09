@@ -167,7 +167,7 @@ class LoginOptionScreen extends StatelessWidget {
                             ),
                             side: BorderSide(color: Colors.transparent),
                           ),
-                          child: Icon(
+                          child: FaIcon(
                             FontAwesomeIcons.facebook,
                             size: 22.sp,
                             color: Colors.blueAccent,
@@ -189,7 +189,7 @@ class LoginOptionScreen extends StatelessWidget {
                             ),
                             side: BorderSide(color: Colors.transparent),
                           ),
-                          child: Icon(
+                          child: FaIcon(
                             FontAwesomeIcons.apple,
                             size: 22.sp,
                             color: Colors.black,

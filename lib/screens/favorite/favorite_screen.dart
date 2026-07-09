@@ -8,6 +8,8 @@ import 'package:realestate/screens/home/modules/featured_properties_list.dart';
 import 'package:realestate/screens/widgets/helpers.dart';
 import 'package:realestate/constant/app_colors.dart';
 import 'package:realestate/Routes/appRoutes.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({Key? key}) : super(key: key);
@@ -18,6 +20,35 @@ class FavoriteScreen extends StatefulWidget {
 
 class _FavoriteScreenState extends State<FavoriteScreen> {
   final FavoriteController controller = Get.put(FavoriteController());
+
+  Future<void> _launchWhatsApp(String phone) async {
+    final contactPhone = phone.trim().isNotEmpty ? phone : "8708818365";
+    final cleanPhone = contactPhone.replaceAll(RegExp(r'[^0-9]'), '');
+    final formattedPhone = cleanPhone.length == 10 ? "91$cleanPhone" : cleanPhone;
+    final urlString = "https://wa.me/$formattedPhone";
+    final Uri url = Uri.parse(urlString);
+    try {
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        showCustomToast("Could not launch WhatsApp", isError: true);
+      }
+    } catch (e) {
+      showCustomToast("Error: $e", isError: true);
+    }
+  }
+
+  Future<void> _launchPhone(String phone) async {
+    final contactPhone = phone.trim().isNotEmpty ? phone : "8708818365";
+    final cleanPhone = contactPhone.replaceAll(RegExp(r'[^0-9+]'), '');
+    final urlString = "tel:$cleanPhone";
+    final Uri url = Uri.parse(urlString);
+    try {
+      if (!await launchUrl(url)) {
+        showCustomToast("Could not place call", isError: true);
+      }
+    } catch (e) {
+      showCustomToast("Error: $e", isError: true);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -166,6 +197,61 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                         fontSize: 10.sp,
                                         fontWeight: FontWeight.w600,
                                         color: secondary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 12.h),
+                              Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () => _launchWhatsApp(property.whatsapp ?? ""),
+                                    child: Container(
+                                      padding: EdgeInsets.all(8.w),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green.withOpacity(0.12),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: FaIcon(
+                                        FontAwesomeIcons.whatsapp,
+                                        color: Colors.green,
+                                        size: 18.sp,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10.w),
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () => _launchPhone(property.phone ?? ""),
+                                      child: Container(
+                                        height: 36.h,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF1E1E1E),
+                                          borderRadius: BorderRadius.circular(10.r),
+                                          border: Border.all(
+                                            color: Colors.white.withOpacity(0.08),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.phone,
+                                              color: Colors.white,
+                                              size: 14.sp,
+                                            ),
+                                            SizedBox(width: 8.w),
+                                            Text(
+                                              "Call Now",
+                                              style: GoogleFonts.inter(
+                                                color: Colors.white,
+                                                fontSize: 12.sp,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),

@@ -5,6 +5,8 @@ class FavoriteProperty {
   final String price;
   final String area;
   final String image;
+  final String? phone;
+  final String? whatsapp;
 
   FavoriteProperty({
     required this.id,
@@ -13,6 +15,8 @@ class FavoriteProperty {
     required this.price,
     required this.area,
     required this.image,
+    this.phone,
+    this.whatsapp,
   });
 
   factory FavoriteProperty.fromJson(Map<String, dynamic> json) {
@@ -23,6 +27,8 @@ class FavoriteProperty {
       price: json['price']?.toString() ?? '0',
       area: json['area']?.toString() ?? '',
       image: json['image'] ?? '',
+      phone: (json['phone'] ?? json['mobile_no'] ?? json['mobile'] ?? json['owner_mobile'] ?? '').toString(),
+      whatsapp: (json['whatsapp'] ?? json['whatsapp_no'] ?? json['owner_whatsapp'] ?? json['phone'] ?? json['mobile_no'] ?? json['mobile'] ?? '').toString(),
     );
   }
 }

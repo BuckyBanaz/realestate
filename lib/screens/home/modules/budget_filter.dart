@@ -65,7 +65,7 @@ class BudgetFilterWidget extends StatelessWidget {
                     controller.maxPriceController.clear();
                     controller.minPrice.value = "";
                     controller.maxPrice.value = "";
-                    controller.fetchFilteredProperties(forceRefreshNetwork: false);
+                    controller.fetchFilteredProperties(forceRefreshNetwork: true);
                   },
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),

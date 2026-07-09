@@ -299,42 +299,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
                     SizedBox(height: 20.h),
 
-                    // Hold Details Section
-                    if (property.status.toLowerCase() == 'hold' && property.activeHold != null) ...[
-                      Container(
-                        padding: EdgeInsets.all(16.w),
-                        decoration: BoxDecoration(
-                          color: Colors.orangeAccent.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(20.r),
-                          border: Border.all(color: Colors.orangeAccent.withOpacity(0.2)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(IconlyLight.info_square, color: Colors.orangeAccent, size: 20.sp),
-                                SizedBox(width: 8.w),
-                                Text(
-                                  "Hold Details",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 12.h),
-                            _buildHoldInfoRow("Customer", property.activeHold!.customerName),
-                            _buildHoldInfoRow("Until", property.activeHold!.holdUntil.split('T')[0]),
-                            if (property.activeHold!.user != null)
-                              _buildHoldInfoRow("Held By", property.activeHold!.user!.name),
-                          ],
-                        ),
-                      ).animate().fadeIn(delay: 250.ms).slideY(begin: 0.1, end: 0),
-                      SizedBox(height: 20.h),
-                    ],
+
 
                     // Details Card
                     _buildDetailsCard(context)
@@ -717,31 +682,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     );
   }
 
-  Widget _buildHoldInfoRow(String label, String value) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.grey.shade400,
-              fontSize: 14.sp,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildCircleButton(
     IconData icon,

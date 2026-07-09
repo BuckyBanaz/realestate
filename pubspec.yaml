@@ -38,9 +38,9 @@ dependencies:
   intl: ^0.20.2
   sizer: ^3.1.3
   flutter_svg: ^2.2.3
-  font_awesome_flutter: ^10.12.0
+  font_awesome_flutter: ^11.0.0
   google_fonts: ^6.3.2
-  iconly: ^1.0.1
+  iconly: ^2.0.0
   pinput: ^6.0.0
   cached_network_image: ^3.4.1
   flutter_screenutil: ^5.9.3
@@ -60,6 +60,10 @@ dependencies:
   pdf: ^3.12.0
   printing: ^5.14.3
   screenshot: ^3.0.0
+
+dependency_overrides:
+  iconly:
+    path: ../local_packages/iconly
 
 dev_dependencies:
   flutter_test:
