@@ -1,0 +1,36 @@
+{
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-east2",
+    "rules": "y",
+    "indexes": "y"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "channel-partner-app-d8789",
+          "appId": "1:913744660808:android:672e431e543280f5114b7d",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "channel-partner-app-d8789",
+          "configurations": {
+            "android": "1:913744660808:android:672e431e543280f5114b7d"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "cleanUrls": true
+  }
+}

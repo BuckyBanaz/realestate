@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "1072318429261",
+    "project_id": "bl-real-estate",
+    "storage_bucket": "bl-real-estate.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1072318429261:android:c9a2db45dff31581d50404",
+        "android_client_info": {
+          "package_name": "com.bla.employee"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8WIxcZcsWQfhdWLu7dRc77gUppmc2ydE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1072318429261:android:8da702ff2877ee1ed50404",
+        "android_client_info": {
+          "package_name": "com.bla.realestate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8WIxcZcsWQfhdWLu7dRc77gUppmc2ydE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1072318429261:android:b3f6d5e64486933cd50404",
+        "android_client_info": {
+          "package_name": "com.blrealestateapp.blrealestate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8WIxcZcsWQfhdWLu7dRc77gUppmc2ydE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

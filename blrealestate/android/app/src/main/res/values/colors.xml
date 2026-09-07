@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches AppColors.primary = Color(0xFF89B23B) from Flutter splash_screen.dart -->
+    <color name="splash_green">#89B23B</color>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Specialized splash icon for Android 12+. 
+    Adds padding so the logo fits inside the circular crop without being "zoomed" or cut off.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:top="32dp"
+        android:bottom="32dp"
+        android:left="32dp"
+        android:right="32dp">
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/splash_logo" />
+    </item>
+</layer-list>

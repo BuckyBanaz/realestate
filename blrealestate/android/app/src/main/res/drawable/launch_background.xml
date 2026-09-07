@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Green background matching AppColors.primary #6B9935 -->
+    <item android:drawable="@color/splash_green" />
+
+    <!-- Centered high-quality splash logo matching Flutter side -->
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/splash_logo" />
+    </item>
+</layer-list>
