@@ -111,7 +111,7 @@ class TopLocation {
     String? img = json['property_image'];
     if (img != null && img.trim().isNotEmpty) {
       if (!img.startsWith('http')) {
-        img = 'http://108.181.185.27/bladmin/public/uploads/properties/$img';
+        img = 'https://hisarpropertybazar.com/bladmin/public/uploads/properties/$img';
       }
     }
     return TopLocation(

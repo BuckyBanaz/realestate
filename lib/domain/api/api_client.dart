@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:realestate/domain/app/local_storage.dart';
 
 class ApiClient {
-  static const String baseUrl = 'http://108.181.185.27/blapis/api/'; // Updated base URL
+  static const String baseUrl = 'https://hisarpropertybazar.com/blapis/api/'; // Updated base URL
 
   late Dio _dio;
   

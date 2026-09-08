@@ -162,7 +162,7 @@ class PropertyListItem {
 
     String? mainImg = json['main_image_url'] ?? json['main_image'];
     if (mainImg != null && !mainImg.startsWith('http')) {
-      mainImg = 'http://108.181.185.27/bladmin/public/uploads/properties/$mainImg';
+      mainImg = 'https://hisarpropertybazar.com/bladmin/public/uploads/properties/$mainImg';
     }
 
     return PropertyListItem(
@@ -330,7 +330,7 @@ class PropertyImage {
   factory PropertyImage.fromJson(Map<String, dynamic> json) {
     String? img = json['image'] ?? json['file_name'];
     if (img != null && !img.startsWith('http')) {
-      img = 'http://108.181.185.27/blapis/public/$img';
+      img = 'https://hisarpropertybazar.com/blapis/public/$img';
     }
     return PropertyImage(
       id: json['id'] ?? 0,
